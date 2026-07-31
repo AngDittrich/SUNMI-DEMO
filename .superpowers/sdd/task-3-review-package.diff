@@ -1,0 +1,316 @@
+﻿BASE: 3742a5402dd0b5c6bb87ac89b680b70c3fde95c9
+HEAD: 99f6c75ea804d19155785d37d90653f411ce53a0
+
+## Commits
+99f6c75 fix: remove unrelated CartSummaryBar end padding
+73448f4 feat: expose card image and bag positions for fly animation
+
+## Stat
+ .../main/java/com/example/kiosco/MainActivity.kt   |  2 +-
+ .../java/com/example/kiosco/SnackKioskScreen.kt    | 71 +++++++++++++++++++---
+ 2 files changed, 65 insertions(+), 8 deletions(-)
+
+## Diff
+diff --git a/mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt b/mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt
+index 8470020..4f991d7 100644
+--- a/mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt
++++ b/mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt
+@@ -171,21 +171,21 @@ class MainActivity : ComponentActivity() {
+                                             }
+                                         )
+                                     }
+ 
+                                     composable(NavRoutes.PRODUCT_LIST) {
+                                         SnackKioskScreen(
+                                             products = products,
+                                             onProductClick = { product ->
+                                                 navController.navigate(NavRoutes.productDetail(product.id))
+                                             },
+-                                            onAddToCart = { product -> addToCart(product) },
++                                            onAddToCart = { product, _, _ -> addToCart(product) },
+                                             onCartClick = { cartSheetVisible = true }
+                                         )
+                                     }
+ 
+                                     composable(
+                                         route = NavRoutes.PRODUCT_DETAIL,
+                                         arguments = listOf(
+                                             navArgument("productId") { type = NavType.IntType }
+                                         )
+                                     ) { backStackEntry ->
+diff --git a/mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt b/mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt
+index 36ca3bd..a0eceec 100644
+--- a/mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt
++++ b/mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt
+@@ -1,16 +1,17 @@
+ package com.example.kiosco
+ 
+ import androidx.compose.animation.AnimatedContent
+ import androidx.compose.animation.AnimatedVisibility
+ import androidx.compose.animation.animateContentSize
+ import androidx.compose.animation.togetherWith
++import androidx.compose.animation.core.Animatable
+ import androidx.compose.animation.core.Spring
+ import androidx.compose.animation.core.animateFloatAsState
+ import androidx.compose.animation.core.spring
+ import androidx.compose.animation.core.tween
+ import androidx.compose.animation.fadeIn
+ import androidx.compose.animation.fadeOut
+ import androidx.compose.animation.scaleIn
+ import androidx.compose.animation.scaleOut
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.clickable
+@@ -49,52 +50,57 @@ import androidx.compose.material3.Button
+ import androidx.compose.material3.ButtonDefaults
+ import androidx.compose.material3.Card
+ import androidx.compose.material3.CardDefaults
+ import androidx.compose.material3.Icon
+ import androidx.compose.material3.IconButton
+ import androidx.compose.material3.OutlinedTextField
+ import androidx.compose.material3.OutlinedTextFieldDefaults
+ import androidx.compose.material3.Surface
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
++import androidx.compose.runtime.LaunchedEffect
+ import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+ import androidx.compose.runtime.saveable.rememberSaveable
+ import androidx.compose.runtime.setValue
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.draw.scale
+ import androidx.compose.ui.graphics.Brush
+ import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.graphics.graphicsLayer
++import androidx.compose.ui.geometry.Offset
+ import androidx.compose.ui.layout.ContentScale
++import androidx.compose.ui.layout.onGloballyPositioned
++import androidx.compose.ui.layout.positionInRoot
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.style.TextOverflow
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import coil.compose.AsyncImage
+ import com.example.kiosco.ui.theme.DarkCharcoal
+ import com.example.kiosco.ui.theme.LightBg
+ import com.example.kiosco.ui.theme.NeonGreen
+ import com.example.kiosco.ui.theme.TextMuted
+ import java.util.Locale
+ 
+ private val SearchBackground = Color(0xFFFFFFFF)
+ private val ImageBackground = Color(0xFFF2F2F2)
+ private val FilterBackground = Color(0xFFE9E9EC)
+ 
+ @Composable
+ fun SnackKioskScreen(
+     products: List<Product>,
+     onProductClick: (Product) -> Unit,
+-    onAddToCart: (Product) -> Unit,
++    onAddToCart: (Product, Offset, Float) -> Unit,
+     onCartClick: () -> Unit
+ ) {
+     var searchQuery by rememberSaveable { mutableStateOf("") }
+     var selectedCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
+ 
+     val categories = remember(products) {
+         products
+             .map { it.category.trim() }
+             .filter { it.isNotEmpty() }
+             .distinct()
+@@ -250,21 +256,21 @@ fun SnackKioskScreen(
+                     ) {
+                         gridItems(
+                             items = visibleProducts,
+                             key = { it.id },
+                             contentType = { "product" }
+                         ) { product ->
+                             SnackCard(
+                                 product = product,
+                                 largeDisplay = largeDisplay,
+                                 onClick = { onProductClick(product) },
+-                                onAdd = { onAddToCart(product) }
++                                onAdd = { center, size -> onAddToCart(product, center, size) }
+                             )
+                         }
+                     }
+                 }
+             }
+         }
+     }
+ }
+ 
+ @Composable
+@@ -480,25 +486,27 @@ private fun CategoryChip(
+             fontSize = if (largeDisplay) 13.sp else 10.sp,
+             fontWeight = FontWeight.ExtraBold
+         )
+     }
+ }
+ 
+ @Composable
+ fun SnackCard(
+     product: Product,
+     onClick: () -> Unit,
+-    onAdd: () -> Unit,
++    onAdd: (startCenter: Offset, startSize: Float) -> Unit,
+     largeDisplay: Boolean = false
+ ) {
+     val interactionSource = remember { MutableInteractionSource() }
+     val isPressed by interactionSource.collectIsPressedAsState()
++    var imageCenter by remember { mutableStateOf(Offset.Zero) }
++    var imageSizePx by remember { mutableStateOf(0f) }
+     val scale by animateFloatAsState(
+         targetValue = if (isPressed) 0.975f else 1f,
+         animationSpec = spring(
+             dampingRatio = Spring.DampingRatioMediumBouncy,
+             stiffness = Spring.StiffnessMedium
+         ),
+         label = "cardPress"
+     )
+ 
+     Card(
+@@ -515,21 +523,30 @@ fun SnackCard(
+                 indication = null,
+                 onClick = onClick
+             )
+     ) {
+         Column(modifier = Modifier.padding(if (largeDisplay) 18.dp else 12.dp)) {
+             Box(
+                 modifier = Modifier
+                     .fillMaxWidth()
+                     .aspectRatio(1.16f)
+                     .clip(RoundedCornerShape(if (largeDisplay) 23.dp else 17.dp))
+-                    .background(ImageBackground),
++                    .background(ImageBackground)
++                    .onGloballyPositioned { coords ->
++                        val pos = coords.positionInRoot()
++                        val size = coords.size
++                        imageCenter = Offset(
++                            pos.x + size.width / 2f,
++                            pos.y + size.height / 2f
++                        )
++                        imageSizePx = minOf(size.width, size.height).toFloat() * 0.55f
++                    },
+                 contentAlignment = Alignment.Center
+             ) {
+                 AsyncImage(
+                     model = product.imageUrl,
+                     contentDescription = product.name,
+                     modifier = Modifier
+                         .fillMaxSize()
+                         .padding(if (largeDisplay) 18.dp else 10.dp),
+                     contentScale = ContentScale.Fit
+                 )
+@@ -587,21 +604,25 @@ fun SnackCard(
+                 Text(
+                     text = String.format(Locale.US, "$%.2f", product.price),
+                     color = DarkCharcoal,
+                     fontWeight = FontWeight.Black,
+                     fontSize = if (largeDisplay) 20.sp else 15.sp
+                 )
+ 
+                 Surface(
+                     modifier = Modifier
+                         .size(if (largeDisplay) 48.dp else 38.dp)
+-                        .clickable(onClick = onAdd),
++                        .clickable(
++                            onClick = {
++                                onAdd(imageCenter, imageSizePx.coerceAtLeast(48f))
++                            }
++                        ),
+                     shape = CircleShape,
+                     color = NeonGreen
+                 ) {
+                     Box(contentAlignment = Alignment.Center) {
+                         Icon(
+                             imageVector = Icons.Default.Add,
+                             contentDescription = "Agregar ${product.name}",
+                             tint = DarkCharcoal,
+                             modifier = Modifier.size(if (largeDisplay) 25.dp else 20.dp)
+                         )
+@@ -670,22 +691,44 @@ private fun EmptyProductsState(
+             )
+         }
+     }
+ }
+ 
+ @Composable
+ fun CartSummaryBar(
+     totalItems: Int,
+     totalPrice: Double,
+     onCartClick: () -> Unit,
+-    modifier: Modifier = Modifier
++    modifier: Modifier = Modifier,
++    bagBounceTrigger: Int = 0,
++    onBagPositioned: (Offset) -> Unit = {}
+ ) {
++    val bagScale = remember { Animatable(1f) }
++    LaunchedEffect(bagBounceTrigger) {
++        if (bagBounceTrigger == 0) return@LaunchedEffect
++        bagScale.snapTo(1f)
++        bagScale.animateTo(
++            1.18f,
++            spring(
++                dampingRatio = Spring.DampingRatioMediumBouncy,
++                stiffness = Spring.StiffnessMedium
++            )
++        )
++        bagScale.animateTo(
++            1f,
++            spring(
++                dampingRatio = Spring.DampingRatioMediumBouncy,
++                stiffness = Spring.StiffnessMedium
++            )
++        )
++    }
++
+     BoxWithConstraints(
+         modifier = modifier
+             .widthIn(max = 900.dp)
+             .fillMaxWidth()
+     ) {
+         val largeBar = maxWidth >= 700.dp
+ 
+         Surface(
+             modifier = Modifier
+                 .fillMaxWidth()
+@@ -701,22 +744,36 @@ fun CartSummaryBar(
+                         start = if (largeBar) 30.dp else 20.dp,
+                         end = if (largeBar) 10.dp else 8.dp
+                     ),
+                 verticalAlignment = Alignment.CenterVertically,
+                 horizontalArrangement = Arrangement.SpaceBetween
+             ) {
+                 Row(verticalAlignment = Alignment.CenterVertically) {
+                     Box(
+                         modifier = Modifier
+                             .size(if (largeBar) 46.dp else 36.dp)
++                            .graphicsLayer {
++                                scaleX = bagScale.value
++                                scaleY = bagScale.value
++                            }
+                             .clip(CircleShape)
+-                            .background(Color.White.copy(alpha = 0.1f)),
++                            .background(Color.White.copy(alpha = 0.1f))
++                            .onGloballyPositioned { coords ->
++                                val pos = coords.positionInRoot()
++                                val size = coords.size
++                                onBagPositioned(
++                                    Offset(
++                                        pos.x + size.width / 2f,
++                                        pos.y + size.height / 2f
++                                    )
++                                )
++                            },
+                         contentAlignment = Alignment.Center
+                     ) {
+                         Icon(
+                             imageVector = Icons.Default.ShoppingBag,
+                             contentDescription = null,
+                             tint = NeonGreen,
+                             modifier = Modifier.size(if (largeBar) 23.dp else 18.dp)
+                         )
+                     }
+ 

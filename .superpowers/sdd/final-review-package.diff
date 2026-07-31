@@ -1,0 +1,603 @@
+﻿BASE: 3b76e76be90a4e7d4a37f446df43c4137e3998f6
+HEAD: 4977de84c408e0cdc365f4298693fdc0569aaf74
+
+## Commits
+4977de8 feat: fly product thumbnail into cart on first add
+99f6c75 fix: remove unrelated CartSummaryBar end padding
+73448f4 feat: expose card image and bag positions for fly animation
+3742a54 feat: add AddToCartFlyOverlay composable
+79a282b feat: add fly-to-cart bezier helpers and unit tests
+
+## Stat
+ .../main/java/com/example/kiosco/AddToCartFly.kt   | 110 +++++++++++++++++++++
+ .../main/java/com/example/kiosco/MainActivity.kt   |  51 +++++++++-
+ .../java/com/example/kiosco/SnackKioskScreen.kt    |  71 +++++++++++--
+ .../com/example/kiosco/AddToCartFlyMathTest.kt     |  38 +++++++
+ 4 files changed, 262 insertions(+), 8 deletions(-)
+
+## Diff
+diff --git a/mobile-kiosk/app/src/main/java/com/example/kiosco/AddToCartFly.kt b/mobile-kiosk/app/src/main/java/com/example/kiosco/AddToCartFly.kt
+new file mode 100644
+index 0000000..b5f834d
+--- /dev/null
++++ b/mobile-kiosk/app/src/main/java/com/example/kiosco/AddToCartFly.kt
+@@ -0,0 +1,110 @@
++package com.example.kiosco
++
++import androidx.compose.animation.core.Animatable
++import androidx.compose.animation.core.FastOutSlowInEasing
++import androidx.compose.animation.core.tween
++import androidx.compose.foundation.background
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.offset
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.size
++import androidx.compose.foundation.shape.CircleShape
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.LaunchedEffect
++import androidx.compose.runtime.remember
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.draw.clip
++import androidx.compose.ui.geometry.Offset
++import androidx.compose.ui.graphics.graphicsLayer
++import androidx.compose.ui.layout.ContentScale
++import androidx.compose.ui.platform.LocalDensity
++import androidx.compose.ui.unit.IntOffset
++import androidx.compose.ui.unit.dp
++import coil.compose.AsyncImage
++import com.example.kiosco.ui.theme.DarkCharcoal
++import com.example.kiosco.ui.theme.NeonGreen
++import kotlin.math.roundToInt
++
++data class AddToCartFlyEvent(
++    val id: Long,
++    val imageUrl: String,
++    val startCenter: Offset,
++    val startSize: Float,
++    val endCenter: Offset,
++    val endSize: Float
++)
++
++fun quadraticBezier(t: Float, p0: Offset, p1: Offset, p2: Offset): Offset {
++    val u = 1f - t
++    val x = u * u * p0.x + 2f * u * t * p1.x + t * t * p2.x
++    val y = u * u * p0.y + 2f * u * t * p1.y + t * t * p2.y
++    return Offset(x, y)
++}
++
++fun defaultFlyControlPoint(start: Offset, end: Offset): Offset {
++    val midX = (start.x + end.x) / 2f
++    val midY = (start.y + end.y) / 2f
++    val lift = (end.y - start.y).coerceAtLeast(120f) * 0.35f
++    return Offset(midX, midY - lift)
++}
++
++@Composable
++fun AddToCartFlyOverlay(
++    event: AddToCartFlyEvent?,
++    onFinished: (Long) -> Unit
++) {
++    if (event == null) return
++
++    val progress = remember(event.id) { Animatable(0f) }
++    LaunchedEffect(event.id) {
++        progress.snapTo(0f)
++        progress.animateTo(
++            targetValue = 1f,
++            animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
++        )
++        onFinished(event.id)
++    }
++
++    val t = progress.value
++    val control = remember(event.id) {
++        defaultFlyControlPoint(event.startCenter, event.endCenter)
++    }
++    val center = quadraticBezier(t, event.startCenter, control, event.endCenter)
++    val size = event.startSize + (event.endSize - event.startSize) * t
++    val alpha = if (t < 0.75f) 1f else (1f - (t - 0.75f) / 0.25f).coerceIn(0f, 1f)
++
++    Box(modifier = Modifier.fillMaxSize()) {
++        Box(
++            modifier = Modifier
++                .offset {
++                    IntOffset(
++                        (center.x - size / 2f).roundToInt(),
++                        (center.y - size / 2f).roundToInt()
++                    )
++                }
++                .size(with(LocalDensity.current) { size.toDp() })
++                .clip(CircleShape)
++                .graphicsLayer { this.alpha = alpha }
++                .background(DarkCharcoal.copy(alpha = 0.12f)),
++            contentAlignment = Alignment.Center
++        ) {
++            if (event.imageUrl.isNotBlank()) {
++                AsyncImage(
++                    model = event.imageUrl,
++                    contentDescription = null,
++                    modifier = Modifier.fillMaxSize().padding(6.dp),
++                    contentScale = ContentScale.Fit
++                )
++            } else {
++                Box(
++                    Modifier
++                        .fillMaxSize(0.55f)
++                        .clip(CircleShape)
++                        .background(NeonGreen)
++                )
++            }
++        }
++    }
++}
+diff --git a/mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt b/mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt
+index 8470020..97e12d8 100644
+--- a/mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt
++++ b/mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt
+@@ -5,20 +5,23 @@ import androidx.activity.ComponentActivity
+ import androidx.activity.compose.setContent
+ import androidx.activity.enableEdgeToEdge
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.layout.*
+ import androidx.compose.material3.CircularProgressIndicator
+ import androidx.compose.material3.Surface
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.*
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
++import androidx.compose.ui.geometry.Offset
++import androidx.compose.ui.platform.LocalConfiguration
++import androidx.compose.ui.platform.LocalDensity
+ import androidx.compose.ui.text.style.TextAlign
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import androidx.navigation.NavType
+ import androidx.navigation.compose.NavHost
+ import androidx.navigation.compose.composable
+ import androidx.navigation.compose.currentBackStackEntryAsState
+ import androidx.navigation.compose.rememberNavController
+ import androidx.navigation.navArgument
+ import com.example.kiosco.ui.theme.KioscoTheme
+@@ -43,23 +46,40 @@ class MainActivity : ComponentActivity() {
+         enableEdgeToEdge()
+ 
+         setContent {
+             KioscoTheme {
+                 var products by remember { mutableStateOf<List<Product>>(emptyList()) }
+                 var isLoading by remember { mutableStateOf(true) }
+                 var errorMessage by remember { mutableStateOf<String?>(null) }
+                 val cartItems = remember { mutableStateOf<List<CartItem>>(emptyList()) }
+                 var cartSheetVisible by remember { mutableStateOf(false) }
+                 val lastOrder = remember { mutableStateOf<List<CartItem>>(emptyList()) }
++                var flyEvent by remember { mutableStateOf<AddToCartFlyEvent?>(null) }
++                var bagCenter by remember { mutableStateOf<Offset?>(null) }
++                var bagBounceTrigger by remember { mutableStateOf(0) }
++                var flyIdSeq by remember { mutableStateOf(0L) }
++                val density = LocalDensity.current
++                val configuration = LocalConfiguration.current
+                 val scope = rememberCoroutineScope()
+                 val navController = rememberNavController()
+ 
++                fun fallbackBagCenter(): Offset {
++                    val widthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
++                    val heightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
++                    val horizontalPad = with(density) { 24.dp.toPx() }
++                    val bottomPad = with(density) { 16.dp.toPx() }
++                    val barHeight = with(density) { 72.dp.toPx() }
++                    val bagX = horizontalPad + with(density) { 38.dp.toPx() }
++                    val bagY = heightPx - bottomPad - barHeight / 2f
++                    return Offset(bagX.coerceAtMost(widthPx / 2f), bagY)
++                }
++
+                 // Cart helpers
+                 val addToCart: (Product) -> Unit = { product ->
+                     val current = cartItems.value
+                     val existing = current.find { it.product.id == product.id }
+                     cartItems.value = if (existing != null) {
+                         current.map {
+                             if (it.product.id == product.id) it.copy(quantity = it.quantity + 1) else it
+                         }
+                     } else {
+                         current + CartItem(product, 1)
+@@ -171,21 +191,38 @@ class MainActivity : ComponentActivity() {
+                                             }
+                                         )
+                                     }
+ 
+                                     composable(NavRoutes.PRODUCT_LIST) {
+                                         SnackKioskScreen(
+                                             products = products,
+                                             onProductClick = { product ->
+                                                 navController.navigate(NavRoutes.productDetail(product.id))
+                                             },
+-                                            onAddToCart = { product -> addToCart(product) },
++                                            onAddToCart = { product, startCenter, startSize ->
++                                                val existingQty = cartItems.value
++                                                    .find { it.product.id == product.id }
++                                                    ?.quantity ?: 0
++                                                addToCart(product)
++                                                if (existingQty == 0) {
++                                                    flyIdSeq += 1
++                                                    val end = bagCenter ?: fallbackBagCenter()
++                                                    flyEvent = AddToCartFlyEvent(
++                                                        id = flyIdSeq,
++                                                        imageUrl = product.imageUrl,
++                                                        startCenter = startCenter,
++                                                        startSize = startSize,
++                                                        endCenter = end,
++                                                        endSize = with(density) { 28.dp.toPx() }
++                                                    )
++                                                }
++                                            },
+                                             onCartClick = { cartSheetVisible = true }
+                                         )
+                                     }
+ 
+                                     composable(
+                                         route = NavRoutes.PRODUCT_DETAIL,
+                                         arguments = listOf(
+                                             navArgument("productId") { type = NavType.IntType }
+                                         )
+                                     ) { backStackEntry ->
+@@ -211,27 +248,39 @@ class MainActivity : ComponentActivity() {
+                                             }
+                                         )
+                                     }
+                                 }
+ 
+                                 if (totalItems > 0 && !isWelcomeRoute && !cartSheetVisible) {
+                                     CartSummaryBar(
+                                         totalItems = totalItems,
+                                         totalPrice = totalPrice,
+                                         onCartClick = { cartSheetVisible = true },
++                                        bagBounceTrigger = bagBounceTrigger,
++                                        onBagPositioned = { bagCenter = it },
+                                         modifier = Modifier
+                                             .align(Alignment.BottomCenter)
+                                             .padding(horizontal = 24.dp)
+                                             .padding(bottom = 16.dp)
+                                             .navigationBarsPadding()
+                                     )
+                                 }
++
++                                AddToCartFlyOverlay(
++                                    event = flyEvent,
++                                    onFinished = { finishedId ->
++                                        if (flyEvent?.id == finishedId) {
++                                            flyEvent = null
++                                            bagBounceTrigger += 1
++                                        }
++                                    }
++                                )
+                             }
+ 
+                             CartScreen(
+                                 cartItems = cartItems.value,
+                                 onUpdateQuantity = { id, qty -> updateQuantity(id, qty) },
+                                 onClearCart = { cartItems.value = emptyList() },
+                                 onCheckout = {
+                                     lastOrder.value = cartItems.value
+                                     cartItems.value = emptyList()
+                                     cartSheetVisible = false
+diff --git a/mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt b/mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt
+index 36ca3bd..a0eceec 100644
+--- a/mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt
++++ b/mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt
+@@ -1,16 +1,17 @@
+ package com.example.kiosco
+ 
+ import androidx.compose.animation.AnimatedContent
+ import androidx.compose.animation.AnimatedVisibility
+ import androidx.compose.animation.animateContentSize
+ import androidx.compose.animation.togetherWith
++import androidx.compose.animation.core.Animatable
+ import androidx.compose.animation.core.Spring
+ import androidx.compose.animation.core.animateFloatAsState
+ import androidx.compose.animation.core.spring
+ import androidx.compose.animation.core.tween
+ import androidx.compose.animation.fadeIn
+ import androidx.compose.animation.fadeOut
+ import androidx.compose.animation.scaleIn
+ import androidx.compose.animation.scaleOut
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.clickable
+@@ -49,52 +50,57 @@ import androidx.compose.material3.Button
+ import androidx.compose.material3.ButtonDefaults
+ import androidx.compose.material3.Card
+ import androidx.compose.material3.CardDefaults
+ import androidx.compose.material3.Icon
+ import androidx.compose.material3.IconButton
+ import androidx.compose.material3.OutlinedTextField
+ import androidx.compose.material3.OutlinedTextFieldDefaults
+ import androidx.compose.material3.Surface
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
++import androidx.compose.runtime.LaunchedEffect
+ import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+ import androidx.compose.runtime.saveable.rememberSaveable
+ import androidx.compose.runtime.setValue
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.draw.scale
+ import androidx.compose.ui.graphics.Brush
+ import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.graphics.graphicsLayer
++import androidx.compose.ui.geometry.Offset
+ import androidx.compose.ui.layout.ContentScale
++import androidx.compose.ui.layout.onGloballyPositioned
++import androidx.compose.ui.layout.positionInRoot
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.style.TextOverflow
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import coil.compose.AsyncImage
+ import com.example.kiosco.ui.theme.DarkCharcoal
+ import com.example.kiosco.ui.theme.LightBg
+ import com.example.kiosco.ui.theme.NeonGreen
+ import com.example.kiosco.ui.theme.TextMuted
+ import java.util.Locale
+ 
+ private val SearchBackground = Color(0xFFFFFFFF)
+ private val ImageBackground = Color(0xFFF2F2F2)
+ private val FilterBackground = Color(0xFFE9E9EC)
+ 
+ @Composable
+ fun SnackKioskScreen(
+     products: List<Product>,
+     onProductClick: (Product) -> Unit,
+-    onAddToCart: (Product) -> Unit,
++    onAddToCart: (Product, Offset, Float) -> Unit,
+     onCartClick: () -> Unit
+ ) {
+     var searchQuery by rememberSaveable { mutableStateOf("") }
+     var selectedCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
+ 
+     val categories = remember(products) {
+         products
+             .map { it.category.trim() }
+             .filter { it.isNotEmpty() }
+             .distinct()
+@@ -250,21 +256,21 @@ fun SnackKioskScreen(
+                     ) {
+                         gridItems(
+                             items = visibleProducts,
+                             key = { it.id },
+                             contentType = { "product" }
+                         ) { product ->
+                             SnackCard(
+                                 product = product,
+                                 largeDisplay = largeDisplay,
+                                 onClick = { onProductClick(product) },
+-                                onAdd = { onAddToCart(product) }
++                                onAdd = { center, size -> onAddToCart(product, center, size) }
+                             )
+                         }
+                     }
+                 }
+             }
+         }
+     }
+ }
+ 
+ @Composable
+@@ -480,25 +486,27 @@ private fun CategoryChip(
+             fontSize = if (largeDisplay) 13.sp else 10.sp,
+             fontWeight = FontWeight.ExtraBold
+         )
+     }
+ }
+ 
+ @Composable
+ fun SnackCard(
+     product: Product,
+     onClick: () -> Unit,
+-    onAdd: () -> Unit,
++    onAdd: (startCenter: Offset, startSize: Float) -> Unit,
+     largeDisplay: Boolean = false
+ ) {
+     val interactionSource = remember { MutableInteractionSource() }
+     val isPressed by interactionSource.collectIsPressedAsState()
++    var imageCenter by remember { mutableStateOf(Offset.Zero) }
++    var imageSizePx by remember { mutableStateOf(0f) }
+     val scale by animateFloatAsState(
+         targetValue = if (isPressed) 0.975f else 1f,
+         animationSpec = spring(
+             dampingRatio = Spring.DampingRatioMediumBouncy,
+             stiffness = Spring.StiffnessMedium
+         ),
+         label = "cardPress"
+     )
+ 
+     Card(
+@@ -515,21 +523,30 @@ fun SnackCard(
+                 indication = null,
+                 onClick = onClick
+             )
+     ) {
+         Column(modifier = Modifier.padding(if (largeDisplay) 18.dp else 12.dp)) {
+             Box(
+                 modifier = Modifier
+                     .fillMaxWidth()
+                     .aspectRatio(1.16f)
+                     .clip(RoundedCornerShape(if (largeDisplay) 23.dp else 17.dp))
+-                    .background(ImageBackground),
++                    .background(ImageBackground)
++                    .onGloballyPositioned { coords ->
++                        val pos = coords.positionInRoot()
++                        val size = coords.size
++                        imageCenter = Offset(
++                            pos.x + size.width / 2f,
++                            pos.y + size.height / 2f
++                        )
++                        imageSizePx = minOf(size.width, size.height).toFloat() * 0.55f
++                    },
+                 contentAlignment = Alignment.Center
+             ) {
+                 AsyncImage(
+                     model = product.imageUrl,
+                     contentDescription = product.name,
+                     modifier = Modifier
+                         .fillMaxSize()
+                         .padding(if (largeDisplay) 18.dp else 10.dp),
+                     contentScale = ContentScale.Fit
+                 )
+@@ -587,21 +604,25 @@ fun SnackCard(
+                 Text(
+                     text = String.format(Locale.US, "$%.2f", product.price),
+                     color = DarkCharcoal,
+                     fontWeight = FontWeight.Black,
+                     fontSize = if (largeDisplay) 20.sp else 15.sp
+                 )
+ 
+                 Surface(
+                     modifier = Modifier
+                         .size(if (largeDisplay) 48.dp else 38.dp)
+-                        .clickable(onClick = onAdd),
++                        .clickable(
++                            onClick = {
++                                onAdd(imageCenter, imageSizePx.coerceAtLeast(48f))
++                            }
++                        ),
+                     shape = CircleShape,
+                     color = NeonGreen
+                 ) {
+                     Box(contentAlignment = Alignment.Center) {
+                         Icon(
+                             imageVector = Icons.Default.Add,
+                             contentDescription = "Agregar ${product.name}",
+                             tint = DarkCharcoal,
+                             modifier = Modifier.size(if (largeDisplay) 25.dp else 20.dp)
+                         )
+@@ -670,22 +691,44 @@ private fun EmptyProductsState(
+             )
+         }
+     }
+ }
+ 
+ @Composable
+ fun CartSummaryBar(
+     totalItems: Int,
+     totalPrice: Double,
+     onCartClick: () -> Unit,
+-    modifier: Modifier = Modifier
++    modifier: Modifier = Modifier,
++    bagBounceTrigger: Int = 0,
++    onBagPositioned: (Offset) -> Unit = {}
+ ) {
++    val bagScale = remember { Animatable(1f) }
++    LaunchedEffect(bagBounceTrigger) {
++        if (bagBounceTrigger == 0) return@LaunchedEffect
++        bagScale.snapTo(1f)
++        bagScale.animateTo(
++            1.18f,
++            spring(
++                dampingRatio = Spring.DampingRatioMediumBouncy,
++                stiffness = Spring.StiffnessMedium
++            )
++        )
++        bagScale.animateTo(
++            1f,
++            spring(
++                dampingRatio = Spring.DampingRatioMediumBouncy,
++                stiffness = Spring.StiffnessMedium
++            )
++        )
++    }
++
+     BoxWithConstraints(
+         modifier = modifier
+             .widthIn(max = 900.dp)
+             .fillMaxWidth()
+     ) {
+         val largeBar = maxWidth >= 700.dp
+ 
+         Surface(
+             modifier = Modifier
+                 .fillMaxWidth()
+@@ -701,22 +744,36 @@ fun CartSummaryBar(
+                         start = if (largeBar) 30.dp else 20.dp,
+                         end = if (largeBar) 10.dp else 8.dp
+                     ),
+                 verticalAlignment = Alignment.CenterVertically,
+                 horizontalArrangement = Arrangement.SpaceBetween
+             ) {
+                 Row(verticalAlignment = Alignment.CenterVertically) {
+                     Box(
+                         modifier = Modifier
+                             .size(if (largeBar) 46.dp else 36.dp)
++                            .graphicsLayer {
++                                scaleX = bagScale.value
++                                scaleY = bagScale.value
++                            }
+                             .clip(CircleShape)
+-                            .background(Color.White.copy(alpha = 0.1f)),
++                            .background(Color.White.copy(alpha = 0.1f))
++                            .onGloballyPositioned { coords ->
++                                val pos = coords.positionInRoot()
++                                val size = coords.size
++                                onBagPositioned(
++                                    Offset(
++                                        pos.x + size.width / 2f,
++                                        pos.y + size.height / 2f
++                                    )
++                                )
++                            },
+                         contentAlignment = Alignment.Center
+                     ) {
+                         Icon(
+                             imageVector = Icons.Default.ShoppingBag,
+                             contentDescription = null,
+                             tint = NeonGreen,
+                             modifier = Modifier.size(if (largeBar) 23.dp else 18.dp)
+                         )
+                     }
+ 
+diff --git a/mobile-kiosk/app/src/test/java/com/example/kiosco/AddToCartFlyMathTest.kt b/mobile-kiosk/app/src/test/java/com/example/kiosco/AddToCartFlyMathTest.kt
+new file mode 100644
+index 0000000..126b3ef
+--- /dev/null
++++ b/mobile-kiosk/app/src/test/java/com/example/kiosco/AddToCartFlyMathTest.kt
+@@ -0,0 +1,38 @@
++package com.example.kiosco
++
++import androidx.compose.ui.geometry.Offset
++import org.junit.Assert.assertEquals
++import org.junit.Test
++
++class AddToCartFlyMathTest {
++    @Test
++    fun quadraticBezier_atEndpoints_matchesP0AndP2() {
++        val p0 = Offset(0f, 0f)
++        val p1 = Offset(50f, -100f)
++        val p2 = Offset(100f, 200f)
++        assertEquals(0f, quadraticBezier(0f, p0, p1, p2).x, 0.01f)
++        assertEquals(0f, quadraticBezier(0f, p0, p1, p2).y, 0.01f)
++        assertEquals(100f, quadraticBezier(1f, p0, p1, p2).x, 0.01f)
++        assertEquals(200f, quadraticBezier(1f, p0, p1, p2).y, 0.01f)
++    }
++
++    @Test
++    fun quadraticBezier_atMidpoint_pullsTowardControl() {
++        val p0 = Offset(0f, 0f)
++        val p1 = Offset(0f, -100f)
++        val p2 = Offset(0f, 0f)
++        val mid = quadraticBezier(0.5f, p0, p1, p2)
++        assertEquals(0f, mid.x, 0.01f)
++        assertEquals(-50f, mid.y, 0.01f)
++    }
++
++    @Test
++    fun defaultFlyControlPoint_isAboveMidpoint() {
++        val start = Offset(100f, 400f)
++        val end = Offset(200f, 800f)
++        val control = defaultFlyControlPoint(start, end)
++        assertEquals(150f, control.x, 0.01f)
++        // Control y must be less than midpoint y (higher on screen)
++        assertEquals(true, control.y < (start.y + end.y) / 2f)
++    }
++}
