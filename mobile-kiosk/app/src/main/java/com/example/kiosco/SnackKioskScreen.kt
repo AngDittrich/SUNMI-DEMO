@@ -732,8 +732,7 @@ fun CartSummaryBar(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (largeBar) 88.dp else 72.dp)
-                .padding(end = if (largeBar) 24.dp else 16.dp),
+                .height(if (largeBar) 88.dp else 72.dp),
             shape = RoundedCornerShape(50),
             color = DarkCharcoal,
             shadowElevation = 12.dp
