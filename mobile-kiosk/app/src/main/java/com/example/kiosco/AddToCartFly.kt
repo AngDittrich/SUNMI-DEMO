@@ -1,6 +1,31 @@
 package com.example.kiosco
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.kiosco.ui.theme.DarkCharcoal
+import com.example.kiosco.ui.theme.NeonGreen
+import kotlin.math.roundToInt
 
 data class AddToCartFlyEvent(
     val id: Long,
@@ -23,4 +48,63 @@ fun defaultFlyControlPoint(start: Offset, end: Offset): Offset {
     val midY = (start.y + end.y) / 2f
     val lift = (end.y - start.y).coerceAtLeast(120f) * 0.35f
     return Offset(midX, midY - lift)
+}
+
+@Composable
+fun AddToCartFlyOverlay(
+    event: AddToCartFlyEvent?,
+    onFinished: (Long) -> Unit
+) {
+    if (event == null) return
+
+    val progress = remember(event.id) { Animatable(0f) }
+    LaunchedEffect(event.id) {
+        progress.snapTo(0f)
+        progress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
+        )
+        onFinished(event.id)
+    }
+
+    val t = progress.value
+    val control = remember(event.id) {
+        defaultFlyControlPoint(event.startCenter, event.endCenter)
+    }
+    val center = quadraticBezier(t, event.startCenter, control, event.endCenter)
+    val size = event.startSize + (event.endSize - event.startSize) * t
+    val alpha = if (t < 0.75f) 1f else (1f - (t - 0.75f) / 0.25f).coerceIn(0f, 1f)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .offset {
+                    IntOffset(
+                        (center.x - size / 2f).roundToInt(),
+                        (center.y - size / 2f).roundToInt()
+                    )
+                }
+                .size(with(LocalDensity.current) { size.toDp() })
+                .clip(CircleShape)
+                .graphicsLayer { this.alpha = alpha }
+                .background(DarkCharcoal.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (event.imageUrl.isNotBlank()) {
+                AsyncImage(
+                    model = event.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().padding(6.dp),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                Box(
+                    Modifier
+                        .fillMaxSize(0.55f)
+                        .clip(CircleShape)
+                        .background(NeonGreen)
+                )
+            }
+        }
+    }
 }
