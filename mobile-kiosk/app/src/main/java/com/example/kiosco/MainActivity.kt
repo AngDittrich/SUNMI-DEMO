@@ -171,6 +171,7 @@ class MainActivity : ComponentActivity() {
                                         initialProductId = productId,
                                         getQuantity = getQuantity,
                                         onQuantityChange = { id, qty -> updateQuantity(id, qty) },
+                                        totalItems = totalItems,
                                         onBack = { navController.popBackStack() },
                                         onCartClick = { navController.navigate(NavRoutes.CART) }
                                     )
