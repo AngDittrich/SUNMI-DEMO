@@ -1,26 +1,36 @@
 package com.example.kiosco
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,31 +39,37 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.DarkCharcoal
 import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.NeonGreenV2
 import java.util.Locale
+import kotlin.math.abs
 
 private val DetailBackground = Color(0xFFF8F8F8)
 private val DetailSheet = Color(0xFFFFFFFF)
@@ -65,42 +81,155 @@ fun ProductDetailScreen(
     initialProductId: Int,
     getQuantity: (Int) -> Int,
     onQuantityChange: (Int, Int) -> Unit,
-    totalItems: Int,
+    cartBarVisible: Boolean,
     onBack: () -> Unit,
     onCartClick: () -> Unit
 ) {
-    val product = products.firstOrNull { it.id == initialProductId } ?: return
-    val quantity = getQuantity(product.id)
+    val initialIndex = products.indexOfFirst { it.id == initialProductId }
+    if (initialIndex < 0) return
 
-    Box(
+    val pagerState = rememberPagerState(initialPage = initialIndex) { products.size }
+    val hapticFeedback = LocalHapticFeedback.current
+    var lastSettledPage by remember { mutableIntStateOf(initialIndex) }
+
+    LaunchedEffect(pagerState.settledPage) {
+        if (pagerState.settledPage != lastSettledPage) {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            lastSettledPage = pagerState.settledPage
+        }
+    }
+
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(DetailBackground),
         contentAlignment = Alignment.TopCenter
     ) {
+        val largeDisplay = maxWidth >= 700.dp || maxHeight >= 1000.dp
+        val contentMaxWidth = if (largeDisplay) 900.dp else 520.dp
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .widthIn(max = 520.dp)
+                .widthIn(max = contentMaxWidth)
                 .background(DetailBackground)
                 .statusBarsPadding()
         ) {
-            DetailTopBar(onBack = onBack, onCartClick = onCartClick)
-
-            ProductHero(
-                product = product,
-                quantity = quantity,
-                onIncrease = { onQuantityChange(product.id, quantity + 1) },
-                onDecrease = {
-                    if (quantity > 0) onQuantityChange(product.id, quantity - 1)
-                },
-                modifier = Modifier.weight(1f)
+            DetailTopBar(
+                largeDisplay = largeDisplay,
+                onBack = onBack,
+                onCartClick = onCartClick
             )
 
-            ProductInformationSheet(
-                product = product,
-                totalItems = totalItems,
-                onCartClick = onCartClick
+            ProductPagerIndicator(
+                pageCount = products.size,
+                currentPosition = pagerState.currentPage + pagerState.currentPageOffsetFraction,
+                largeDisplay = largeDisplay
+            )
+
+            HorizontalPager(
+                state = pagerState,
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                pageSpacing = 8.dp,
+                beyondViewportPageCount = 1,
+                flingBehavior = PagerDefaults.flingBehavior(
+                    state = pagerState,
+                    snapAnimationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) { page ->
+                val product = products[page]
+                val quantity = getQuantity(product.id)
+
+                val pageOffset =
+                    ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
+                        .coerceIn(-1.25f, 1.25f)
+                val distance = abs(pageOffset).coerceIn(0f, 1f)
+                val focusProgress = FastOutSlowInEasing.transform(1f - distance)
+                val scale = 0.88f + 0.12f * focusProgress
+                val alpha = 0.45f + 0.55f * focusProgress
+
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .zIndex(focusProgress)
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                            this.alpha = alpha
+                            translationX = pageOffset * -20.dp.toPx()
+                            translationY = distance * 18.dp.toPx()
+                            rotationZ = pageOffset * -2.5f
+                            rotationY = pageOffset * 7f
+                            cameraDistance = 16f * density
+                        }
+                ) {
+                    val imageHeight = maxHeight * if (largeDisplay) 0.43f else 0.35f
+
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        ProductHero(
+                            product = product,
+                            quantity = quantity,
+                            imageHeight = imageHeight,
+                            largeDisplay = largeDisplay,
+                            onIncrease = {
+                                onQuantityChange(product.id, getQuantity(product.id) + 1)
+                            },
+                            onDecrease = {
+                                val current = getQuantity(product.id)
+                                if (current > 0) onQuantityChange(product.id, current - 1)
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(if (largeDisplay) 32.dp else 16.dp))
+
+                        ProductInformationSheet(
+                            product = product,
+                            cartBarVisible = cartBarVisible,
+                            largeDisplay = largeDisplay,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProductPagerIndicator(
+    pageCount: Int,
+    currentPosition: Float,
+    largeDisplay: Boolean
+) {
+    if (pageCount <= 1) return
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(if (largeDisplay) 30.dp else 22.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        repeat(pageCount) { index ->
+            val proximity = (1f - abs(currentPosition - index)).coerceIn(0f, 1f)
+            val baseWidth = if (largeDisplay) 10.dp else 7.dp
+            val activeWidth = if (largeDisplay) 26.dp else 18.dp
+            val width = baseWidth + (activeWidth * proximity)
+            val color = lerp(Color(0xFFD7D7D7), NeonGreen, proximity)
+
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 3.dp)
+                    .width(width)
+                    .height(if (largeDisplay) 10.dp else 7.dp)
+                    .clip(CircleShape)
+                    .background(color)
             )
         }
     }
@@ -108,26 +237,28 @@ fun ProductDetailScreen(
 
 @Composable
 private fun DetailTopBar(
+    largeDisplay: Boolean,
     onBack: () -> Unit,
     onCartClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(58.dp)
-            .padding(horizontal = 14.dp)
+            .height(if (largeDisplay) 78.dp else 58.dp)
+            .padding(horizontal = if (largeDisplay) 24.dp else 14.dp)
     ) {
         DetailTopButton(
             icon = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Volver",
             onClick = onBack,
+            largeDisplay = largeDisplay,
             modifier = Modifier.align(Alignment.CenterStart)
         )
 
         Text(
             text = "Snack Information",
             color = DarkCharcoal,
-            fontSize = 17.sp,
+            fontSize = if (largeDisplay) 24.sp else 17.sp,
             fontWeight = FontWeight.ExtraBold,
             modifier = Modifier.align(Alignment.Center)
         )
@@ -136,6 +267,7 @@ private fun DetailTopBar(
             icon = Icons.Default.MoreVert,
             contentDescription = "Más opciones",
             onClick = onCartClick,
+            largeDisplay = largeDisplay,
             modifier = Modifier.align(Alignment.CenterEnd)
         )
     }
@@ -146,12 +278,13 @@ private fun DetailTopButton(
     icon: ImageVector,
     contentDescription: String,
     onClick: () -> Unit,
+    largeDisplay: Boolean,
     modifier: Modifier = Modifier
 ) {
     IconButton(
         onClick = onClick,
         modifier = modifier
-            .size(42.dp)
+            .size(if (largeDisplay) 58.dp else 42.dp)
             .clip(CircleShape)
             .background(ControlBackground)
     ) {
@@ -159,7 +292,7 @@ private fun DetailTopButton(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = DarkCharcoal,
-            modifier = Modifier.size(21.dp)
+            modifier = Modifier.size(if (largeDisplay) 29.dp else 21.dp)
         )
     }
 }
@@ -168,106 +301,112 @@ private fun DetailTopButton(
 private fun ProductHero(
     product: Product,
     quantity: Int,
+    imageHeight: Dp,
+    largeDisplay: Boolean,
     onIncrease: () -> Unit,
     onDecrease: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
-                color = Color.White,
-                radius = size.width * 0.57f,
-                center = Offset(
-                    x = size.width / 2,
-                    y = size.height * 0.18f
-                )
-            )
-            drawCircle(
-                color = Color.White,
-                radius = size.width * 0.32f,
-                center = Offset(
-                    x = -size.width * 0.12f,
-                    y = size.height * 0.75f
-                )
-            )
-            drawCircle(
-                color = Color.White,
-                radius = size.width * 0.32f,
-                center = Offset(
-                    x = size.width * 1.12f,
-                    y = size.height * 0.75f
-                )
-            )
-        }
-
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .height(imageHeight)
+                .clip(RoundedCornerShape(28.dp)),
+            contentAlignment = Alignment.Center
         ) {
             AsyncImage(
                 model = product.imageUrl,
                 contentDescription = product.name,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                    .clip(RoundedCornerShape(28.dp)),
-                contentScale = ContentScale.Crop
+                    .fillMaxHeight()
+                    .padding(12.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            QuantityButton(
+                icon = Icons.Default.Remove,
+                contentDescription = "Quitar",
+                onClick = onDecrease,
+                enabled = quantity > 0,
+                largeDisplay = largeDisplay
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                QuantityButton(
-                    icon = Icons.Default.Add,
-                    contentDescription = "Agregar",
-                    onClick = onIncrease,
-                    enabled = true
-                )
-
-                AnimatedContent(
-                    targetState = quantity,
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    label = "quantity"
-                ) { currentQuantity ->
-                    Text(
-                        text = currentQuantity.toString(),
-                        color = DarkCharcoal,
-                        fontSize = 42.sp,
-                        lineHeight = 42.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-
-                QuantityButton(
-                    icon = Icons.Default.Remove,
-                    contentDescription = "Quitar",
-                    onClick = onDecrease,
-                    enabled = quantity > 0
-                )
-            }
-
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = DarkCharcoal,
-                modifier = Modifier.padding(bottom = 12.dp)
-            ) {
+            AnimatedContent(
+                targetState = quantity,
+                transitionSpec = {
+                    if (targetState > initialState) {
+                        (
+                            slideInVertically { it / 2 } +
+                                fadeIn() +
+                                scaleIn(initialScale = 0.8f)
+                            ).togetherWith(
+                            slideOutVertically { -it / 2 } +
+                                fadeOut() +
+                                scaleOut(targetScale = 0.8f)
+                        )
+                    } else {
+                        (
+                            slideInVertically { -it / 2 } +
+                                fadeIn() +
+                                scaleIn(initialScale = 0.8f)
+                            ).togetherWith(
+                            slideOutVertically { it / 2 } +
+                                fadeOut() +
+                                scaleOut(targetScale = 0.8f)
+                        )
+                    }
+                },
+                label = "quantity"
+            ) { currentQuantity ->
                 Text(
-                    text = String.format(Locale.US, "$%05.2f", product.price),
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    lineHeight = 16.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
+                    text = currentQuantity.toString(),
+                    color = DarkCharcoal,
+                    fontSize = if (largeDisplay) 78.sp else 60.sp,
+                    lineHeight = if (largeDisplay) 78.sp else 60.sp,
+                    fontWeight = FontWeight.Black
                 )
             }
+
+            QuantityButton(
+                icon = Icons.Default.Add,
+                contentDescription = "Agregar",
+                onClick = onIncrease,
+                enabled = true,
+                largeDisplay = largeDisplay
+            )
+        }
+
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = DarkCharcoal,
+            modifier = Modifier.padding(top = 10.dp, bottom = 8.dp)
+        ) {
+            Text(
+                text = String.format(Locale.US, "$%.2f", product.price),
+                color = Color.White,
+                fontSize = if (largeDisplay) 36.sp else 28.sp,
+                lineHeight = if (largeDisplay) 42.sp else 34.sp,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.padding(
+                    horizontal = if (largeDisplay) 30.dp else 22.dp,
+                    vertical = if (largeDisplay) 11.dp else 8.dp
+                )
+            )
         }
     }
 }
@@ -277,21 +416,26 @@ private fun QuantityButton(
     icon: ImageVector,
     contentDescription: String,
     onClick: () -> Unit,
-    enabled: Boolean
+    enabled: Boolean,
+    largeDisplay: Boolean
 ) {
+    // Fondo usando NeonGreenV2 con opacidad reducida si está deshabilitado
+    val backgroundColor = if (enabled) NeonGreenV2 else NeonGreenV2.copy(alpha = 0.30f)
+    // Mantenemos el ícono legible ajustando también su opacidad
+    val iconTint = DarkCharcoal.copy(alpha = if (enabled) 1f else 0.35f)
     IconButton(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier
-            .size(58.dp)
+            .size(if (largeDisplay) 104.dp else 80.dp)
             .clip(CircleShape)
-            .background(Color.White)
+            .background(NeonGreen)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = DarkCharcoal.copy(alpha = if (enabled) 1f else 0.25f),
-            modifier = Modifier.size(34.dp)
+            modifier = Modifier.size(if (largeDisplay) 58.dp else 46.dp)
         )
     }
 }
@@ -299,30 +443,45 @@ private fun QuantityButton(
 @Composable
 private fun ProductInformationSheet(
     product: Product,
-    totalItems: Int,
-    onCartClick: () -> Unit
+    cartBarVisible: Boolean,
+    largeDisplay: Boolean,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding(),
-        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
+        modifier = modifier
+            .padding(horizontal = if (largeDisplay) 32.dp else 20.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(
+            topStart = if (largeDisplay) 42.dp else 30.dp,
+            topEnd = if (largeDisplay) 42.dp else 30.dp
+        ),
         color = DetailSheet,
         shadowElevation = 12.dp
     ) {
         Column(
-            modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 10.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = if (largeDisplay) 48.dp else 32.dp,
+                    end = if (largeDisplay) 48.dp else 32.dp,
+                    top = if (largeDisplay) 14.dp else 8.dp,
+                    bottom = if (cartBarVisible) {
+                        if (largeDisplay) 132.dp else 104.dp
+                    } else {
+                        20.dp
+                    }
+                )
         ) {
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .width(52.dp)
-                    .height(5.dp)
+                    .width(if (largeDisplay) 68.dp else 48.dp)
+                    .height(if (largeDisplay) 7.dp else 5.dp)
                     .clip(CircleShape)
                     .background(DarkCharcoal)
             )
 
-            Spacer(modifier = Modifier.height(13.dp))
+            Spacer(modifier = Modifier.height(if (largeDisplay) 20.dp else 13.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -332,13 +491,13 @@ private fun ProductInformationSheet(
                 Text(
                     text = product.name,
                     color = DarkCharcoal,
-                    fontSize = 20.sp,
+                    fontSize = if (largeDisplay) 30.sp else 20.sp,
                     fontWeight = FontWeight.Black
                 )
 
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(if (largeDisplay) 58.dp else 40.dp)
                         .clip(CircleShape)
                         .background(ControlBackground),
                     contentAlignment = Alignment.Center
@@ -347,99 +506,20 @@ private fun ProductInformationSheet(
                         imageVector = Icons.Default.Bookmark,
                         contentDescription = "Guardar",
                         tint = DarkCharcoal,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(if (largeDisplay) 28.dp else 20.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(if (largeDisplay) 14.dp else 8.dp))
 
             Text(
-                text = buildAnnotatedString {
-                    append("This popcorn may have a sweet taste with a touch of caramel or fruit syrup which gives it a rich taste and pampers the tongue. ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.Black)) {
-                        append("Read More")
-                    }
-                },
+                text = product.description.orEmpty(),
                 color = Color(0xFF454545),
-                fontSize = 12.sp,
-                lineHeight = 17.sp,
-                maxLines = 3
+                fontSize = if (largeDisplay) 21.sp else 15.sp,
+                lineHeight = if (largeDisplay) 29.sp else 20.sp,
+                maxLines = if (largeDisplay) 7 else 5
             )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            DetailCartBar(
-                totalItems = totalItems,
-                onClick = onCartClick
-            )
-        }
-    }
-}
-
-@Composable
-private fun DetailCartBar(
-    totalItems: Int,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(66.dp),
-        shape = RoundedCornerShape(34.dp),
-        color = DarkCharcoal
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 20.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    text = "Total",
-                    color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 11.sp,
-                    lineHeight = 12.sp
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "$totalItems donuts",
-                        color = Color.White,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 15.sp
-                    )
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(
-                        text = "›››",
-                        color = NeonGreen,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-            }
-
-            Button(
-                onClick = onClick,
-                colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
-                shape = RoundedCornerShape(25.dp),
-                contentPadding = PaddingValues(horizontal = 15.dp, vertical = 10.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingBag,
-                    contentDescription = null,
-                    tint = DarkCharcoal,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "Cart",
-                    color = DarkCharcoal,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Black
-                )
-            }
         }
     }
 }

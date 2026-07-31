@@ -2,22 +2,20 @@ package com.example.kiosco
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
@@ -30,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,67 +40,123 @@ import com.example.kiosco.ui.theme.*
 @Composable
 fun CartScreen(
     cartItems: List<CartItem>,
-    onBack: () -> Unit,
     onUpdateQuantity: (Int, Int) -> Unit,
     onClearCart: () -> Unit,
-    onCheckout: () -> Unit
+    onCheckout: () -> Unit,
+    cartSheetVisible: Boolean,
+    onDismiss: () -> Unit
 ) {
     val totalPrice = cartItems.sumOf { it.subtotal }
     val totalItems = cartItems.sumOf { it.quantity }
     var showClearDialog by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(LightBg)
+    AnimatedVisibility(
+        visible = cartSheetVisible,
+        enter = slideInVertically(
+            initialOffsetY = { it },
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        ) + fadeIn(),
+        exit = slideOutVertically(
+            targetOffsetY = { it },
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        ) + fadeOut()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Top bar
-            CartTopBar(
-                itemCount = cartItems.size,
-                onBack = onBack,
-                onClear = if (cartItems.isNotEmpty()) {
-                    { showClearDialog = true }
-                } else null
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onDismiss
+                    )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (cartItems.isEmpty()) {
-                EmptyCartState(modifier = Modifier.weight(1f))
-            } else {
-                // Items list
-                LazyColumn(
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.82f)
+                    .align(Alignment.BottomCenter)
+                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
+                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                color = LightBg,
+                shadowElevation = 16.dp
+            ) {
+                Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(vertical = 8.dp)
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp)
+                        .navigationBarsPadding()
                 ) {
-                    items(cartItems, key = { it.product.id }) { item ->
-                        CartItemRow(
-                            item = item,
-                            onIncrease = { onUpdateQuantity(item.product.id, item.quantity + 1) },
-                            onDecrease = { onUpdateQuantity(item.product.id, item.quantity - 1) },
-                            onRemove = { onUpdateQuantity(item.product.id, 0) }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .width(48.dp)
+                            .height(5.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFD7D7D7))
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    CartTopBar(
+                        itemCount = cartItems.size,
+                        onDismiss = onDismiss,
+                        onClear = if (cartItems.isNotEmpty()) {
+                            { showClearDialog = true }
+                        } else null
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (cartItems.isEmpty()) {
+                        EmptyCartState(modifier = Modifier.weight(1f))
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            items(cartItems, key = { it.product.id }) { item ->
+                                CartItemRow(
+                                    item = item,
+                                    onIncrease = { onUpdateQuantity(item.product.id, item.quantity + 1) },
+                                    onDecrease = { onUpdateQuantity(item.product.id, item.quantity - 1) },
+                                    onRemove = { onUpdateQuantity(item.product.id, 0) }
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = "Desliza a la izquierda para eliminar",
+                            fontSize = 13.sp,
+                            color = TextMuted,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            textAlign = TextAlign.Center
                         )
                     }
+
+                    CartBottomBar(
+                        totalItems = totalItems,
+                        totalPrice = totalPrice,
+                        enabled = cartItems.isNotEmpty(),
+                        onCheckout = onCheckout
+                    )
                 }
             }
-
-            // Bottom summary
-            CartBottomBar(
-                totalItems = totalItems,
-                totalPrice = totalPrice,
-                enabled = cartItems.isNotEmpty(),
-                onCheckout = onCheckout
-            )
         }
     }
 
@@ -119,7 +174,7 @@ fun CartScreen(
 @Composable
 private fun CartTopBar(
     itemCount: Int,
-    onBack: () -> Unit,
+    onDismiss: () -> Unit,
     onClear: (() -> Unit)?
 ) {
     Row(
@@ -127,15 +182,15 @@ private fun CartTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = onBack,
+            onClick = onDismiss,
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(Color.White)
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Volver",
+                imageVector = Icons.Filled.Remove,
+                contentDescription = "Cerrar",
                 tint = DarkCharcoal
             )
         }
@@ -167,7 +222,8 @@ private fun CartTopBar(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Vaciar carrito",
-                    tint = Color(0xFFE53935)
+                    tint = Color(0xFFE53935),
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
@@ -181,108 +237,105 @@ private fun CartItemRow(
     onDecrease: () -> Unit,
     onRemove: () -> Unit
 ) {
-    val animatedElevation by animateFloatAsState(
-        targetValue = if (item.quantity > 0) 4f else 1f,
-        animationSpec = tween(300),
-        label = "rowElevation"
-    )
+    val dismissState = rememberSwipeToDismissBoxState()
 
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = animatedElevation.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Product image
-            AsyncImage(
-                model = item.product.imageUrl,
-                contentDescription = item.product.name,
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onRemove()
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            Box(
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Product info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.product.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = DarkCharcoal,
-                    maxLines = 1
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color(0xFFFFCDD2))
+                    .padding(horizontal = 24.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Eliminar",
+                    tint = Color(0xFFE53935),
+                    modifier = Modifier.size(24.dp)
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "$${String.format("%.2f", item.product.price)} c/u",
-                    fontSize = 13.sp,
-                    color = TextMuted
+            }
+        }
+    ) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    model = item.product.imageUrl,
+                    contentDescription = item.product.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.height(6.dp))
 
-                // Quantity controls
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SmallQuantityButton(
-                        icon = Icons.Default.Remove,
-                        onClick = onDecrease
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.product.name,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkCharcoal,
+                        maxLines = 1
                     )
-
-                    Box(
-                        modifier = Modifier
-                            .width(36.dp)
-                            .height(32.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(LightBg),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = item.quantity.toString(),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = DarkCharcoal
-                        )
-                    }
-
-                    SmallQuantityButton(
-                        icon = Icons.Default.Add,
-                        onClick = onIncrease
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "$${String.format("%.2f", item.product.price)} c/u",
+                        fontSize = 13.sp,
+                        color = TextMuted
                     )
                 }
-            }
 
-            // Subtotal + remove
-            Column(
-                horizontalAlignment = Alignment.End
-            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        SmallQuantityButton(
+                            icon = Icons.Default.Remove,
+                            onClick = onDecrease
+                        )
+                        Text(
+                            text = item.quantity.toString(),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = DarkCharcoal
+                        )
+                        SmallQuantityButton(
+                            icon = Icons.Default.Add,
+                            onClick = onIncrease
+                        )
+                    }
+                }
+
                 Text(
                     text = "$${String.format("%.2f", item.subtotal)}",
-                    fontSize = 18.sp,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Black,
                     color = DarkCharcoal
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                IconButton(
-                    onClick = onRemove,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar",
-                        tint = Color(0xFFE53935),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
             }
         }
     }
@@ -290,12 +343,12 @@ private fun CartItemRow(
 
 @Composable
 private fun SmallQuantityButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .size(32.dp)
+            .size(36.dp)
             .clip(CircleShape)
             .background(NeonGreen)
             .clickable(onClick = onClick),
@@ -319,19 +372,23 @@ private fun EmptyCartState(modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = Modifier
-                .size(120.dp)
+                .size(140.dp)
                 .clip(CircleShape)
-                .background(Color.White),
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(NeonGreen.copy(alpha = 0.3f), NeonGreen.copy(alpha = 0.1f))
+                    )
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Outlined.ShoppingBag,
                 contentDescription = null,
                 tint = TextMuted,
-                modifier = Modifier.size(60.dp)
+                modifier = Modifier.size(64.dp)
             )
         }
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
         Text(
             text = "Tu carrito está vacío",
             fontSize = 24.sp,
@@ -358,7 +415,8 @@ private fun CartBottomBar(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+            .padding(vertical = 16.dp)
+            .padding(bottom = 8.dp),
         shape = RoundedCornerShape(32.dp),
         color = DarkCharcoal,
         shadowElevation = 12.dp

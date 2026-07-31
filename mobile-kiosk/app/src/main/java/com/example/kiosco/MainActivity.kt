@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.kiosco.ui.theme.KioscoTheme
@@ -28,9 +29,9 @@ import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.launch
 
 object NavRoutes {
+    const val WELCOME = "welcome"
     const val PRODUCT_LIST = "product_list"
     const val PRODUCT_DETAIL = "product_detail/{productId}"
-    const val CART = "cart"
 
     fun productDetail(productId: Int) = "product_detail/$productId"
 }
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
                 var isLoading by remember { mutableStateOf(true) }
                 var errorMessage by remember { mutableStateOf<String?>(null) }
                 val cartItems = remember { mutableStateOf<List<CartItem>>(emptyList()) }
+                var cartSheetVisible by remember { mutableStateOf(false) }
                 val scope = rememberCoroutineScope()
                 val navController = rememberNavController()
 
@@ -66,8 +68,16 @@ class MainActivity : ComponentActivity() {
                     if (newQty <= 0) {
                         cartItems.value = cartItems.value.filter { it.product.id != productId }
                     } else {
-                        cartItems.value = cartItems.value.map {
-                            if (it.product.id == productId) it.copy(quantity = newQty) else it
+                        val existing = cartItems.value.find { it.product.id == productId }
+                        if (existing != null) {
+                            cartItems.value = cartItems.value.map {
+                                if (it.product.id == productId) it.copy(quantity = newQty) else it
+                            }
+                        } else {
+                            val product = products.find { it.id == productId }
+                            if (product != null) {
+                                cartItems.value = cartItems.value + CartItem(product, newQty)
+                            }
                         }
                     }
                 }
@@ -140,55 +150,81 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         else -> {
-                            NavHost(
-                                navController = navController,
-                                startDestination = NavRoutes.PRODUCT_LIST
-                            ) {
-                                composable(NavRoutes.PRODUCT_LIST) {
-                                    SnackKioskScreen(
-                                        products = products,
-                                        onProductClick = { product ->
-                                            navController.navigate(NavRoutes.productDetail(product.id))
-                                        },
-                                        onAddToCart = { product -> addToCart(product) },
+                            val currentDestination = navController.currentBackStackEntryAsState()
+                            val currentRoute = currentDestination.value?.destination?.route
+                            val isWelcomeRoute = currentRoute == NavRoutes.WELCOME
+
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                NavHost(
+                                    navController = navController,
+                                    startDestination = NavRoutes.WELCOME
+                                ) {
+                                    composable(NavRoutes.WELCOME) {
+                                        WelcomeScreen(
+                                            products = products,
+                                            onGetStarted = {
+                                                navController.navigate(NavRoutes.PRODUCT_LIST) {
+                                                    popUpTo(NavRoutes.WELCOME) { inclusive = true }
+                                                }
+                                            }
+                                        )
+                                    }
+
+                                    composable(NavRoutes.PRODUCT_LIST) {
+                                        SnackKioskScreen(
+                                            products = products,
+                                            onProductClick = { product ->
+                                                navController.navigate(NavRoutes.productDetail(product.id))
+                                            },
+                                            onAddToCart = { product -> addToCart(product) },
+                                            onCartClick = { cartSheetVisible = true }
+                                        )
+                                    }
+
+                                    composable(
+                                        route = NavRoutes.PRODUCT_DETAIL,
+                                        arguments = listOf(
+                                            navArgument("productId") { type = NavType.IntType }
+                                        )
+                                    ) { backStackEntry ->
+                                        val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                                        ProductDetailScreen(
+                                            products = products,
+                                            initialProductId = productId,
+                                            getQuantity = getQuantity,
+                                            onQuantityChange = { id, qty -> updateQuantity(id, qty) },
+                                            cartBarVisible = totalItems > 0,
+                                            onBack = { navController.popBackStack() },
+                                            onCartClick = { cartSheetVisible = true }
+                                        )
+                                    }
+                                }
+
+                                if (totalItems > 0 && !isWelcomeRoute && !cartSheetVisible) {
+                                    CartSummaryBar(
                                         totalItems = totalItems,
                                         totalPrice = totalPrice,
-                                        onCheckoutClick = {
-                                            navController.navigate(NavRoutes.CART)
-                                        }
-                                    )
-                                }
-
-                                composable(
-                                    route = NavRoutes.PRODUCT_DETAIL,
-                                    arguments = listOf(
-                                        navArgument("productId") { type = NavType.IntType }
-                                    )
-                                ) { backStackEntry ->
-                                    val productId = backStackEntry.arguments?.getInt("productId") ?: 0
-                                    ProductDetailScreen(
-                                        products = products,
-                                        initialProductId = productId,
-                                        getQuantity = getQuantity,
-                                        onQuantityChange = { id, qty -> updateQuantity(id, qty) },
-                                        totalItems = totalItems,
-                                        onBack = { navController.popBackStack() },
-                                        onCartClick = { navController.navigate(NavRoutes.CART) }
-                                    )
-                                }
-
-                                composable(NavRoutes.CART) {
-                                    CartScreen(
-                                        cartItems = cartItems.value,
-                                        onBack = { navController.popBackStack() },
-                                        onUpdateQuantity = { id, qty -> updateQuantity(id, qty) },
-                                        onClearCart = { cartItems.value = emptyList() },
-                                        onCheckout = {
-                                            // TODO: Emit WebSocket event to terminal
-                                        }
+                                        onCartClick = { cartSheetVisible = true },
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .padding(horizontal = 24.dp)
+                                            .padding(bottom = 16.dp)
+                                            .navigationBarsPadding()
                                     )
                                 }
                             }
+
+                            CartScreen(
+                                cartItems = cartItems.value,
+                                onUpdateQuantity = { id, qty -> updateQuantity(id, qty) },
+                                onClearCart = { cartItems.value = emptyList() },
+                                onCheckout = {
+                                    cartSheetVisible = false
+                                    // TODO: Emit WebSocket event to terminal
+                                },
+                                cartSheetVisible = cartSheetVisible,
+                                onDismiss = { cartSheetVisible = false }
+                            )
                         }
                     }
                 }
