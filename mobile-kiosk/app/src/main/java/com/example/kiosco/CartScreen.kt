@@ -1,12 +1,20 @@
 package com.example.kiosco
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,6 +25,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingBag
@@ -26,6 +36,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -36,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.*
+import kotlinx.coroutines.delay
 
 @Composable
 fun CartScreen(
@@ -49,6 +61,7 @@ fun CartScreen(
     val totalPrice = cartItems.sumOf { it.subtotal }
     val totalItems = cartItems.sumOf { it.quantity }
     var showClearDialog by remember { mutableStateOf(false) }
+    var showPaymentModal by remember { mutableStateOf(false) }
 
     AnimatedVisibility(
         visible = cartSheetVisible,
@@ -153,7 +166,7 @@ fun CartScreen(
                         totalItems = totalItems,
                         totalPrice = totalPrice,
                         enabled = cartItems.isNotEmpty(),
-                        onCheckout = onCheckout
+                        onCheckout = { showPaymentModal = true }
                     )
                 }
             }
@@ -167,6 +180,15 @@ fun CartScreen(
                 onClearCart()
             },
             onDismiss = { showClearDialog = false }
+        )
+    }
+
+    if (showPaymentModal) {
+        PaymentModal(
+            onPaymentComplete = {
+                showPaymentModal = false
+                onCheckout()
+            }
         )
     }
 }
@@ -506,4 +528,181 @@ private fun ClearCartDialog(
         shape = RoundedCornerShape(24.dp),
         containerColor = Color.White
     )
+}
+
+@Composable
+private fun PaymentModal(
+    onPaymentComplete: () -> Unit
+) {
+    var phase by remember { mutableStateOf(PaymentPhase.Paying) }
+    var approved by remember { mutableStateOf(false) }
+
+    LaunchedEffect(phase) {
+        when (phase) {
+            PaymentPhase.Paying -> {
+                delay(2400)
+                phase = PaymentPhase.Paid
+            }
+            PaymentPhase.Paid -> {
+                delay(1400)
+                onPaymentComplete()
+            }
+        }
+    }
+
+    LaunchedEffect(phase) {
+        if (phase == PaymentPhase.Paid) {
+            delay(120)
+            approved = true
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.55f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 28.dp),
+            shape = RoundedCornerShape(32.dp),
+            color = Color.White,
+            shadowElevation = 20.dp
+        ) {
+            AnimatedContent(
+                targetState = phase,
+                transitionSpec = {
+                    fadeIn() togetherWith fadeOut()
+                },
+                label = "paymentPhase"
+            ) { currentPhase ->
+                when (currentPhase) {
+                    PaymentPhase.Paying -> PayingContent()
+                    PaymentPhase.Paid -> PaidContent(approved = approved)
+                }
+            }
+        }
+    }
+}
+
+private enum class PaymentPhase { Paying, Paid }
+
+@Composable
+private fun PayingContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 28.dp, vertical = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val transition = rememberInfiniteTransition(label = "payingPulse")
+        val pulse by transition.animateFloat(
+            initialValue = 1f,
+            targetValue = 1.12f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 700),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "pulseScale"
+        )
+
+        Box(
+            modifier = Modifier
+                .size(128.dp)
+                .scale(pulse)
+                .clip(CircleShape)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(NeonGreen, NeonGreen.copy(alpha = 0.7f))
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.CreditCard,
+                contentDescription = null,
+                tint = DarkCharcoal,
+                modifier = Modifier.size(56.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        Text(
+            text = "Acerque su tarjeta al terminal",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = DarkCharcoal,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Procesando pago...",
+            fontSize = 15.sp,
+            color = TextMuted,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun PaidContent(approved: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 28.dp, vertical = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val scale by animateFloatAsState(
+            targetValue = if (approved) 1f else 0.4f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium
+            ),
+            label = "checkScale"
+        )
+
+        Box(
+            modifier = Modifier
+                .size(128.dp)
+                .scale(scale)
+                .clip(CircleShape)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(NeonGreen, NeonGreen.copy(alpha = 0.7f))
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null,
+                tint = DarkCharcoal,
+                modifier = Modifier.size(72.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        Text(
+            text = "Pago aprobado",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Black,
+            color = DarkCharcoal,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Preparando tu pedido...",
+            fontSize = 15.sp,
+            color = TextMuted,
+            textAlign = TextAlign.Center
+        )
+    }
 }

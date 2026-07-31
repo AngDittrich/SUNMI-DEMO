@@ -32,6 +32,7 @@ object NavRoutes {
     const val WELCOME = "welcome"
     const val PRODUCT_LIST = "product_list"
     const val PRODUCT_DETAIL = "product_detail/{productId}"
+    const val ORDER_SUMMARY = "order_summary"
 
     fun productDetail(productId: Int) = "product_detail/$productId"
 }
@@ -48,6 +49,7 @@ class MainActivity : ComponentActivity() {
                 var errorMessage by remember { mutableStateOf<String?>(null) }
                 val cartItems = remember { mutableStateOf<List<CartItem>>(emptyList()) }
                 var cartSheetVisible by remember { mutableStateOf(false) }
+                val lastOrder = remember { mutableStateOf<List<CartItem>>(emptyList()) }
                 val scope = rememberCoroutineScope()
                 val navController = rememberNavController()
 
@@ -198,6 +200,17 @@ class MainActivity : ComponentActivity() {
                                             onCartClick = { cartSheetVisible = true }
                                         )
                                     }
+
+                                    composable(NavRoutes.ORDER_SUMMARY) {
+                                        OrderSummaryScreen(
+                                            orderItems = lastOrder.value,
+                                            onDone = {
+                                                navController.navigate(NavRoutes.WELCOME) {
+                                                    popUpTo(0) { inclusive = true }
+                                                }
+                                            }
+                                        )
+                                    }
                                 }
 
                                 if (totalItems > 0 && !isWelcomeRoute && !cartSheetVisible) {
@@ -219,7 +232,10 @@ class MainActivity : ComponentActivity() {
                                 onUpdateQuantity = { id, qty -> updateQuantity(id, qty) },
                                 onClearCart = { cartItems.value = emptyList() },
                                 onCheckout = {
+                                    lastOrder.value = cartItems.value
+                                    cartItems.value = emptyList()
                                     cartSheetVisible = false
+                                    navController.navigate(NavRoutes.ORDER_SUMMARY)
                                     // TODO: Emit WebSocket event to terminal
                                 },
                                 cartSheetVisible = cartSheetVisible,
