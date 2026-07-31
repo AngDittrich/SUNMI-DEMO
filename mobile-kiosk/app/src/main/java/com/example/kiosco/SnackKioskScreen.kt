@@ -59,6 +59,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -699,12 +700,15 @@ fun CartSummaryBar(
     totalPrice: Double,
     onCartClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     bagBounceTrigger: Int = 0,
     onBagPositioned: (Offset) -> Unit = {}
 ) {
     val bagScale = remember { Animatable(1f) }
+    var handledBounce by remember { mutableIntStateOf(bagBounceTrigger) }
     LaunchedEffect(bagBounceTrigger) {
-        if (bagBounceTrigger == 0) return@LaunchedEffect
+        if (bagBounceTrigger == handledBounce) return@LaunchedEffect
+        handledBounce = bagBounceTrigger
         bagScale.snapTo(1f)
         bagScale.animateTo(
             1.18f,
@@ -796,6 +800,7 @@ fun CartSummaryBar(
 
                 Button(
                     onClick = onCartClick,
+                    enabled = enabled,
                     colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
                     shape = RoundedCornerShape(50),
                     contentPadding = PaddingValues(

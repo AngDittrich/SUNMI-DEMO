@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -250,11 +251,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
-                                if (totalItems > 0 && !isWelcomeRoute && !cartSheetVisible) {
+                                if (!isWelcomeRoute && !cartSheetVisible) {
                                     CartSummaryBar(
                                         totalItems = totalItems,
                                         totalPrice = totalPrice,
                                         onCartClick = { cartSheetVisible = true },
+                                        enabled = totalItems > 0,
                                         bagBounceTrigger = bagBounceTrigger,
                                         onBagPositioned = { bagCenter = it },
                                         modifier = Modifier
@@ -262,6 +264,7 @@ class MainActivity : ComponentActivity() {
                                             .padding(horizontal = 24.dp)
                                             .padding(bottom = 16.dp)
                                             .navigationBarsPadding()
+                                            .alpha(if (totalItems > 0) 1f else 0f)
                                     )
                                 }
 
