@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -56,6 +57,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +69,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -87,7 +93,7 @@ private val FilterBackground = Color(0xFFE9E9EC)
 fun SnackKioskScreen(
     products: List<Product>,
     onProductClick: (Product) -> Unit,
-    onAddToCart: (Product) -> Unit,
+    onAddToCart: (Product, Offset, Float) -> Unit,
     onCartClick: () -> Unit
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -257,7 +263,7 @@ fun SnackKioskScreen(
                                 product = product,
                                 largeDisplay = largeDisplay,
                                 onClick = { onProductClick(product) },
-                                onAdd = { onAddToCart(product) }
+                                onAdd = { center, size -> onAddToCart(product, center, size) }
                             )
                         }
                     }
@@ -487,11 +493,13 @@ private fun CategoryChip(
 fun SnackCard(
     product: Product,
     onClick: () -> Unit,
-    onAdd: () -> Unit,
+    onAdd: (startCenter: Offset, startSize: Float) -> Unit,
     largeDisplay: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    var imageCenter by remember { mutableStateOf(Offset.Zero) }
+    var imageSizePx by remember { mutableStateOf(0f) }
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.975f else 1f,
         animationSpec = spring(
@@ -522,7 +530,16 @@ fun SnackCard(
                     .fillMaxWidth()
                     .aspectRatio(1.16f)
                     .clip(RoundedCornerShape(if (largeDisplay) 23.dp else 17.dp))
-                    .background(ImageBackground),
+                    .background(ImageBackground)
+                    .onGloballyPositioned { coords ->
+                        val pos = coords.positionInRoot()
+                        val size = coords.size
+                        imageCenter = Offset(
+                            pos.x + size.width / 2f,
+                            pos.y + size.height / 2f
+                        )
+                        imageSizePx = minOf(size.width, size.height).toFloat() * 0.55f
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -594,7 +611,11 @@ fun SnackCard(
                 Surface(
                     modifier = Modifier
                         .size(if (largeDisplay) 48.dp else 38.dp)
-                        .clickable(onClick = onAdd),
+                        .clickable(
+                            onClick = {
+                                onAdd(imageCenter, imageSizePx.coerceAtLeast(48f))
+                            }
+                        ),
                     shape = CircleShape,
                     color = NeonGreen
                 ) {
@@ -677,8 +698,30 @@ fun CartSummaryBar(
     totalItems: Int,
     totalPrice: Double,
     onCartClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bagBounceTrigger: Int = 0,
+    onBagPositioned: (Offset) -> Unit = {}
 ) {
+    val bagScale = remember { Animatable(1f) }
+    LaunchedEffect(bagBounceTrigger) {
+        if (bagBounceTrigger == 0) return@LaunchedEffect
+        bagScale.snapTo(1f)
+        bagScale.animateTo(
+            1.18f,
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        )
+        bagScale.animateTo(
+            1f,
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        )
+    }
+
     BoxWithConstraints(
         modifier = modifier
             .widthIn(max = 900.dp)
@@ -689,7 +732,8 @@ fun CartSummaryBar(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (largeBar) 88.dp else 72.dp),
+                .height(if (largeBar) 88.dp else 72.dp)
+                .padding(end = if (largeBar) 24.dp else 16.dp),
             shape = RoundedCornerShape(50),
             color = DarkCharcoal,
             shadowElevation = 12.dp
@@ -708,8 +752,22 @@ fun CartSummaryBar(
                     Box(
                         modifier = Modifier
                             .size(if (largeBar) 46.dp else 36.dp)
+                            .graphicsLayer {
+                                scaleX = bagScale.value
+                                scaleY = bagScale.value
+                            }
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f)),
+                            .background(Color.White.copy(alpha = 0.1f))
+                            .onGloballyPositioned { coords ->
+                                val pos = coords.positionInRoot()
+                                val size = coords.size
+                                onBagPositioned(
+                                    Offset(
+                                        pos.x + size.width / 2f,
+                                        pos.y + size.height / 2f
+                                    )
+                                )
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

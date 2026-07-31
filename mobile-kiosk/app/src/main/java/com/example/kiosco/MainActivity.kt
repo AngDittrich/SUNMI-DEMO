@@ -178,7 +178,7 @@ class MainActivity : ComponentActivity() {
                                             onProductClick = { product ->
                                                 navController.navigate(NavRoutes.productDetail(product.id))
                                             },
-                                            onAddToCart = { product -> addToCart(product) },
+                                            onAddToCart = { product, _, _ -> addToCart(product) },
                                             onCartClick = { cartSheetVisible = true }
                                         )
                                     }
