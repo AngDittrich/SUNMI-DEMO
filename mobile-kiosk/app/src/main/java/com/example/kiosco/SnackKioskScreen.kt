@@ -174,9 +174,10 @@ fun SnackKioskScreen(
                 onAllClick = { selectedCategories = emptySet() },
                 onCategoryClick = { category ->
                     selectedCategories = if (category in selectedCategories) {
-                        selectedCategories - category
+                        emptySet()
                     } else {
-                        selectedCategories + category
+                        val newSet = selectedCategories + category
+                        if (newSet.size == categories.size) emptySet() else newSet
                     }
                 }
             )
