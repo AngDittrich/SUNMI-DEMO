@@ -12,6 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,8 +53,25 @@ class MainActivity : ComponentActivity() {
                 val cartItems = remember { mutableStateOf<List<CartItem>>(emptyList()) }
                 var cartSheetVisible by remember { mutableStateOf(false) }
                 val lastOrder = remember { mutableStateOf<List<CartItem>>(emptyList()) }
+                var flyEvent by remember { mutableStateOf<AddToCartFlyEvent?>(null) }
+                var bagCenter by remember { mutableStateOf<Offset?>(null) }
+                var bagBounceTrigger by remember { mutableStateOf(0) }
+                var flyIdSeq by remember { mutableStateOf(0L) }
+                val density = LocalDensity.current
+                val configuration = LocalConfiguration.current
                 val scope = rememberCoroutineScope()
                 val navController = rememberNavController()
+
+                fun fallbackBagCenter(): Offset {
+                    val widthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+                    val heightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+                    val horizontalPad = with(density) { 24.dp.toPx() }
+                    val bottomPad = with(density) { 16.dp.toPx() }
+                    val barHeight = with(density) { 72.dp.toPx() }
+                    val bagX = horizontalPad + with(density) { 38.dp.toPx() }
+                    val bagY = heightPx - bottomPad - barHeight / 2f
+                    return Offset(bagX.coerceAtMost(widthPx / 2f), bagY)
+                }
 
                 // Cart helpers
                 val addToCart: (Product) -> Unit = { product ->
@@ -178,7 +198,24 @@ class MainActivity : ComponentActivity() {
                                             onProductClick = { product ->
                                                 navController.navigate(NavRoutes.productDetail(product.id))
                                             },
-                                            onAddToCart = { product, _, _ -> addToCart(product) },
+                                            onAddToCart = { product, startCenter, startSize ->
+                                                val existingQty = cartItems.value
+                                                    .find { it.product.id == product.id }
+                                                    ?.quantity ?: 0
+                                                addToCart(product)
+                                                if (existingQty == 0) {
+                                                    flyIdSeq += 1
+                                                    val end = bagCenter ?: fallbackBagCenter()
+                                                    flyEvent = AddToCartFlyEvent(
+                                                        id = flyIdSeq,
+                                                        imageUrl = product.imageUrl,
+                                                        startCenter = startCenter,
+                                                        startSize = startSize,
+                                                        endCenter = end,
+                                                        endSize = with(density) { 28.dp.toPx() }
+                                                    )
+                                                }
+                                            },
                                             onCartClick = { cartSheetVisible = true }
                                         )
                                     }
@@ -218,6 +255,8 @@ class MainActivity : ComponentActivity() {
                                         totalItems = totalItems,
                                         totalPrice = totalPrice,
                                         onCartClick = { cartSheetVisible = true },
+                                        bagBounceTrigger = bagBounceTrigger,
+                                        onBagPositioned = { bagCenter = it },
                                         modifier = Modifier
                                             .align(Alignment.BottomCenter)
                                             .padding(horizontal = 24.dp)
@@ -225,6 +264,16 @@ class MainActivity : ComponentActivity() {
                                             .navigationBarsPadding()
                                     )
                                 }
+
+                                AddToCartFlyOverlay(
+                                    event = flyEvent,
+                                    onFinished = { finishedId ->
+                                        if (flyEvent?.id == finishedId) {
+                                            flyEvent = null
+                                            bagBounceTrigger += 1
+                                        }
+                                    }
+                                )
                             }
 
                             CartScreen(
