@@ -6,80 +6,192 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.kiosco.ui.theme.KioscoTheme
+import com.example.kiosco.ui.theme.DarkCharcoal
+import com.example.kiosco.ui.theme.LightBg
+import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.TextMuted
+import kotlinx.coroutines.launch
+
+object NavRoutes {
+    const val PRODUCT_LIST = "product_list"
+    const val PRODUCT_DETAIL = "product_detail/{productId}"
+    const val CART = "cart"
+
+    fun productDetail(productId: Int) = "product_detail/$productId"
+}
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
             KioscoTheme {
-                // Estado mutable para rastrear si el WebSocket está conectado
-                var isConnected by remember { mutableStateOf(false) }
+                var products by remember { mutableStateOf<List<Product>>(emptyList()) }
+                var isLoading by remember { mutableStateOf(true) }
+                var errorMessage by remember { mutableStateOf<String?>(null) }
+                val cartItems = remember { mutableStateOf<List<CartItem>>(emptyList()) }
+                val scope = rememberCoroutineScope()
+                val navController = rememberNavController()
 
-                // Inicializar conexión WebSocket al cargar la interfaz
-                LaunchedEffect(Unit) {
-                    SocketManager.init { connected ->
-                        isConnected = connected
+                // Cart helpers
+                val addToCart: (Product) -> Unit = { product ->
+                    val current = cartItems.value
+                    val existing = current.find { it.product.id == product.id }
+                    cartItems.value = if (existing != null) {
+                        current.map {
+                            if (it.product.id == product.id) it.copy(quantity = it.quantity + 1) else it
+                        }
+                    } else {
+                        current + CartItem(product, 1)
                     }
                 }
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    KioskStatusScreen(
-                        isConnected = isConnected,
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val updateQuantity: (Int, Int) -> Unit = { productId, newQty ->
+                    if (newQty <= 0) {
+                        cartItems.value = cartItems.value.filter { it.product.id != productId }
+                    } else {
+                        cartItems.value = cartItems.value.map {
+                            if (it.product.id == productId) it.copy(quantity = newQty) else it
+                        }
+                    }
+                }
+
+                val getQuantity: (Int) -> Int = { productId ->
+                    cartItems.value.find { it.product.id == productId }?.quantity ?: 0
+                }
+
+                val totalItems = cartItems.value.sumOf { it.quantity }
+                val totalPrice = cartItems.value.sumOf { it.subtotal }
+
+                LaunchedEffect(Unit) {
+                    scope.launch {
+                        try {
+                            val api = ApiService.create()
+                            products = api.getProducts()
+                            isLoading = false
+                        } catch (e: Exception) {
+                            errorMessage = "Error: ${e.message}"
+                            isLoading = false
+                            e.printStackTrace()
+                        }
+                    }
+                }
+
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = LightBg
+                ) {
+                    when {
+                        isLoading -> {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(LightBg),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator(color = NeonGreen)
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Cargando productos...",
+                                    color = TextMuted,
+                                    fontSize = 18.sp
+                                )
+                            }
+                        }
+                        errorMessage != null -> {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(LightBg)
+                                    .padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "No se pudieron cargar los productos",
+                                    color = DarkCharcoal,
+                                    fontSize = 24.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = errorMessage!!,
+                                    color = TextMuted,
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                        else -> {
+                            NavHost(
+                                navController = navController,
+                                startDestination = NavRoutes.PRODUCT_LIST
+                            ) {
+                                composable(NavRoutes.PRODUCT_LIST) {
+                                    SnackKioskScreen(
+                                        products = products,
+                                        onProductClick = { product ->
+                                            navController.navigate(NavRoutes.productDetail(product.id))
+                                        },
+                                        onAddToCart = { product -> addToCart(product) },
+                                        totalItems = totalItems,
+                                        totalPrice = totalPrice,
+                                        onCheckoutClick = {
+                                            navController.navigate(NavRoutes.CART)
+                                        }
+                                    )
+                                }
+
+                                composable(
+                                    route = NavRoutes.PRODUCT_DETAIL,
+                                    arguments = listOf(
+                                        navArgument("productId") { type = NavType.IntType }
+                                    )
+                                ) { backStackEntry ->
+                                    val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                                    ProductDetailScreen(
+                                        products = products,
+                                        initialProductId = productId,
+                                        getQuantity = getQuantity,
+                                        onQuantityChange = { id, qty -> updateQuantity(id, qty) },
+                                        onBack = { navController.popBackStack() },
+                                        onCartClick = { navController.navigate(NavRoutes.CART) }
+                                    )
+                                }
+
+                                composable(NavRoutes.CART) {
+                                    CartScreen(
+                                        cartItems = cartItems.value,
+                                        onBack = { navController.popBackStack() },
+                                        onUpdateQuantity = { id, qty -> updateQuantity(id, qty) },
+                                        onClearCart = { cartItems.value = emptyList() },
+                                        onCheckout = {
+                                            // TODO: Emit WebSocket event to terminal
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        SocketManager.disconnect()
-    }
-}
-
-@Composable
-fun KioskStatusScreen(isConnected: Boolean, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "SUNMI Kiosko POS Demo",
-            fontSize = 32.sp,
-            style = MaterialTheme.typography.headlineLarge
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Indicador de estado de conexión
-        Box(
-            modifier = Modifier
-                .background(
-                    color = if (isConnected) Color(0xFF4CAF50) else Color(0xFFF44336),
-                    shape = MaterialTheme.shapes.medium
-                )
-                .padding(horizontal = 24.dp, vertical = 12.dp)
-        ) {
-            Text(
-                text = if (isConnected) "Servidor Conectado" else "Servidor Desconectado",
-                color = Color.White,
-                fontSize = 20.sp
-            )
         }
     }
 }
