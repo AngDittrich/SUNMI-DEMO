@@ -63,24 +63,12 @@ fun CartScreen(
     var showClearDialog by remember { mutableStateOf(false) }
     var showPaymentModal by remember { mutableStateOf(false) }
 
-    AnimatedVisibility(
-        visible = cartSheetVisible,
-        enter = slideInVertically(
-            initialOffsetY = { it },
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
-            )
-        ) + fadeIn(),
-        exit = slideOutVertically(
-            targetOffsetY = { it },
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioNoBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
-        ) + fadeOut()
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = cartSheetVisible,
+            enter = fadeIn(animationSpec = tween(durationMillis = 220)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 200))
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -91,12 +79,30 @@ fun CartScreen(
                         onClick = onDismiss
                     )
             )
+        }
 
+        AnimatedVisibility(
+            visible = cartSheetVisible,
+            enter = slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            ),
+            exit = slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            ),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.82f)
-                    .align(Alignment.BottomCenter)
                     .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                 color = LightBg,

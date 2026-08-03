@@ -93,6 +93,7 @@ private val FilterBackground = Color(0xFFE9E9EC)
 @Composable
 fun SnackKioskScreen(
     products: List<Product>,
+    cartItemCount: Int,
     onProductClick: (Product) -> Unit,
     onAddToCart: (Product, Offset, Float) -> Unit,
     onCartClick: () -> Unit
@@ -149,6 +150,7 @@ fun SnackKioskScreen(
             ) {
                 KioskHeader(
                     productCount = products.size,
+                    cartItemCount = cartItemCount,
                     largeDisplay = largeDisplay,
                     onCartClick = onCartClick
                 )
@@ -278,6 +280,7 @@ fun SnackKioskScreen(
 @Composable
 private fun KioskHeader(
     productCount: Int,
+    cartItemCount: Int,
     largeDisplay: Boolean,
     onCartClick: () -> Unit
 ) {
@@ -310,19 +313,47 @@ private fun KioskHeader(
             )
         }
 
-        IconButton(
-            onClick = onCartClick,
-            modifier = Modifier
-                .size(if (largeDisplay) 66.dp else 48.dp)
-                .clip(CircleShape)
-                .background(DarkCharcoal)
-        ) {
-            Icon(
-                imageVector = Icons.Default.ShoppingBag,
-                contentDescription = "Abrir carrito",
-                tint = NeonGreen,
-                modifier = Modifier.size(if (largeDisplay) 30.dp else 22.dp)
-            )
+        Box {
+            IconButton(
+                onClick = onCartClick,
+                modifier = Modifier
+                    .size(if (largeDisplay) 66.dp else 48.dp)
+                    .clip(CircleShape)
+                    .background(DarkCharcoal)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingBag,
+                    contentDescription = "Abrir carrito",
+                    tint = NeonGreen,
+                    modifier = Modifier.size(if (largeDisplay) 30.dp else 22.dp)
+                )
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = cartItemCount > 0,
+                enter = scaleIn() + fadeIn(),
+                exit = scaleOut() + fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(NeonGreen)
+                        .padding(
+                            horizontal = if (largeDisplay) 7.dp else 6.dp,
+                            vertical = if (largeDisplay) 3.dp else 2.dp
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = cartItemCount.toString(),
+                        color = DarkCharcoal,
+                        fontSize = if (largeDisplay) 13.sp else 10.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
         }
     }
 }

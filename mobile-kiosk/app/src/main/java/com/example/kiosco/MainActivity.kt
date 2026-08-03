@@ -196,6 +196,7 @@ class MainActivity : ComponentActivity() {
                                     composable(NavRoutes.PRODUCT_LIST) {
                                         SnackKioskScreen(
                                             products = products,
+                                            cartItemCount = totalItems,
                                             onProductClick = { product ->
                                                 navController.navigate(NavRoutes.productDetail(product.id))
                                             },
