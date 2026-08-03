@@ -1,21 +1,39 @@
 package com.example.kiosco
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,20 +43,28 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.kiosco.ui.theme.KioscoTheme
 import com.example.kiosco.ui.theme.DarkCharcoal
+import com.example.kiosco.ui.theme.KioscoTheme
 import com.example.kiosco.ui.theme.LightBg
 import com.example.kiosco.ui.theme.NeonGreen
 import com.example.kiosco.ui.theme.TextMuted
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 object NavRoutes {
     const val WELCOME = "welcome"
     const val PRODUCT_LIST = "product_list"
     const val PRODUCT_DETAIL = "product_detail/{productId}"
     const val ORDER_SUMMARY = "order_summary"
+    const val ADMIN_LIST = "admin_list"
+    const val ADMIN_FORM = "admin_form/{productId}/{barcode}"
 
     fun productDetail(productId: Int) = "product_detail/$productId"
+
+    fun adminForm(productId: Int? = null, barcode: String = ""): String {
+        val id = productId ?: -1
+        val encoded = Uri.encode(barcode.ifBlank { "_" })
+        return "admin_form/$id/$encoded"
+    }
 }
 
 class MainActivity : ComponentActivity() {
@@ -58,10 +84,13 @@ class MainActivity : ComponentActivity() {
                 var bagCenter by remember { mutableStateOf<Offset?>(null) }
                 var bagBounceTrigger by remember { mutableStateOf(0) }
                 var flyIdSeq by remember { mutableStateOf(0L) }
+                var isEmployee by remember { mutableStateOf(false) }
+                var pinDialogVisible by remember { mutableStateOf(false) }
+                var scanFeedback by remember { mutableStateOf<String?>(null) }
                 val density = LocalDensity.current
                 val configuration = LocalConfiguration.current
-                val scope = rememberCoroutineScope()
                 val navController = rememberNavController()
+                val api = remember { ApiService.create() }
 
                 fun fallbackBagCenter(): Offset {
                     val widthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
@@ -74,6 +103,70 @@ class MainActivity : ComponentActivity() {
                     return Offset(bagX.coerceAtMost(widthPx / 2f), bagY)
                 }
 
+                suspend fun refreshProducts() {
+                    products = api.getProducts()
+                }
+
+                fun enterEmployeeMode() {
+                    isEmployee = true
+                    pinDialogVisible = false
+                    cartSheetVisible = false
+                    navController.navigate(NavRoutes.ADMIN_LIST) {
+                        popUpTo(NavRoutes.PRODUCT_LIST) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+
+                fun exitEmployeeMode() {
+                    isEmployee = false
+                    pinDialogVisible = false
+                    navController.navigate(NavRoutes.PRODUCT_LIST) {
+                        popUpTo(0) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+
+                val onBarcodeScanned by rememberUpdatedState<(String) -> Unit> { code ->
+                    if (isEmployee) {
+                        val match = products.find { it.barcode == code }
+                        if (match != null) {
+                            navController.navigate(NavRoutes.adminForm(productId = match.id)) {
+                                launchSingleTop = true
+                            }
+                        } else {
+                            navController.navigate(NavRoutes.adminForm(barcode = code)) {
+                                launchSingleTop = true
+                            }
+                        }
+                    } else {
+                        val match = products.find { it.barcode == code }
+                        if (match != null) {
+                            val existingQty = cartItems.value
+                                .find { it.product.id == match.id }
+                                ?.quantity ?: 0
+                            val current = cartItems.value
+                            val existing = current.find { it.product.id == match.id }
+                            cartItems.value = if (existing != null) {
+                                current.map {
+                                    if (it.product.id == match.id) {
+                                        it.copy(quantity = it.quantity + 1)
+                                    } else {
+                                        it
+                                    }
+                                }
+                            } else {
+                                current + CartItem(match, 1)
+                            }
+                            if (existingQty == 0) {
+                                bagBounceTrigger += 1
+                            }
+                            scanFeedback = "${match.name} agregado"
+                        } else {
+                            scanFeedback = "Product not found"
+                        }
+                    }
+                }
+
                 // Cart helpers
                 val addToCart = remember(cartItems.value) {
                     { product: Product ->
@@ -81,7 +174,11 @@ class MainActivity : ComponentActivity() {
                         val existing = current.find { it.product.id == product.id }
                         cartItems.value = if (existing != null) {
                             current.map {
-                                if (it.product.id == product.id) it.copy(quantity = it.quantity + 1) else it
+                                if (it.product.id == product.id) {
+                                    it.copy(quantity = it.quantity + 1)
+                                } else {
+                                    it
+                                }
                             }
                         } else {
                             current + CartItem(product, 1)
@@ -120,14 +217,28 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     try {
-                        val api = ApiService.create()
-                        products = api.getProducts()
+                        refreshProducts()
                         isLoading = false
                     } catch (e: Exception) {
                         errorMessage = "Error: ${e.message}"
                         isLoading = false
                         e.printStackTrace()
                     }
+                }
+
+                LaunchedEffect(scanFeedback) {
+                    if (scanFeedback != null) {
+                        delay(2200)
+                        scanFeedback = null
+                    }
+                }
+
+                DisposableEffect(Unit) {
+                    val scanner = BarcodeScanManager(this@MainActivity) { code ->
+                        onBarcodeScanned(code)
+                    }
+                    scanner.register()
+                    onDispose { scanner.unregister() }
                 }
 
                 Surface(
@@ -180,6 +291,10 @@ class MainActivity : ComponentActivity() {
                             val currentDestination = navController.currentBackStackEntryAsState()
                             val currentRoute = currentDestination.value?.destination?.route
                             val isWelcomeRoute = currentRoute == NavRoutes.WELCOME
+                            val isAdminRoute =
+                                currentRoute == NavRoutes.ADMIN_LIST ||
+                                    currentRoute?.startsWith("admin_form/") == true ||
+                                    currentRoute == NavRoutes.ADMIN_FORM
 
                             Box(modifier = Modifier.fillMaxSize()) {
                                 NavHost(
@@ -201,8 +316,11 @@ class MainActivity : ComponentActivity() {
                                         SnackKioskScreen(
                                             products = products,
                                             cartItemCount = totalItems,
+                                            isEmployee = isEmployee,
                                             onProductClick = { product ->
-                                                navController.navigate(NavRoutes.productDetail(product.id))
+                                                navController.navigate(
+                                                    NavRoutes.productDetail(product.id)
+                                                )
                                             },
                                             onAddToCart = { product, startCenter, startSize ->
                                                 val existingQty = cartItems.value
@@ -222,7 +340,14 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 }
                                             },
-                                            onCartClick = { cartSheetVisible = true }
+                                            onCartClick = { cartSheetVisible = true },
+                                            onEmployeeLockClick = {
+                                                if (isEmployee) {
+                                                    exitEmployeeMode()
+                                                } else {
+                                                    pinDialogVisible = true
+                                                }
+                                            }
                                         )
                                     }
 
@@ -232,12 +357,15 @@ class MainActivity : ComponentActivity() {
                                             navArgument("productId") { type = NavType.IntType }
                                         )
                                     ) { backStackEntry ->
-                                        val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                                        val productId =
+                                            backStackEntry.arguments?.getInt("productId") ?: 0
                                         ProductDetailScreen(
                                             products = products,
                                             initialProductId = productId,
                                             getQuantity = getQuantity,
-                                            onQuantityChange = { id, qty -> updateQuantity(id, qty) },
+                                            onQuantityChange = { id, qty ->
+                                                updateQuantity(id, qty)
+                                            },
                                             cartBarVisible = totalItems > 0,
                                             onBack = { navController.popBackStack() },
                                             onCartClick = { cartSheetVisible = true }
@@ -254,9 +382,62 @@ class MainActivity : ComponentActivity() {
                                             }
                                         )
                                     }
+
+                                    composable(NavRoutes.ADMIN_LIST) {
+                                        AdminProductListScreen(
+                                            products = products,
+                                            onProductClick = { product ->
+                                                navController.navigate(
+                                                    NavRoutes.adminForm(productId = product.id)
+                                                )
+                                            },
+                                            onCreateClick = {
+                                                navController.navigate(NavRoutes.adminForm())
+                                            },
+                                            onLogout = { exitEmployeeMode() },
+                                            onDeleted = { refreshProducts() }
+                                        )
+                                    }
+
+                                    composable(
+                                        route = NavRoutes.ADMIN_FORM,
+                                        arguments = listOf(
+                                            navArgument("productId") { type = NavType.IntType },
+                                            navArgument("barcode") { type = NavType.StringType }
+                                        )
+                                    ) { backStackEntry ->
+                                        val productId =
+                                            backStackEntry.arguments?.getInt("productId") ?: -1
+                                        val rawBarcode =
+                                            backStackEntry.arguments?.getString("barcode")
+                                                .orEmpty()
+                                        val barcode =
+                                            Uri.decode(rawBarcode).let { decoded ->
+                                                if (decoded == "_") "" else decoded
+                                            }
+                                        AdminProductFormScreen(
+                                            products = products,
+                                            editingProductId =
+                                                productId.takeIf { it > 0 },
+                                            initialBarcode = barcode,
+                                            onBack = { navController.popBackStack() },
+                                            onSaved = {
+                                                refreshProducts()
+                                                if (!navController.popBackStack(
+                                                        NavRoutes.ADMIN_LIST,
+                                                        inclusive = false
+                                                    )
+                                                ) {
+                                                    navController.navigate(NavRoutes.ADMIN_LIST) {
+                                                        launchSingleTop = true
+                                                    }
+                                                }
+                                            }
+                                        )
+                                    }
                                 }
 
-                                if (!isWelcomeRoute && !cartSheetVisible) {
+                                if (!isWelcomeRoute && !isAdminRoute && !cartSheetVisible) {
                                     CartSummaryBar(
                                         totalItems = totalItems,
                                         totalPrice = totalPrice,
@@ -282,22 +463,53 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                 )
+
+                                scanFeedback?.let { message ->
+                                    Surface(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .navigationBarsPadding()
+                                            .padding(bottom = if (totalItems > 0) 100.dp else 32.dp)
+                                            .padding(horizontal = 24.dp),
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = DarkCharcoal,
+                                        shadowElevation = 8.dp
+                                    ) {
+                                        Text(
+                                            text = message,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.SemiBold,
+                                            modifier = Modifier.padding(
+                                                horizontal = 20.dp,
+                                                vertical = 14.dp
+                                            )
+                                        )
+                                    }
+                                }
                             }
 
-                            CartScreen(
-                                cartItems = cartItems.value,
-                                onUpdateQuantity = { id, qty -> updateQuantity(id, qty) },
-                                onClearCart = { cartItems.value = emptyList() },
-                                onCheckout = {
-                                    lastOrder.value = cartItems.value
-                                    cartItems.value = emptyList()
-                                    cartSheetVisible = false
-                                    navController.navigate(NavRoutes.ORDER_SUMMARY)
-                                    // TODO: Emit WebSocket event to terminal
-                                },
-                                cartSheetVisible = cartSheetVisible,
-                                onDismiss = { cartSheetVisible = false }
-                            )
+                            if (!isAdminRoute) {
+                                CartScreen(
+                                    cartItems = cartItems.value,
+                                    onUpdateQuantity = { id, qty -> updateQuantity(id, qty) },
+                                    onClearCart = { cartItems.value = emptyList() },
+                                    onCheckout = {
+                                        lastOrder.value = cartItems.value
+                                        cartItems.value = emptyList()
+                                        cartSheetVisible = false
+                                        navController.navigate(NavRoutes.ORDER_SUMMARY)
+                                    },
+                                    cartSheetVisible = cartSheetVisible,
+                                    onDismiss = { cartSheetVisible = false }
+                                )
+                            }
+
+                            if (pinDialogVisible) {
+                                EmployeePinDialog(
+                                    onUnlocked = { enterEmployeeMode() },
+                                    onDismiss = { pinDialogVisible = false }
+                                )
+                            }
                         }
                     }
                 }

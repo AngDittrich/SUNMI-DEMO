@@ -42,6 +42,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Button
@@ -91,9 +93,11 @@ private val FilterBackground = Color(0xFFE9E9EC)
 fun SnackKioskScreen(
     products: List<Product>,
     cartItemCount: Int,
+    isEmployee: Boolean,
     onProductClick: (Product) -> Unit,
     onAddToCart: (Product, Offset, Float) -> Unit,
-    onCartClick: () -> Unit
+    onCartClick: () -> Unit,
+    onEmployeeLockClick: () -> Unit
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -174,7 +178,9 @@ fun SnackKioskScreen(
                     KioskHeader(
                         cartItemCount = cartItemCount,
                         largeDisplay = largeDisplay,
-                        onCartClick = onCartClick
+                        isEmployee = isEmployee,
+                        onCartClick = onCartClick,
+                        onEmployeeLockClick = onEmployeeLockClick
                     )
                     Spacer(modifier = Modifier.height(if (largeDisplay) 26.dp else 18.dp))
                 }
@@ -259,7 +265,9 @@ fun SnackKioskScreen(
 private fun KioskHeader(
     cartItemCount: Int,
     largeDisplay: Boolean,
-    onCartClick: () -> Unit
+    isEmployee: Boolean,
+    onCartClick: () -> Unit,
+    onEmployeeLockClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -276,7 +284,7 @@ private fun KioskHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "SNACK",
@@ -300,45 +308,68 @@ private fun KioskHeader(
                 )
             }
 
-            Box {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(
-                    onClick = onCartClick,
+                    onClick = onEmployeeLockClick,
                     modifier = Modifier
-                        .size(if (largeDisplay) 66.dp else 48.dp)
+                        .size(if (largeDisplay) 56.dp else 44.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ShoppingBag,
-                        contentDescription = "Abrir carrito",
+                        imageVector = if (isEmployee) Icons.Default.LockOpen else Icons.Default.Lock,
+                        contentDescription = if (isEmployee) {
+                            "Salir modo empleado"
+                        } else {
+                            "Modo empleado"
+                        },
                         tint = NeonGreen,
-                        modifier = Modifier.size(if (largeDisplay) 30.dp else 22.dp)
+                        modifier = Modifier.size(if (largeDisplay) 26.dp else 20.dp)
                     )
                 }
 
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = cartItemCount > 0,
-                    enter = scaleIn() + fadeIn(),
-                    exit = scaleOut() + fadeOut(),
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                ) {
-                    Box(
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Box {
+                    IconButton(
+                        onClick = onCartClick,
                         modifier = Modifier
+                            .size(if (largeDisplay) 66.dp else 48.dp)
                             .clip(CircleShape)
-                            .background(NeonGreen)
-                            .padding(
-                                horizontal = if (largeDisplay) 7.dp else 6.dp,
-                                vertical = if (largeDisplay) 3.dp else 2.dp
-                            ),
-                        contentAlignment = Alignment.Center
+                            .background(Color.White.copy(alpha = 0.1f))
                     ) {
-                        Text(
-                            text = cartItemCount.toString(),
-                            color = DarkCharcoal,
-                            fontSize = if (largeDisplay) 13.sp else 10.sp,
-                            fontWeight = FontWeight.Black
+                        Icon(
+                            imageVector = Icons.Default.ShoppingBag,
+                            contentDescription = "Abrir carrito",
+                            tint = NeonGreen,
+                            modifier = Modifier.size(if (largeDisplay) 30.dp else 22.dp)
                         )
+                    }
+
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = cartItemCount > 0,
+                        enter = scaleIn() + fadeIn(),
+                        exit = scaleOut() + fadeOut(),
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(NeonGreen)
+                                .padding(
+                                    horizontal = if (largeDisplay) 7.dp else 6.dp,
+                                    vertical = if (largeDisplay) 3.dp else 2.dp
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = cartItemCount.toString(),
+                                color = DarkCharcoal,
+                                fontSize = if (largeDisplay) 13.sp else 10.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
                     }
                 }
             }
