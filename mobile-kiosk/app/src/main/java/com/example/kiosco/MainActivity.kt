@@ -75,54 +75,58 @@ class MainActivity : ComponentActivity() {
                 }
 
                 // Cart helpers
-                val addToCart: (Product) -> Unit = { product ->
-                    val current = cartItems.value
-                    val existing = current.find { it.product.id == product.id }
-                    cartItems.value = if (existing != null) {
-                        current.map {
-                            if (it.product.id == product.id) it.copy(quantity = it.quantity + 1) else it
-                        }
-                    } else {
-                        current + CartItem(product, 1)
-                    }
-                }
-
-                val updateQuantity: (Int, Int) -> Unit = { productId, newQty ->
-                    if (newQty <= 0) {
-                        cartItems.value = cartItems.value.filter { it.product.id != productId }
-                    } else {
-                        val existing = cartItems.value.find { it.product.id == productId }
-                        if (existing != null) {
-                            cartItems.value = cartItems.value.map {
-                                if (it.product.id == productId) it.copy(quantity = newQty) else it
+                val addToCart = remember(cartItems.value) {
+                    { product: Product ->
+                        val current = cartItems.value
+                        val existing = current.find { it.product.id == product.id }
+                        cartItems.value = if (existing != null) {
+                            current.map {
+                                if (it.product.id == product.id) it.copy(quantity = it.quantity + 1) else it
                             }
                         } else {
-                            val product = products.find { it.id == productId }
-                            if (product != null) {
-                                cartItems.value = cartItems.value + CartItem(product, newQty)
+                            current + CartItem(product, 1)
+                        }
+                    }
+                }
+
+                val updateQuantity = remember(cartItems.value, products) {
+                    { productId: Int, newQty: Int ->
+                        if (newQty <= 0) {
+                            cartItems.value = cartItems.value.filter { it.product.id != productId }
+                        } else {
+                            val existing = cartItems.value.find { it.product.id == productId }
+                            if (existing != null) {
+                                cartItems.value = cartItems.value.map {
+                                    if (it.product.id == productId) it.copy(quantity = newQty) else it
+                                }
+                            } else {
+                                val product = products.find { it.id == productId }
+                                if (product != null) {
+                                    cartItems.value = cartItems.value + CartItem(product, newQty)
+                                }
                             }
                         }
                     }
                 }
 
-                val getQuantity: (Int) -> Int = { productId ->
-                    cartItems.value.find { it.product.id == productId }?.quantity ?: 0
+                val getQuantity = remember(cartItems.value) {
+                    { productId: Int ->
+                        cartItems.value.find { it.product.id == productId }?.quantity ?: 0
+                    }
                 }
 
-                val totalItems = cartItems.value.sumOf { it.quantity }
-                val totalPrice = cartItems.value.sumOf { it.subtotal }
+                val totalItems by remember { derivedStateOf { cartItems.value.sumOf { it.quantity } } }
+                val totalPrice by remember { derivedStateOf { cartItems.value.sumOf { it.subtotal } } }
 
                 LaunchedEffect(Unit) {
-                    scope.launch {
-                        try {
-                            val api = ApiService.create()
-                            products = api.getProducts()
-                            isLoading = false
-                        } catch (e: Exception) {
-                            errorMessage = "Error: ${e.message}"
-                            isLoading = false
-                            e.printStackTrace()
-                        }
+                    try {
+                        val api = ApiService.create()
+                        products = api.getProducts()
+                        isLoading = false
+                    } catch (e: Exception) {
+                        errorMessage = "Error: ${e.message}"
+                        isLoading = false
+                        e.printStackTrace()
                     }
                 }
 

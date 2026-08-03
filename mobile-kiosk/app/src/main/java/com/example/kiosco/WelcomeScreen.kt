@@ -153,7 +153,7 @@ private fun BrandHeader(largeDisplay: Boolean) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "SNACK",
+                text = "SYSCOM - SUNMI",
                 color = DarkCharcoal,
                 fontSize = if (largeDisplay) 30.sp else 22.sp,
                 fontWeight = FontWeight.Black,
@@ -173,7 +173,7 @@ private fun BrandHeader(largeDisplay: Boolean) {
             color = SoftGreen
         ) {
             Text(
-                text = "SELF-SERVICE KIOSK",
+                text = "Auto Servicio",
                 color = DarkCharcoal,
                 fontSize = if (largeDisplay) 13.sp else 9.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -483,8 +483,8 @@ private fun SlideToStartButton(
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
-                                NeonGreen.copy(alpha = 0.20f),
-                                NeonGreen.copy(alpha = 0.08f)
+                                NeonGreen.copy(alpha = 0.85f),
+                                NeonGreen.copy(alpha = 0.0f)
                             )
                         )
                     )

@@ -1,9 +1,7 @@
 package com.example.kiosco
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -86,7 +84,6 @@ import com.example.kiosco.ui.theme.NeonGreen
 import com.example.kiosco.ui.theme.TextMuted
 import java.util.Locale
 
-private val SearchBackground = Color(0xFFFFFFFF)
 private val ImageBackground = Color(0xFFF2F2F2)
 private val FilterBackground = Color(0xFFE9E9EC)
 
@@ -140,29 +137,61 @@ fun SnackKioskScreen(
         val gridSpacing = if (largeDisplay) 22.dp else 12.dp
         val cardMinWidth = if (largeDisplay) 250.dp else 160.dp
 
+        val gridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+        var lastVisibleItemIndex by remember { mutableIntStateOf(0) }
+        var lastVisibleItemScrollOffset by remember { mutableIntStateOf(0) }
+        var isHeaderVisible by remember { mutableStateOf(true) }
+
+        LaunchedEffect(gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset) {
+            val currentItemIndex = gridState.firstVisibleItemIndex
+            val currentOffset = gridState.firstVisibleItemScrollOffset
+            
+            if (currentItemIndex == 0 && currentOffset == 0) {
+                isHeaderVisible = true
+            } else if (currentItemIndex > lastVisibleItemIndex || (currentItemIndex == lastVisibleItemIndex && currentOffset > lastVisibleItemScrollOffset + 10)) {
+                isHeaderVisible = false
+            } else if (currentItemIndex < lastVisibleItemIndex || (currentItemIndex == lastVisibleItemIndex && currentOffset < lastVisibleItemScrollOffset - 10)) {
+                isHeaderVisible = true
+            }
+            
+            lastVisibleItemIndex = currentItemIndex
+            lastVisibleItemScrollOffset = currentOffset
+        }
+
         Column(modifier = Modifier.fillMaxSize()) {
+            AnimatedVisibility(
+                visible = isHeaderVisible,
+                enter = androidx.compose.animation.expandVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
+                exit = androidx.compose.animation.shrinkVertically(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+            ) {
+                Column(
+                    modifier = Modifier.padding(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        top = if (largeDisplay) 22.dp else 10.dp
+                    )
+                ) {
+                    KioskHeader(
+                        cartItemCount = cartItemCount,
+                        largeDisplay = largeDisplay,
+                        onCartClick = onCartClick
+                    )
+                    Spacer(modifier = Modifier.height(if (largeDisplay) 26.dp else 18.dp))
+                }
+            }
+
             Column(
                 modifier = Modifier.padding(
                     start = horizontalPadding,
                     end = horizontalPadding,
-                    top = if (largeDisplay) 22.dp else 10.dp
+                    top = if (isHeaderVisible) 0.dp else (if (largeDisplay) 22.dp else 10.dp)
                 )
             ) {
-                KioskHeader(
-                    productCount = products.size,
-                    cartItemCount = cartItemCount,
-                    largeDisplay = largeDisplay,
-                    onCartClick = onCartClick
-                )
-
-                Spacer(modifier = Modifier.height(if (largeDisplay) 26.dp else 18.dp))
-
                 SearchBar(
                     query = searchQuery,
                     onQueryChange = { searchQuery = it },
                     largeDisplay = largeDisplay
                 )
-
                 Spacer(modifier = Modifier.height(if (largeDisplay) 18.dp else 12.dp))
             }
 
@@ -184,92 +213,41 @@ fun SnackKioskScreen(
                 }
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = horizontalPadding,
-                        vertical = if (largeDisplay) 18.dp else 12.dp
-                    ),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = when {
-                        searchQuery.isNotBlank() -> "Resultados para “${searchQuery.trim()}”"
-                        selectedCategories.isNotEmpty() -> "Selección personalizada"
-                        else -> "Todos los productos"
+            Spacer(modifier = Modifier.height(if (largeDisplay) 18.dp else 12.dp))
+
+            if (filteredProducts.isEmpty()) {
+                EmptyProductsState(
+                    largeDisplay = largeDisplay,
+                    onClearFilters = {
+                        searchQuery = ""
+                        selectedCategories = emptySet()
                     },
-                    color = DarkCharcoal,
-                    fontSize = if (largeDisplay) 22.sp else 16.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = DarkCharcoal
+            } else {
+                LazyVerticalGrid(
+                    state = gridState,
+                    columns = GridCells.Adaptive(minSize = cardMinWidth),
+                    contentPadding = PaddingValues(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        bottom = 118.dp
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(gridSpacing),
+                    verticalArrangement = Arrangement.spacedBy(gridSpacing),
+                    modifier = Modifier.weight(1f).fillMaxSize()
                 ) {
-                    Text(
-                        text = "${filteredProducts.size} ${if (filteredProducts.size == 1) "producto" else "productos"}",
-                        color = Color.White,
-                        fontSize = if (largeDisplay) 14.sp else 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(
-                            horizontal = if (largeDisplay) 15.dp else 10.dp,
-                            vertical = if (largeDisplay) 8.dp else 6.dp
+                    gridItems(
+                        items = filteredProducts,
+                        key = { it.id },
+                        contentType = { "product" }
+                    ) { product ->
+                        SnackCard(
+                            product = product,
+                            largeDisplay = largeDisplay,
+                            onClick = { onProductClick(product) },
+                            onAdd = { center, size -> onAddToCart(product, center, size) }
                         )
-                    )
-                }
-            }
-
-            val filteredIds = filteredProducts.map { it.id }
-
-            AnimatedContent(
-                targetState = filteredIds,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(durationMillis = 240)) togetherWith
-                        fadeOut(animationSpec = tween(durationMillis = 240))
-                },
-                contentKey = { it },
-                label = "filteredProducts",
-                modifier = Modifier.weight(1f)
-            ) { visibleIds ->
-                val visibleProducts = products.filter { it.id in visibleIds }
-                if (visibleProducts.isEmpty()) {
-                    EmptyProductsState(
-                        largeDisplay = largeDisplay,
-                        onClearFilters = {
-                            searchQuery = ""
-                            selectedCategories = emptySet()
-                        }
-                    )
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = cardMinWidth),
-                        contentPadding = PaddingValues(
-                            start = horizontalPadding,
-                            end = horizontalPadding,
-                            bottom = 118.dp
-                        ),
-                        horizontalArrangement = Arrangement.spacedBy(gridSpacing),
-                        verticalArrangement = Arrangement.spacedBy(gridSpacing),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        gridItems(
-                            items = visibleProducts,
-                            key = { it.id },
-                            contentType = { "product" }
-                        ) { product ->
-                            SnackCard(
-                                product = product,
-                                largeDisplay = largeDisplay,
-                                onClick = { onProductClick(product) },
-                                onAdd = { center, size -> onAddToCart(product, center, size) }
-                            )
-                        }
                     }
                 }
             }
@@ -279,79 +257,89 @@ fun SnackKioskScreen(
 
 @Composable
 private fun KioskHeader(
-    productCount: Int,
     cartItemCount: Int,
     largeDisplay: Boolean,
     onCartClick: () -> Unit
 ) {
-    Row(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(if (largeDisplay) 24.dp else 16.dp),
+        color = DarkCharcoal
     ) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "SNACK",
-                    fontSize = if (largeDisplay) 40.sp else 28.sp,
-                    fontWeight = FontWeight.Black,
-                    color = DarkCharcoal,
-                    letterSpacing = (-0.8).sp
-                )
-                Box(
-                    modifier = Modifier
-                        .padding(start = 7.dp)
-                        .size(if (largeDisplay) 15.dp else 11.dp)
-                        .clip(CircleShape)
-                        .background(NeonGreen)
-                )
-            }
-            Text(
-                text = "¿Qué se te antoja hoy?  •  $productCount opciones",
-                fontSize = if (largeDisplay) 18.sp else 12.sp,
-                color = TextMuted
-            )
-        }
-
-        Box {
-            IconButton(
-                onClick = onCartClick,
-                modifier = Modifier
-                    .size(if (largeDisplay) 66.dp else 48.dp)
-                    .clip(CircleShape)
-                    .background(DarkCharcoal)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingBag,
-                    contentDescription = "Abrir carrito",
-                    tint = NeonGreen,
-                    modifier = Modifier.size(if (largeDisplay) 30.dp else 22.dp)
-                )
-            }
-
-            androidx.compose.animation.AnimatedVisibility(
-                visible = cartItemCount > 0,
-                enter = scaleIn() + fadeIn(),
-                exit = scaleOut() + fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(NeonGreen)
-                        .padding(
-                            horizontal = if (largeDisplay) 7.dp else 6.dp,
-                            vertical = if (largeDisplay) 3.dp else 2.dp
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = if (largeDisplay) 24.dp else 16.dp,
+                    vertical = if (largeDisplay) 20.dp else 16.dp
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = cartItemCount.toString(),
-                        color = DarkCharcoal,
-                        fontSize = if (largeDisplay) 13.sp else 10.sp,
-                        fontWeight = FontWeight.Black
+                        text = "SNACK",
+                        fontSize = if (largeDisplay) 40.sp else 28.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        letterSpacing = (-0.8).sp
                     )
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 7.dp)
+                            .size(if (largeDisplay) 15.dp else 11.dp)
+                            .clip(CircleShape)
+                            .background(NeonGreen)
+                    )
+                }
+                Text(
+                    text = "¿Qué se te antoja hoy?",
+                    fontSize = if (largeDisplay) 18.sp else 12.sp,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            Box {
+                IconButton(
+                    onClick = onCartClick,
+                    modifier = Modifier
+                        .size(if (largeDisplay) 66.dp else 48.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingBag,
+                        contentDescription = "Abrir carrito",
+                        tint = NeonGreen,
+                        modifier = Modifier.size(if (largeDisplay) 30.dp else 22.dp)
+                    )
+                }
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = cartItemCount > 0,
+                    enter = scaleIn() + fadeIn(),
+                    exit = scaleOut() + fadeOut(),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(NeonGreen)
+                            .padding(
+                                horizontal = if (largeDisplay) 7.dp else 6.dp,
+                                vertical = if (largeDisplay) 3.dp else 2.dp
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = cartItemCount.toString(),
+                            color = DarkCharcoal,
+                            fontSize = if (largeDisplay) 13.sp else 10.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
                 }
             }
         }
@@ -403,13 +391,15 @@ private fun SearchBar(
         singleLine = true,
         shape = RoundedCornerShape(if (largeDisplay) 24.dp else 18.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = SearchBackground,
-            unfocusedContainerColor = SearchBackground,
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = FilterBackground,
             focusedBorderColor = DarkCharcoal,
-            unfocusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color(0xFFD7D7D7),
             cursorColor = DarkCharcoal,
             focusedTextColor = DarkCharcoal,
-            unfocusedTextColor = DarkCharcoal
+            unfocusedTextColor = DarkCharcoal,
+            focusedLeadingIconColor = DarkCharcoal,
+            unfocusedLeadingIconColor = TextMuted
         )
     )
 }
@@ -669,10 +659,11 @@ fun SnackCard(
 @Composable
 private fun EmptyProductsState(
     largeDisplay: Boolean,
-    onClearFilters: () -> Unit
+    onClearFilters: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

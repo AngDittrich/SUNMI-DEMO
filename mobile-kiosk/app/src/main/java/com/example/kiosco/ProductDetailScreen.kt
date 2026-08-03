@@ -1,6 +1,7 @@
 package com.example.kiosco
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
@@ -46,7 +48,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,7 +61,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -99,101 +107,178 @@ fun ProductDetailScreen(
         }
     }
 
+    val configuration = LocalConfiguration.current
+    val screenHeightPx = with(LocalDensity.current) { configuration.screenHeightDp.dp.toPx() }
+    val dismissThreshold = 0.15f
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    var isDismissing by remember { mutableStateOf(false) }
+    val animatedOffset = remember { Animatable(0f) }
+
+    LaunchedEffect(isDismissing) {
+        if (isDismissing) {
+            animatedOffset.snapTo(dragOffset)
+            animatedOffset.animateTo(
+                targetValue = screenHeightPx,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            )
+            onBack()
+        }
+    }
+
+    LaunchedEffect(dragOffset) {
+        if (!isDismissing && dragOffset == 0f && animatedOffset.value != 0f) {
+            animatedOffset.animateTo(
+                targetValue = 0f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            )
+        }
+    }
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(DetailBackground),
+            .background(DetailBackground)
+            .pointerInput(onBack) {
+                detectVerticalDragGestures(
+                    onDragEnd = {
+                        if (!isDismissing) {
+                            if (dragOffset > screenHeightPx * dismissThreshold) {
+                                isDismissing = true
+                            } else {
+                                dragOffset = 0f
+                            }
+                        }
+                    },
+                    onDragCancel = {
+                        if (!isDismissing) {
+                            dragOffset = 0f
+                        }
+                    },
+                    onVerticalDrag = { change, dragAmount ->
+                        if (!isDismissing) {
+                            change.consume()
+                            dragOffset = (dragOffset + dragAmount).coerceAtLeast(0f)
+                        }
+                    }
+                )
+            },
         contentAlignment = Alignment.TopCenter
     ) {
+        val currentOffset = if (isDismissing) animatedOffset.value else dragOffset
+        val dragProgress = (currentOffset / screenHeightPx).coerceIn(0f, 1f)
+        val contentScale = 1f - 0.05f * dragProgress
+        val contentAlpha = 1f - 0.4f * dragProgress
+
         val largeDisplay = maxWidth >= 700.dp || maxHeight >= 1000.dp
         val contentMaxWidth = if (largeDisplay) 900.dp else 520.dp
 
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .widthIn(max = contentMaxWidth)
-                .background(DetailBackground)
-                .statusBarsPadding()
+                .graphicsLayer {
+                    translationY = currentOffset
+                    scaleX = contentScale
+                    scaleY = contentScale
+                    alpha = contentAlpha
+                }
         ) {
-            DetailTopBar(
-                largeDisplay = largeDisplay,
-                onBack = onBack,
-                onCartClick = onCartClick
-            )
-
-            ProductPagerIndicator(
-                pageCount = products.size,
-                currentPosition = pagerState.currentPage + pagerState.currentPageOffsetFraction,
-                largeDisplay = largeDisplay
-            )
-
-            HorizontalPager(
-                state = pagerState,
-                contentPadding = PaddingValues(horizontal = 12.dp),
-                pageSpacing = 8.dp,
-                beyondViewportPageCount = 1,
-                flingBehavior = PagerDefaults.flingBehavior(
-                    state = pagerState,
-                    snapAnimationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow
-                    )
-                ),
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) { page ->
-                val product = products[page]
-                val quantity = getQuantity(product.id)
+                    .fillMaxSize()
+                    .widthIn(max = contentMaxWidth)
+                    .background(DetailBackground)
+                    .statusBarsPadding()
+            ) {
+                DetailTopBar(
+                    largeDisplay = largeDisplay,
+                    onBack = onBack,
+                    onCartClick = onCartClick
+                )
 
-                val pageOffset =
-                    ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
-                        .coerceIn(-1.25f, 1.25f)
-                val distance = abs(pageOffset).coerceIn(0f, 1f)
-                val focusProgress = FastOutSlowInEasing.transform(1f - distance)
-                val scale = 0.88f + 0.12f * focusProgress
-                val alpha = 0.45f + 0.55f * focusProgress
+                ProductPagerIndicator(
+                    pageCount = products.size,
+                    currentPosition = pagerState.currentPage + pagerState.currentPageOffsetFraction,
+                    largeDisplay = largeDisplay
+                )
 
-                BoxWithConstraints(
+                HorizontalPager(
+                    state = pagerState,
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    pageSpacing = 8.dp,
+                    beyondViewportPageCount = 0,
+                    flingBehavior = PagerDefaults.flingBehavior(
+                        state = pagerState,
+                        snapAnimationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    ),
                     modifier = Modifier
-                        .fillMaxSize()
-                        .zIndex(focusProgress)
-                        .graphicsLayer {
-                            scaleX = scale
-                            scaleY = scale
-                            this.alpha = alpha
-                            translationX = pageOffset * -20.dp.toPx()
-                            translationY = distance * 18.dp.toPx()
-                            rotationZ = pageOffset * -2.5f
-                            rotationY = pageOffset * 7f
-                            cameraDistance = 16f * density
-                        }
-                ) {
-                    val imageHeight = maxHeight * if (largeDisplay) 0.43f else 0.35f
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) { page ->
+                    val product = products[page]
+                    val quantity = getQuantity(product.id)
 
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        ProductHero(
-                            product = product,
-                            quantity = quantity,
-                            imageHeight = imageHeight,
-                            largeDisplay = largeDisplay,
-                            onIncrease = {
-                                onQuantityChange(product.id, getQuantity(product.id) + 1)
-                            },
-                            onDecrease = {
-                                val current = getQuantity(product.id)
-                                if (current > 0) onQuantityChange(product.id, current - 1)
+                    val pageOffset =
+                        ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
+                            .coerceIn(-1.25f, 1.25f)
+                    val distance = abs(pageOffset).coerceIn(0f, 1f)
+                    val focusProgress = FastOutSlowInEasing.transform(1f - distance)
+                    val scale = 0.88f + 0.12f * focusProgress
+                    val alpha = 0.45f + 0.55f * focusProgress
+
+                    var pageHeightPx by remember { mutableIntStateOf(0) }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onSizeChanged { pageHeightPx = it.height }
+                            .zIndex(focusProgress)
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                                this.alpha = alpha
+                                translationX = pageOffset * -20.dp.toPx()
+                                translationY = distance * 18.dp.toPx()
+                                rotationZ = pageOffset * -2.5f
+                                rotationY = pageOffset * 7f
+                                cameraDistance = 16f * density
                             }
-                        )
+                    ) {
+                        val imageHeight = with(LocalDensity.current) {
+                            (pageHeightPx * if (largeDisplay) 0.43f else 0.35f).toDp()
+                        }
 
-                        Spacer(modifier = Modifier.height(if (largeDisplay) 32.dp else 16.dp))
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            ProductHero(
+                                product = product,
+                                quantity = quantity,
+                                imageHeight = imageHeight,
+                                largeDisplay = largeDisplay,
+                                onIncrease = {
+                                    onQuantityChange(product.id, getQuantity(product.id) + 1)
+                                },
+                                onDecrease = {
+                                    val current = getQuantity(product.id)
+                                    if (current > 0) onQuantityChange(product.id, current - 1)
+                                }
+                            )
 
-                        ProductInformationSheet(
-                            product = product,
-                            cartBarVisible = cartBarVisible,
-                            largeDisplay = largeDisplay,
-                            modifier = Modifier.weight(1f)
-                        )
+                            Spacer(modifier = Modifier.height(if (largeDisplay) 32.dp else 16.dp))
+
+                            ProductInformationSheet(
+                                product = product,
+                                cartBarVisible = cartBarVisible,
+                                largeDisplay = largeDisplay,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
