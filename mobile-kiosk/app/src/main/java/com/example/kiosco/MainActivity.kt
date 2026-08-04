@@ -51,6 +51,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +66,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.kiosco.data.ProductRepository
 import com.example.kiosco.ui.theme.DarkCharcoal
 import com.example.kiosco.ui.theme.KioscoTheme
 import com.example.kiosco.ui.theme.LightBg
@@ -150,8 +152,9 @@ class MainActivity : ComponentActivity() {
                 val density = LocalDensity.current
                 val configuration = LocalConfiguration.current
                 val focusManager = LocalFocusManager.current
+                val context = LocalContext.current
                 val navController = rememberNavController()
-                val api = remember { ApiService.create() }
+                val repository = remember(context) { ProductRepository(context) }
 
                 fun fallbackBagCenter(): Offset {
                     val widthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
@@ -165,7 +168,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 suspend fun refreshProducts() {
-                    products = api.getProducts()
+                    products = repository.getProducts()
                 }
 
                 fun enterEmployeeMode() {

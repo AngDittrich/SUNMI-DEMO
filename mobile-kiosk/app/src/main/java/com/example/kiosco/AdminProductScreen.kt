@@ -52,12 +52,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.kiosco.data.ProductImages
+import com.example.kiosco.data.ProductRepository
 import com.example.kiosco.ui.theme.DarkCharcoal
 import com.example.kiosco.ui.theme.LightBg
 import com.example.kiosco.ui.theme.NeonGreen
@@ -78,6 +81,8 @@ fun AdminProductListScreen(
     var deleting by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val repository = remember(context) { ProductRepository(context) }
 
     val filtered = remember(products, searchQuery) {
         val q = searchQuery.trim()
@@ -214,13 +219,9 @@ fun AdminProductListScreen(
                             deleting = true
                             errorMessage = null
                             try {
-                                val response = ApiService.create().deleteProduct(product.id)
-                                if (response.isSuccessful) {
-                                    pendingDelete = null
-                                    onDeleted()
-                                } else {
-                                    errorMessage = "No se pudo eliminar (${response.code()})"
-                                }
+                                repository.deleteProduct(product.id)
+                                pendingDelete = null
+                                onDeleted()
                             } catch (e: Exception) {
                                 errorMessage = e.message ?: "Error al eliminar"
                             } finally {
@@ -339,7 +340,9 @@ fun AdminProductFormScreen(
         mutableStateOf(existing?.barcode?.takeIf { it.isNotBlank() } ?: initialBarcode)
     }
     var imageUrl by remember(existing?.id) {
-        mutableStateOf(existing?.imageUrl.orEmpty())
+        mutableStateOf(
+            existing?.imageUrl?.takeIf { it.isNotBlank() } ?: ProductImages.PLACEHOLDER
+        )
     }
     var description by remember(existing?.id) {
         mutableStateOf(existing?.description.orEmpty())
@@ -347,6 +350,8 @@ fun AdminProductFormScreen(
     var saving by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val repository = remember(context) { ProductRepository(context) }
     val isEdit = existing != null
 
     Column(
@@ -391,7 +396,11 @@ fun AdminProductFormScreen(
             ) { priceText = it }
             AdminField("Categoría", category) { category = it }
             AdminField("Código de barras", barcode) { barcode = it }
-            AdminField("URL de imagen", imageUrl) { imageUrl = it }
+            AdminField(
+                label = "Imagen (asset local)",
+                value = imageUrl,
+                onValueChange = { imageUrl = it }
+            )
             AdminField("Descripción", description, singleLine = false) { description = it }
 
             if (errorMessage != null) {
@@ -405,28 +414,36 @@ fun AdminProductFormScreen(
             onClick = {
                 val price = priceText.toDoubleOrNull()
                 if (name.isBlank() || category.isBlank() || barcode.isBlank() ||
-                    imageUrl.isBlank() || price == null || price < 0
+                    price == null || price < 0
                 ) {
-                    errorMessage = "Completa nombre, precio, categoría, código e imagen"
+                    errorMessage = "Completa nombre, precio, categoría y código"
                     return@Button
                 }
-                val payload = ProductPayload(
-                    name = name.trim(),
-                    price = price,
-                    category = category.trim(),
-                    barcode = barcode.trim(),
-                    imageUrl = imageUrl.trim(),
-                    description = description.trim()
-                )
+                val resolvedImage = imageUrl.trim().ifBlank { ProductImages.PLACEHOLDER }
                 scope.launch {
                     saving = true
                     errorMessage = null
                     try {
-                        val api = ApiService.create()
                         if (isEdit) {
-                            api.updateProduct(existing!!.id, payload)
+                            repository.updateProduct(
+                                existing!!.copy(
+                                    name = name.trim(),
+                                    price = price,
+                                    category = category.trim(),
+                                    barcode = barcode.trim(),
+                                    imageUrl = resolvedImage,
+                                    description = description.trim()
+                                )
+                            )
                         } else {
-                            api.createProduct(payload)
+                            repository.createProduct(
+                                name = name.trim(),
+                                price = price,
+                                category = category.trim(),
+                                barcode = barcode.trim(),
+                                imageUrl = resolvedImage,
+                                description = description.trim()
+                            )
                         }
                         onSaved()
                     } catch (e: Exception) {
