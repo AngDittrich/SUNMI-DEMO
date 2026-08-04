@@ -24,12 +24,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
@@ -56,6 +60,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -74,6 +80,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.DarkCharcoal
+import com.example.kiosco.ui.theme.LightBg
 import com.example.kiosco.ui.theme.NeonGreen
 import com.example.kiosco.ui.theme.NeonGreenV2
 import java.util.Locale
@@ -143,7 +150,7 @@ fun ProductDetailScreen(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(DetailBackground)
+            .background(Color.Transparent)
             .pointerInput(onBack) {
                 detectVerticalDragGestures(
                     onDragEnd = {
@@ -177,10 +184,52 @@ fun ProductDetailScreen(
 
         val largeDisplay = maxWidth >= 700.dp || maxHeight >= 1000.dp
         val contentMaxWidth = if (largeDisplay) 900.dp else 520.dp
+        val gridCardMinWidth = if (largeDisplay) 250.dp else 160.dp
+        val gridSpacing = if (largeDisplay) 22.dp else 12.dp
+        val gridPadding = if (largeDisplay) 40.dp else 16.dp
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.White, LightBg),
+                        endY = 900f
+                    )
+                )
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = gridCardMinWidth),
+                contentPadding = PaddingValues(
+                    start = gridPadding,
+                    end = gridPadding,
+                    top = 8.dp,
+                    bottom = 118.dp
+                ),
+                horizontalArrangement = Arrangement.spacedBy(gridSpacing),
+                verticalArrangement = Arrangement.spacedBy(gridSpacing),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(
+                    items = products,
+                    key = { it.id }
+                ) { product ->
+                    SnackCard(
+                        product = product,
+                        largeDisplay = largeDisplay,
+                        onClick = {},
+                        onAdd = { _, _ -> }
+                    )
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(1f)
                 .graphicsLayer {
                     translationY = currentOffset
                     scaleX = contentScale
