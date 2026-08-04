@@ -135,7 +135,11 @@ fun AdminProductListScreen(
 
         OutlinedTextField(
             value = searchQuery,
-            onValueChange = { searchQuery = it },
+            onValueChange = { newQuery ->
+                if (!(newQuery.all { it.isDigit() } && newQuery.length >= 8)) {
+                    searchQuery = newQuery
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Buscar nombre, categoría o código…") },
             leadingIcon = {

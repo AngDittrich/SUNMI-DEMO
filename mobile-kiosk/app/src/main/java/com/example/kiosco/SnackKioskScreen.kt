@@ -68,6 +68,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -94,6 +95,7 @@ fun SnackKioskScreen(
     products: List<Product>,
     cartItemCount: Int,
     isEmployee: Boolean,
+    searchResetToken: Int = 0,
     onProductClick: (Product) -> Unit,
     onAddToCart: (Product, Offset, Float) -> Unit,
     onCartClick: () -> Unit,
@@ -101,6 +103,12 @@ fun SnackKioskScreen(
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
+
+    LaunchedEffect(searchResetToken) {
+        if (searchResetToken > 0) {
+            searchQuery = ""
+        }
+    }
 
     val categories = remember(products) {
         products
@@ -195,7 +203,12 @@ fun SnackKioskScreen(
             ) {
                 SearchBar(
                     query = searchQuery,
-                    onQueryChange = { searchQuery = it },
+                    onQueryChange = { newQuery ->
+                        // Ignore keyboard-wedge barcode dumps into the search field
+                        if (!(newQuery.all { it.isDigit() } && newQuery.length >= 8)) {
+                            searchQuery = newQuery
+                        }
+                    },
                     largeDisplay = largeDisplay
                 )
                 Spacer(modifier = Modifier.height(if (largeDisplay) 18.dp else 12.dp))
@@ -313,6 +326,7 @@ private fun KioskHeader(
                     onClick = onEmployeeLockClick,
                     modifier = Modifier
                         .size(if (largeDisplay) 56.dp else 44.dp)
+                        .focusProperties { canFocus = false }
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
                 ) {
@@ -335,6 +349,7 @@ private fun KioskHeader(
                         onClick = onCartClick,
                         modifier = Modifier
                             .size(if (largeDisplay) 66.dp else 48.dp)
+                            .focusProperties { canFocus = false }
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.1f))
                     ) {

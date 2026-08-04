@@ -2,22 +2,37 @@ package com.example.kiosco
 
 import android.net.Uri
 import android.os.Bundle
+import android.view.KeyCharacterMap
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -29,14 +44,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -67,7 +89,42 @@ object NavRoutes {
     }
 }
 
+private data class ScanSuccessFeedback(
+    val productName: String,
+    val imageUrl: String
+)
+
 class MainActivity : ComponentActivity() {
+    /**
+     * SUNMI scanners often inject keyboard-wedge events (digits + Enter) in
+     * parallel with the broadcast. Enter would activate the focused button
+     * (e.g. the lock icon → PIN dialog) or dismiss dialogs. Swallow those
+     * keys; scans are handled only via [BarcodeScanManager].
+     */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        when (event.keyCode) {
+            KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_NUMPAD_ENTER,
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_TAB -> return true
+        }
+        if (event.keyCode in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9 ||
+            event.keyCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_9
+        ) {
+            return true
+        }
+
+        val device = event.device
+        val fromExternalScanner =
+            event.deviceId != KeyCharacterMap.VIRTUAL_KEYBOARD &&
+                event.deviceId != -1 &&
+                (device == null || !device.isVirtual)
+        if (fromExternalScanner) {
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -86,9 +143,13 @@ class MainActivity : ComponentActivity() {
                 var flyIdSeq by remember { mutableStateOf(0L) }
                 var isEmployee by remember { mutableStateOf(false) }
                 var pinDialogVisible by remember { mutableStateOf(false) }
-                var scanFeedback by remember { mutableStateOf<String?>(null) }
+                var scanSuccess by remember { mutableStateOf<ScanSuccessFeedback?>(null) }
+                var productNotFoundVisible by remember { mutableStateOf(false) }
+                var productNotFoundToken by remember { mutableStateOf(0) }
+                var searchResetToken by remember { mutableStateOf(0) }
                 val density = LocalDensity.current
                 val configuration = LocalConfiguration.current
+                val focusManager = LocalFocusManager.current
                 val navController = rememberNavController()
                 val api = remember { ApiService.create() }
 
@@ -127,6 +188,9 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val onBarcodeScanned by rememberUpdatedState<(String) -> Unit> { code ->
+                    focusManager.clearFocus(force = true)
+                    searchResetToken += 1
+
                     if (isEmployee) {
                         val match = products.find { it.barcode == code }
                         if (match != null) {
@@ -141,9 +205,6 @@ class MainActivity : ComponentActivity() {
                     } else {
                         val match = products.find { it.barcode == code }
                         if (match != null) {
-                            val existingQty = cartItems.value
-                                .find { it.product.id == match.id }
-                                ?.quantity ?: 0
                             val current = cartItems.value
                             val existing = current.find { it.product.id == match.id }
                             cartItems.value = if (existing != null) {
@@ -157,12 +218,29 @@ class MainActivity : ComponentActivity() {
                             } else {
                                 current + CartItem(match, 1)
                             }
-                            if (existingQty == 0) {
-                                bagBounceTrigger += 1
-                            }
-                            scanFeedback = "${match.name} agregado"
+
+                            val widthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+                            val heightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+                            flyIdSeq += 1
+                            flyEvent = AddToCartFlyEvent(
+                                id = flyIdSeq,
+                                imageUrl = match.imageUrl,
+                                startCenter = Offset(widthPx / 2f, heightPx * 0.42f),
+                                startSize = with(density) { 140.dp.toPx() },
+                                endCenter = bagCenter ?: fallbackBagCenter(),
+                                endSize = with(density) { 28.dp.toPx() }
+                            )
+                            bagBounceTrigger += 1
+                            productNotFoundVisible = false
+                            scanSuccess = ScanSuccessFeedback(
+                                productName = match.name,
+                                imageUrl = match.imageUrl
+                            )
                         } else {
-                            scanFeedback = "Product not found"
+                            scanSuccess = null
+                            pinDialogVisible = false
+                            productNotFoundToken += 1
+                            productNotFoundVisible = true
                         }
                     }
                 }
@@ -226,11 +304,19 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                LaunchedEffect(scanFeedback) {
-                    if (scanFeedback != null) {
-                        delay(2200)
-                        scanFeedback = null
+                LaunchedEffect(scanSuccess) {
+                    if (scanSuccess != null) {
+                        delay(2800)
+                        scanSuccess = null
                     }
+                }
+
+                LaunchedEffect(productNotFoundToken) {
+                    if (productNotFoundToken == 0) return@LaunchedEffect
+                    productNotFoundVisible = true
+                    delay(5000)
+                    // Only auto-dismiss if this token is still the latest show
+                    productNotFoundVisible = false
                 }
 
                 DisposableEffect(Unit) {
@@ -317,6 +403,7 @@ class MainActivity : ComponentActivity() {
                                             products = products,
                                             cartItemCount = totalItems,
                                             isEmployee = isEmployee,
+                                            searchResetToken = searchResetToken,
                                             onProductClick = { product ->
                                                 navController.navigate(
                                                     NavRoutes.productDetail(product.id)
@@ -464,27 +551,17 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
 
-                                scanFeedback?.let { message ->
-                                    Surface(
-                                        modifier = Modifier
-                                            .align(Alignment.BottomCenter)
-                                            .navigationBarsPadding()
-                                            .padding(bottom = if (totalItems > 0) 100.dp else 32.dp)
-                                            .padding(horizontal = 24.dp),
-                                        shape = RoundedCornerShape(16.dp),
-                                        color = DarkCharcoal,
-                                        shadowElevation = 8.dp
-                                    ) {
-                                        Text(
-                                            text = message,
-                                            color = Color.White,
-                                            fontWeight = FontWeight.SemiBold,
-                                            modifier = Modifier.padding(
-                                                horizontal = 20.dp,
-                                                vertical = 14.dp
-                                            )
-                                        )
-                                    }
+                                scanSuccess?.let { success ->
+                                    ScanSuccessOverlay(
+                                        feedback = success,
+                                        onDismiss = { scanSuccess = null }
+                                    )
+                                }
+
+                                if (productNotFoundVisible) {
+                                    ProductNotFoundOverlay(
+                                        onDismiss = { productNotFoundVisible = false }
+                                    )
                                 }
                             }
 
@@ -517,3 +594,179 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+@Composable
+private fun ProductNotFoundOverlay(onDismiss: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onDismiss
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = Color.White,
+            shadowElevation = 16.dp,
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .fillMaxWidth()
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = {}
+                )
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 28.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFFEBEE)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SearchOff,
+                        contentDescription = null,
+                        tint = Color(0xFFE53935),
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "¡Lo sentimos!",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 26.sp,
+                    color = DarkCharcoal,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "El producto que escaneaste no existe",
+                    color = TextMuted,
+                    fontSize = 17.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 24.sp
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.focusProperties { canFocus = false }
+                ) {
+                    Text(
+                        text = "Entendido",
+                        fontWeight = FontWeight.Bold,
+                        color = DarkCharcoal,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScanSuccessOverlay(
+    feedback: ScanSuccessFeedback,
+    onDismiss: () -> Unit
+) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(feedback) {
+        visible = true
+    }
+    val scale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.82f,
+        animationSpec = spring(dampingRatio = 0.55f, stiffness = 420f),
+        label = "scanSuccessScale"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.45f))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onDismiss
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            modifier = Modifier
+                .padding(horizontal = 36.dp)
+                .scale(scale)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = {}
+                ),
+            shape = RoundedCornerShape(32.dp),
+            color = Color.White,
+            shadowElevation = 20.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 28.dp, vertical = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box {
+                    AsyncImage(
+                        model = feedback.imageUrl,
+                        contentDescription = feedback.productName,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(Color(0xFFF2F2F2))
+                            .padding(10.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(NeonGreen),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = DarkCharcoal,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(18.dp))
+                Text(
+                    text = "¡Agregado!",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 28.sp,
+                    color = DarkCharcoal
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = feedback.productName,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    color = TextMuted,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Ya está en tu carrito",
+                    fontSize = 14.sp,
+                    color = TextMuted.copy(alpha = 0.85f)
+                )
+            }
+        }
+    }
+}
+
