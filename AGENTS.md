@@ -43,9 +43,10 @@ pnpm start         # Run compiled JS
 
 - **Build:** Gradle with AGP 9.3.1, Kotlin 2.2.10, Compose BOM 2026.02.01, Room 2.7.2
 - **Min SDK:** 24, Target SDK: 36, Compile SDK: 36
-- **Key deps:** Room, Coil 2.7, Navigation Compose 2.8.9, Socket.IO 2.1.1, Material Icons Extended
+- **Key deps:** Room, Coil 2.7, Navigation Compose 2.8.9, Material Icons Extended
 - **Data:** Local Room SQLite (`kiosco.db`); catalog seeded on first launch
 - **Images:** Bundled under `app/src/main/assets/products/` (`file:///android_asset/products/...`)
+- **Offline by design:** no network permissions in the manifest and no HTTP client on the classpath
 
 ### Commands
 
@@ -65,7 +66,6 @@ cd mobile-kiosk
 - **Navigation:** welcome, product list/detail, order summary, admin list/form
 - **Screens:** `SnackKioskScreen`, `ProductDetailScreen`, `CartScreen`, admin screens
 - **Scanner:** `BarcodeScanManager` (SUNMI broadcast); works with CPad scanner / Blink2 USB
-- **Socket.IO:** `SocketManager.kt` exists but is not wired into any screen yet
 - **Edge-to-edge:** `enableEdgeToEdge()` is active — screens that float content at the bottom must apply `navigationBarsPadding()`
 
 ### Key conventions
