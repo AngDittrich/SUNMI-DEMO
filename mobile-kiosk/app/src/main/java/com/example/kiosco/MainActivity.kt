@@ -7,8 +7,12 @@ import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -77,12 +81,9 @@ import kotlinx.coroutines.delay
 object NavRoutes {
     const val WELCOME = "welcome"
     const val PRODUCT_LIST = "product_list"
-    const val PRODUCT_DETAIL = "product_detail/{productId}"
     const val ORDER_SUMMARY = "order_summary"
     const val ADMIN_LIST = "admin_list"
     const val ADMIN_FORM = "admin_form/{productId}/{barcode}"
-
-    fun productDetail(productId: Int) = "product_detail/$productId"
 
     fun adminForm(productId: Int? = null, barcode: String = ""): String {
         val id = productId ?: -1
@@ -138,6 +139,9 @@ class MainActivity : ComponentActivity() {
                 var errorMessage by remember { mutableStateOf<String?>(null) }
                 val cartItems = remember { mutableStateOf<List<CartItem>>(emptyList()) }
                 var cartSheetVisible by remember { mutableStateOf(false) }
+                // The detail lives above the list instead of replacing it, so the
+                // real catalog stays composed behind it while it slides away.
+                var detailProductId by remember { mutableStateOf<Int?>(null) }
                 val lastOrder = remember { mutableStateOf<List<CartItem>>(emptyList()) }
                 var flyEvent by remember { mutableStateOf<AddToCartFlyEvent?>(null) }
                 var bagCenter by remember { mutableStateOf<Offset?>(null) }
@@ -175,6 +179,7 @@ class MainActivity : ComponentActivity() {
                     isEmployee = true
                     pinDialogVisible = false
                     cartSheetVisible = false
+                    detailProductId = null
                     navController.navigate(NavRoutes.ADMIN_LIST) {
                         popUpTo(NavRoutes.PRODUCT_LIST) { inclusive = false }
                         launchSingleTop = true
@@ -184,6 +189,7 @@ class MainActivity : ComponentActivity() {
                 fun exitEmployeeMode() {
                     isEmployee = false
                     pinDialogVisible = false
+                    detailProductId = null
                     navController.navigate(NavRoutes.PRODUCT_LIST) {
                         popUpTo(0) { inclusive = false }
                         launchSingleTop = true
@@ -408,9 +414,7 @@ class MainActivity : ComponentActivity() {
                                             isEmployee = isEmployee,
                                             searchResetToken = searchResetToken,
                                             onProductClick = { product ->
-                                                navController.navigate(
-                                                    NavRoutes.productDetail(product.id)
-                                                )
+                                                detailProductId = product.id
                                             },
                                             onAddToCart = { product, startCenter, startSize ->
                                                 val existingQty = cartItems.value
@@ -438,27 +442,6 @@ class MainActivity : ComponentActivity() {
                                                     pinDialogVisible = true
                                                 }
                                             }
-                                        )
-                                    }
-
-                                    composable(
-                                        route = NavRoutes.PRODUCT_DETAIL,
-                                        arguments = listOf(
-                                            navArgument("productId") { type = NavType.IntType }
-                                        )
-                                    ) { backStackEntry ->
-                                        val productId =
-                                            backStackEntry.arguments?.getInt("productId") ?: 0
-                                        ProductDetailScreen(
-                                            products = products,
-                                            initialProductId = productId,
-                                            getQuantity = getQuantity,
-                                            onQuantityChange = { id, qty ->
-                                                updateQuantity(id, qty)
-                                            },
-                                            cartBarVisible = totalItems > 0,
-                                            onBack = { navController.popBackStack() },
-                                            onCartClick = { cartSheetVisible = true }
                                         )
                                     }
 
@@ -527,6 +510,36 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
+                                AnimatedVisibility(
+                                    visible = detailProductId != null,
+                                    enter = slideInVertically(
+                                        initialOffsetY = { it },
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                            stiffness = Spring.StiffnessMediumLow
+                                        )
+                                    ),
+                                    // The screen slides itself out before clearing the
+                                    // id, so an exit transition here would double up.
+                                    exit = ExitTransition.None,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    val detailId = detailProductId
+                                    if (detailId != null) {
+                                        ProductDetailScreen(
+                                            products = products,
+                                            initialProductId = detailId,
+                                            getQuantity = getQuantity,
+                                            onQuantityChange = { id, qty ->
+                                                updateQuantity(id, qty)
+                                            },
+                                            cartBarVisible = totalItems > 0,
+                                            onBack = { detailProductId = null },
+                                            onCartClick = { cartSheetVisible = true }
+                                        )
+                                    }
+                                }
+
                                 if (!isWelcomeRoute && !isAdminRoute && !cartSheetVisible) {
                                     CartSummaryBar(
                                         totalItems = totalItems,
@@ -577,6 +590,7 @@ class MainActivity : ComponentActivity() {
                                         lastOrder.value = cartItems.value
                                         cartItems.value = emptyList()
                                         cartSheetVisible = false
+                                        detailProductId = null
                                         navController.navigate(NavRoutes.ORDER_SUMMARY)
                                     },
                                     cartSheetVisible = cartSheetVisible,

@@ -2,6 +2,7 @@ package com.example.kiosco
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -17,6 +18,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,8 +41,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun CartScreen(
@@ -63,6 +69,30 @@ fun CartScreen(
     var showClearDialog by remember { mutableStateOf(false) }
     var showPaymentModal by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
+    val sheetOffset = remember { Animatable(0f) }
+    var sheetHeightPx by remember { mutableFloatStateOf(1f) }
+    var lastDragDelta by remember { mutableFloatStateOf(0f) }
+    val dragProgress = (sheetOffset.value / sheetHeightPx).coerceIn(0f, 1f)
+
+    // Reset on open only: when dismissed the sheet must keep travelling from
+    // where the finger left it instead of snapping back up mid-exit.
+    LaunchedEffect(cartSheetVisible) {
+        if (cartSheetVisible) sheetOffset.snapTo(0f)
+    }
+
+    fun settleBack() {
+        scope.launch {
+            sheetOffset.animateTo(
+                targetValue = 0f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            )
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedVisibility(
             visible = cartSheetVisible,
@@ -72,7 +102,7 @@ fun CartScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.4f))
+                    .background(Color.Black.copy(alpha = 0.4f * (1f - dragProgress)))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -103,6 +133,8 @@ fun CartScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.82f)
+                    .onSizeChanged { sheetHeightPx = it.height.toFloat().coerceAtLeast(1f) }
+                    .graphicsLayer { translationY = sheetOffset.value }
                     .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                 color = LightBg,
@@ -114,18 +146,51 @@ fun CartScreen(
                         .padding(horizontal = 24.dp)
                         .navigationBarsPadding()
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Box(
                         modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .width(48.dp)
-                            .height(5.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFD7D7D7))
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .pointerInput(Unit) {
+                                detectVerticalDragGestures(
+                                    onVerticalDrag = { change, dragAmount ->
+                                        change.consume()
+                                        lastDragDelta = dragAmount
+                                        scope.launch {
+                                            sheetOffset.snapTo(
+                                                (sheetOffset.value + dragAmount)
+                                                    .coerceAtLeast(0f)
+                                            )
+                                        }
+                                    },
+                                    onDragEnd = {
+                                        val flungDown = lastDragDelta > 22f
+                                        lastDragDelta = 0f
+                                        if (flungDown ||
+                                            sheetOffset.value > sheetHeightPx * 0.28f
+                                        ) {
+                                            onDismiss()
+                                        } else {
+                                            settleBack()
+                                        }
+                                    },
+                                    onDragCancel = {
+                                        lastDragDelta = 0f
+                                        settleBack()
+                                    }
+                                )
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(48.dp)
+                                .height(5.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFD7D7D7))
+                        )
+                    }
 
                     CartTopBar(
                         itemCount = cartItems.size,
