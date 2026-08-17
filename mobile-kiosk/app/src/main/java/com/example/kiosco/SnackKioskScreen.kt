@@ -83,7 +83,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.DarkCharcoal
 import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.SyscomBlue
 import com.example.kiosco.ui.theme.TextMuted
 import java.util.Locale
 
@@ -285,7 +286,7 @@ private fun KioskHeader(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(if (largeDisplay) 24.dp else 16.dp),
-        color = DarkCharcoal
+        color = SyscomBlue
     ) {
         Row(
             modifier = Modifier
@@ -311,7 +312,7 @@ private fun KioskHeader(
                             .padding(start = 7.dp)
                             .size(if (largeDisplay) 15.dp else 11.dp)
                             .clip(CircleShape)
-                            .background(NeonGreen)
+                            .background(SunmiOrange)
                     )
                 }
                 Text(
@@ -337,7 +338,7 @@ private fun KioskHeader(
                         } else {
                             "Modo empleado"
                         },
-                        tint = NeonGreen,
+                        tint = SunmiOrange,
                         modifier = Modifier.size(if (largeDisplay) 26.dp else 20.dp)
                     )
                 }
@@ -356,7 +357,7 @@ private fun KioskHeader(
                         Icon(
                             imageVector = Icons.Default.ShoppingBag,
                             contentDescription = "Abrir carrito",
-                            tint = NeonGreen,
+                            tint = SunmiOrange,
                             modifier = Modifier.size(if (largeDisplay) 30.dp else 22.dp)
                         )
                     }
@@ -371,7 +372,7 @@ private fun KioskHeader(
                         Box(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(NeonGreen)
+                                .background(SunmiOrange)
                                 .padding(
                                     horizontal = if (largeDisplay) 7.dp else 6.dp,
                                     vertical = if (largeDisplay) 3.dp else 2.dp
@@ -512,7 +513,7 @@ private fun CategoryChip(
             .scale(scale)
             .animateContentSize()
             .clip(RoundedCornerShape(50))
-            .background(if (selected) DarkCharcoal else FilterBackground)
+            .background(if (selected) SyscomBlue else FilterBackground)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -533,7 +534,7 @@ private fun CategoryChip(
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
-                tint = NeonGreen,
+                tint = SunmiOrange,
                 modifier = Modifier
                     .padding(end = 6.dp)
                     .size(if (largeDisplay) 19.dp else 15.dp)
@@ -551,7 +552,7 @@ private fun CategoryChip(
 
         Text(
             text = count.toString(),
-            color = if (selected) NeonGreen else TextMuted,
+            color = if (selected) Color.White else TextMuted,
             fontSize = if (largeDisplay) 13.sp else 10.sp,
             fontWeight = FontWeight.ExtraBold
         )
@@ -686,7 +687,7 @@ fun SnackCard(
                             }
                         ),
                     shape = CircleShape,
-                    color = NeonGreen
+                    color = SunmiOrange
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -750,12 +751,12 @@ private fun EmptyProductsState(
 
         Button(
             onClick = onClearFilters,
-            colors = ButtonDefaults.buttonColors(containerColor = DarkCharcoal),
+            colors = ButtonDefaults.buttonColors(containerColor = SunmiOrange),
             shape = RoundedCornerShape(50)
         ) {
             Text(
                 text = "Limpiar filtros",
-                color = Color.White,
+                color = DarkCharcoal,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
@@ -807,7 +808,7 @@ fun CartSummaryBar(
                 .fillMaxWidth()
                 .height(if (largeBar) 88.dp else 72.dp),
             shape = RoundedCornerShape(50),
-            color = DarkCharcoal,
+            color = SyscomBlue,
             shadowElevation = 12.dp
         ) {
             Row(
@@ -845,7 +846,7 @@ fun CartSummaryBar(
                         Icon(
                             imageVector = Icons.Default.ShoppingBag,
                             contentDescription = null,
-                            tint = NeonGreen,
+                            tint = SunmiOrange,
                             modifier = Modifier.size(if (largeBar) 23.dp else 18.dp)
                         )
                     }
@@ -870,7 +871,7 @@ fun CartSummaryBar(
                 Button(
                     onClick = onCartClick,
                     enabled = enabled,
-                    colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+                    colors = ButtonDefaults.buttonColors(containerColor = SunmiOrange),
                     shape = RoundedCornerShape(50),
                     contentPadding = PaddingValues(
                         horizontal = if (largeBar) 28.dp else 18.dp,

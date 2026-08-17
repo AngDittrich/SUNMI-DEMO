@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.kiosco.ui.theme.DarkCardBg
 import com.example.kiosco.ui.theme.DarkCharcoal
 import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.SyscomBlue
 import com.example.kiosco.ui.theme.TextMuted
 import kotlin.math.roundToInt
 
@@ -101,7 +101,7 @@ fun OrderSummaryScreen(
         Button(
             onClick = onDone,
             colors = ButtonDefaults.buttonColors(
-                containerColor = NeonGreen,
+                containerColor = SunmiOrange,
                 contentColor = DarkCharcoal
             ),
             shape = RoundedCornerShape(26.dp),
@@ -143,17 +143,13 @@ private fun SuccessCheck() {
                 ).value
             )
             .clip(CircleShape)
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(NeonGreen, NeonGreen.copy(alpha = 0.8f))
-                )
-            ),
+            .background(SyscomBlue),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Filled.Check,
             contentDescription = null,
-            tint = DarkCharcoal,
+            tint = Color.White,
             modifier = Modifier.size(72.dp)
         )
     }
@@ -266,7 +262,7 @@ private fun OrderDetailsCard(
 private fun TicketCard() {
     Card(
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = DarkCardBg),
+        colors = CardDefaults.cardColors(containerColor = SyscomBlue),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -301,7 +297,7 @@ private fun TicketCard() {
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowDown,
                 contentDescription = "Recoja su ticket",
-                tint = NeonGreen,
+                tint = SunmiOrange,
                 modifier = Modifier
                     .offset {
                         IntOffset(0, bounce.roundToInt())

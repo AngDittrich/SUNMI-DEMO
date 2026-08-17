@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.SunmiOrange
 import kotlin.math.roundToInt
 
 data class AddToCartFlyEvent(
@@ -102,7 +102,7 @@ fun AddToCartFlyOverlay(
                     Modifier
                         .fillMaxSize(0.55f)
                         .clip(CircleShape)
-                        .background(NeonGreen)
+                        .background(SunmiOrange)
                 )
             }
         }

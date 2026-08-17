@@ -51,7 +51,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.kiosco.ui.theme.*
+import com.example.kiosco.ui.theme.DarkCharcoal
+import com.example.kiosco.ui.theme.LightBg
+import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.SyscomBlue
+import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -443,7 +447,7 @@ private fun SmallQuantityButton(
         modifier = Modifier
             .size(36.dp)
             .clip(CircleShape)
-            .background(NeonGreen)
+            .background(SunmiOrange)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -469,7 +473,10 @@ private fun EmptyCartState(modifier: Modifier = Modifier) {
                 .clip(CircleShape)
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(NeonGreen.copy(alpha = 0.3f), NeonGreen.copy(alpha = 0.1f))
+                        colors = listOf(
+                            SunmiOrange.copy(alpha = 0.3f),
+                            SunmiOrange.copy(alpha = 0.1f)
+                        )
                     )
                 ),
             contentAlignment = Alignment.Center
@@ -511,7 +518,7 @@ private fun CartBottomBar(
             .padding(vertical = 16.dp)
             .padding(bottom = 8.dp),
         shape = RoundedCornerShape(32.dp),
-        color = DarkCharcoal,
+        color = SyscomBlue,
         shadowElevation = 12.dp
     ) {
         Row(
@@ -539,7 +546,7 @@ private fun CartBottomBar(
                 onClick = onCheckout,
                 enabled = enabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = NeonGreen,
+                    containerColor = SunmiOrange,
                     disabledContainerColor = Color.White.copy(alpha = 0.1f)
                 ),
                 shape = RoundedCornerShape(24.dp),
@@ -686,7 +693,7 @@ private fun PayingContent() {
                 .clip(CircleShape)
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(NeonGreen, NeonGreen.copy(alpha = 0.7f))
+                        colors = listOf(SunmiOrange, SunmiOrange.copy(alpha = 0.7f))
                     )
                 ),
             contentAlignment = Alignment.Center
@@ -742,17 +749,13 @@ private fun PaidContent(approved: Boolean) {
                 .size(128.dp)
                 .scale(scale)
                 .clip(CircleShape)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(NeonGreen, NeonGreen.copy(alpha = 0.7f))
-                    )
-                ),
+                .background(SyscomBlue),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.Check,
                 contentDescription = null,
-                tint = DarkCharcoal,
+                tint = Color.White,
                 modifier = Modifier.size(72.dp)
             )
         }

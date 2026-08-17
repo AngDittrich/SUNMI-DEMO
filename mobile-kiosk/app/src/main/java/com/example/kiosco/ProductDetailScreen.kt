@@ -76,8 +76,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.NeonGreen
-import com.example.kiosco.ui.theme.NeonGreenV2
+import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.SyscomBlue
 import java.util.Locale
 import kotlin.math.abs
 
@@ -316,7 +316,7 @@ private fun ProductPagerIndicator(
             val baseWidth = if (largeDisplay) 10.dp else 7.dp
             val activeWidth = if (largeDisplay) 26.dp else 18.dp
             val width = baseWidth + (activeWidth * proximity)
-            val color = lerp(Color(0xFFD7D7D7), NeonGreen, proximity)
+            val color = lerp(Color(0xFFD7D7D7), SunmiOrange, proximity)
 
             Box(
                 modifier = Modifier
@@ -352,7 +352,7 @@ private fun DetailTopBar(
 
         Text(
             text = "Snack Information",
-            color = DarkCharcoal,
+            color = SyscomBlue,
             fontSize = if (largeDisplay) 24.sp else 17.sp,
             fontWeight = FontWeight.ExtraBold,
             modifier = Modifier.align(Alignment.Center)
@@ -381,12 +381,12 @@ private fun DetailTopButton(
         modifier = modifier
             .size(if (largeDisplay) 58.dp else 42.dp)
             .clip(CircleShape)
-            .background(ControlBackground)
+            .background(SyscomBlue)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = DarkCharcoal,
+            tint = SunmiOrange,
             modifier = Modifier.size(if (largeDisplay) 29.dp else 21.dp)
         )
     }
@@ -488,7 +488,7 @@ private fun ProductHero(
 
         Surface(
             shape = RoundedCornerShape(50),
-            color = DarkCharcoal,
+            color = SyscomBlue,
             modifier = Modifier.padding(top = 10.dp, bottom = 8.dp)
         ) {
             Text(
@@ -514,17 +514,13 @@ private fun QuantityButton(
     enabled: Boolean,
     largeDisplay: Boolean
 ) {
-    // Fondo usando NeonGreenV2 con opacidad reducida si está deshabilitado
-    val backgroundColor = if (enabled) NeonGreenV2 else NeonGreenV2.copy(alpha = 0.30f)
-    // Mantenemos el ícono legible ajustando también su opacidad
-    val iconTint = DarkCharcoal.copy(alpha = if (enabled) 1f else 0.35f)
     IconButton(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier
             .size(if (largeDisplay) 104.dp else 80.dp)
             .clip(CircleShape)
-            .background(NeonGreen)
+            .background(SunmiOrange)
     ) {
         Icon(
             imageVector = icon,
@@ -573,7 +569,7 @@ private fun ProductInformationSheet(
                     .width(if (largeDisplay) 68.dp else 48.dp)
                     .height(if (largeDisplay) 7.dp else 5.dp)
                     .clip(CircleShape)
-                    .background(DarkCharcoal)
+                    .background(SyscomBlue)
             )
 
             Spacer(modifier = Modifier.height(if (largeDisplay) 20.dp else 13.dp))

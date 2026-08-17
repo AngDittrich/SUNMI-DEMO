@@ -1,4 +1,46 @@
-﻿### Task 3: Wire `SnackCard` start bounds + `CartSummaryBar` bag target/bounce
+﻿### Task 3: Migrate catalog, detail, cart, and feedback screens
+
+**Files:**
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt`
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/ProductDetailScreen.kt`
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/CartScreen.kt`
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/AddToCartFly.kt`
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt`
+
+**Interfaces:**
+- Do not change public composable signatures or behavior.
+- Import and use `SyscomBlue` and `SunmiOrange` from `com.example.kiosco.ui.theme`.
+- Do not change Room, scanner, cart, navigation, or offline behavior.
+
+- [ ] **Step 1: Migrate action controls**
+
+Replace green usages on add buttons, cart controls, selected category/filter states, product detail quantity buttons, pager indicators, checkout action surfaces, and add-to-cart animation with `SunmiOrange`.
+
+- [ ] **Step 2: Migrate structural emphasis**
+
+Use `SyscomBlue` for structural dark surfaces, headers, selected navigation/filter states, and blue brand emphasis where the current charcoal/green combination represents the application identity. Preserve neutral backgrounds, image placeholders, muted text, and existing red delete/error states.
+
+- [ ] **Step 3: Remove legacy green references from this scope**
+
+Run:
+
+```powershell
+rg "NeonGreen|NeonGreenV2" mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt mobile-kiosk/app/src/main/java/com/example/kiosco/ProductDetailScreen.kt mobile-kiosk/app/src/main/java/com/example/kiosco/CartScreen.kt mobile-kiosk/app/src/main/java/com/example/kiosco/AddToCartFly.kt mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt
+```
+
+Expected: no matches.
+
+- [ ] **Step 4: Validate**
+
+Run from `mobile-kiosk`:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+./gradlew :app:compileDebugKotlin --console=plain
+```
+
+Expected: `BUILD SUCCESSFUL`.
+### Task 3: Wire `SnackCard` start bounds + `CartSummaryBar` bag target/bounce
 
 **Files:**
 - Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt`

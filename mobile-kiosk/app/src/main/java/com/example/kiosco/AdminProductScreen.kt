@@ -63,7 +63,8 @@ import com.example.kiosco.data.ProductImages
 import com.example.kiosco.data.ProductRepository
 import com.example.kiosco.ui.theme.DarkCharcoal
 import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.SyscomBlue
 import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -126,12 +127,12 @@ fun AdminProductListScreen(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(DarkCharcoal)
+                    .background(SyscomBlue)
             ) {
                 Icon(
                     imageVector = Icons.Default.LockOpen,
                     contentDescription = "Salir modo empleado",
-                    tint = NeonGreen
+                    tint = SunmiOrange
                 )
             }
         }
@@ -160,7 +161,7 @@ fun AdminProductListScreen(
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = NeonGreen,
+                focusedBorderColor = SunmiOrange,
                 unfocusedBorderColor = Color(0xFFE0E0E0),
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White
@@ -195,7 +196,7 @@ fun AdminProductListScreen(
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = NeonGreen,
+                containerColor = SunmiOrange,
                 contentColor = DarkCharcoal
             )
         ) {
@@ -460,7 +461,7 @@ fun AdminProductFormScreen(
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = NeonGreen,
+                containerColor = SunmiOrange,
                 contentColor = DarkCharcoal
             )
         ) {
@@ -500,7 +501,7 @@ private fun AdminField(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = NeonGreen,
+            focusedBorderColor = SunmiOrange,
             unfocusedBorderColor = Color(0xFFE0E0E0),
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White

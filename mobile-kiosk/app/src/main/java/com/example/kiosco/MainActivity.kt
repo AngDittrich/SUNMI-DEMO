@@ -74,7 +74,7 @@ import com.example.kiosco.data.ProductRepository
 import com.example.kiosco.ui.theme.DarkCharcoal
 import com.example.kiosco.ui.theme.KioscoTheme
 import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.SunmiOrange
 import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.delay
 
@@ -349,7 +349,7 @@ class MainActivity : ComponentActivity() {
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                CircularProgressIndicator(color = NeonGreen)
+                                CircularProgressIndicator(color = SunmiOrange)
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
                                     text = "Cargando productos...",
@@ -748,7 +748,7 @@ private fun ScanSuccessOverlay(
                             .align(Alignment.BottomEnd)
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(NeonGreen),
+                            .background(SunmiOrange),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

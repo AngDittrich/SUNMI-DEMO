@@ -1,71 +1,49 @@
-# Task 3 Report: SnackCard bounds and CartSummaryBar target/bounce
+# Task 3 Implementation Report
 
-**Status:** DONE  
-**Branch:** `feat/add-to-cart-fly-animation`  
-**Base commit:** `3742a54`  
-**Commit:** `73448f4` — feat: expose card image and bag positions for fly animation
+## Status
 
-## Summary
+Complete.
 
-Updated the product-list UI APIs to expose the product image's root-pixel center and fly size, and to expose the cart bag's root-pixel center while supporting a trigger-driven bounce. Updated the `MainActivity` call site with the required temporary callback stub.
+## Scope
 
-## Implementation
+Migrated the five Task 3 screen files from the legacy green aliases to the shared `SyscomBlue` and `SunmiOrange` palette. No public composable signatures, cart logic, scanner behavior, Room behavior, navigation, or offline behavior were changed.
 
-- `SnackKioskScreen` now accepts `(Product, Offset, Float) -> Unit` and forwards each card's measured values.
-- `SnackCard` measures its image container with `onGloballyPositioned` and `positionInRoot`.
-- Add clicks provide the measured center and 55% of the image container's smaller dimension, with a 48 px minimum.
-- `CartSummaryBar` now accepts `bagBounceTrigger` and `onBagPositioned` with the specified defaults.
-- The bag icon reports its root-pixel center and performs the specified `1f → 1.18f → 1f` medium-bouncy spring animation.
-- Preserved the pre-existing intentional end padding on the cart bar `Surface`.
-
-## Verification
-
-```powershell
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
-cd mobile-kiosk
-.\gradlew :app:compileDebugKotlin
-```
-
-**Result:** `BUILD SUCCESSFUL` (3s; 6 tasks, 1 executed and 5 up-to-date).
-
-`git show --format= --check HEAD` completed successfully with no whitespace errors.
-
-## Commit scope
-
-Committed only:
+## Changed files
 
 - `mobile-kiosk/app/src/main/java/com/example/kiosco/SnackKioskScreen.kt`
+  - Applied `SyscomBlue` to the kiosk header, selected category chips, and cart summary surface.
+  - Applied `SunmiOrange` to add actions, active filter emphasis, cart indicators, cart action controls, and the clear-filter action.
+  - Kept neutral backgrounds/text and dark high-contrast content colors.
+- `mobile-kiosk/app/src/main/java/com/example/kiosco/ProductDetailScreen.kt`
+  - Applied `SunmiOrange` to the pager indicator and quantity controls.
+  - Applied `SyscomBlue` to branded detail emphasis, the price surface, and the information-sheet handle.
+  - Removed legacy green imports and obsolete green-specific local variables/comments.
+- `mobile-kiosk/app/src/main/java/com/example/kiosco/CartScreen.kt`
+  - Applied `SunmiOrange` to quantity controls, checkout action, empty-cart accent, and payment progress/confirmation feedback.
+  - Applied `SyscomBlue` to the checkout summary surface.
+  - Preserved all delete/error reds and neutral surfaces.
+- `mobile-kiosk/app/src/main/java/com/example/kiosco/AddToCartFly.kt`
+  - Applied `SunmiOrange` to the add-to-cart fallback animation marker.
 - `mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt`
+  - Applied `SunmiOrange` to loading and scan-success feedback.
+  - Preserved product-not-found error reds and neutral overlays.
 
-Unrelated `backend/dev.db`, `backend/src/seed.ts`, and `.superpowers/` working-tree files remain uncommitted.
+## Validation
+
+- Legacy green search across all five scoped files: no `NeonGreen` or `NeonGreenV2` matches.
+- Known hardcoded green literal search across all five scoped files: no matches.
+- `./gradlew :app:compileDebugKotlin --console=plain`: `BUILD SUCCESSFUL` in 8s.
+- IDE diagnostics for all five files: no errors.
+- `git diff --check` for all five files: passed; Git emitted only existing LF-to-CRLF conversion warnings for two files.
 
 ## Self-review
 
-- Exact callback signatures and defaults from the brief: Pass
-- Image center and size calculations use root pixels and specified values: Pass
-- Bag center and bounce values match the brief: Pass
-- MainActivity temporary stub compiles: Pass
-- Existing cart bar padding tweak preserved: Pass
-- Commit contains only intended source files: Pass
+- Confirmed the diff is limited to imports and visual color assignments in the five implementation files.
+- Confirmed public APIs and behavior-bearing code are unchanged.
+- Confirmed semantic red delete/error states and neutral backgrounds/placeholders remain intact.
+- Confirmed action controls use orange and branded structural surfaces use blue.
 
 ## Concerns
 
-None.
-
-## Review fix (Important)
-
-**Finding:** Unrelated `.padding(end = if (largeBar) 24.dp else 16.dp)` on `CartSummaryBar`'s `Surface` shifted the checkout CTA and was out of Task 3 scope.
-
-**Change:** Removed that end-padding modifier so the `Surface` uses only `fillMaxWidth()` and `height(...)`. Bag bounce, `onBagPositioned`, `SnackCard` bounds, and `MainActivity` stubs unchanged.
-
-**Commit:** `99f6c75` — fix: remove unrelated CartSummaryBar end padding
-
-### Re-verification
-
-```powershell
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
-cd mobile-kiosk
-.\gradlew :app:compileDebugKotlin
-```
-
-**Result:** `BUILD SUCCESSFUL` (4s; 6 tasks, 1 executed and 5 up-to-date).
+- No emulator/device visual pass was performed; compile and static checks passed.
+- Git reports that `CartScreen.kt` and `ProductDetailScreen.kt` will be converted from LF to CRLF the next time Git rewrites them.

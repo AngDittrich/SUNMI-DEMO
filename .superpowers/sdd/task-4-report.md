@@ -1,67 +1,113 @@
-# Task 4 Report: Orchestrate fly in MainActivity
+# Task 4 Report: PIN, Admin, and Order Summary Brand Migration
 
-**Status:** DONE  
-**Branch:** `feat/add-to-cart-fly-animation`  
-**Base commit:** `99f6c75`  
-**Commit:** `4977de8` — feat: fly product thumbnail into cart on first add
+**Status:** IMPLEMENTED WITH SEARCH CONCERN
 
 ## Summary
 
-Wired the product-list add action to create a fly event only for a product's 0-to-1 cart transition. MainActivity now tracks the measured bag destination, supplies the specified fallback destination while the cart bar is absent, replaces an active event on another first-add, and triggers the bag bounce only when the current flight finishes.
+Migrated the three scoped Compose files from the legacy `NeonGreen` alias to the shared SUNMI + SYSCOM brand variables. No behavior, navigation, state handling, or public composable signatures were changed.
 
-## Implementation
+## Changed files
 
-- Added remembered fly event, bag center, bounce trigger, and monotonic event ID state.
-- Added the density/configuration-based fallback bag center from the task brief.
-- Reads the existing quantity before calling `addToCart`; only quantity zero starts a flight.
-- Uses non-null `product.imageUrl` directly.
-- Passes `bagBounceTrigger` and `onBagPositioned` to `CartSummaryBar`.
-- Places `AddToCartFlyOverlay` as the final child of the navigation root `Box`.
-- Guards completion by event ID so a replaced flight cannot clear the newer event or bounce the bag.
+- `mobile-kiosk/app/src/main/java/com/example/kiosco/EmployeePinDialog.kt`
+  - Uses `SunmiOrange` for filled PIN dots.
+- `mobile-kiosk/app/src/main/java/com/example/kiosco/AdminProductScreen.kt`
+  - Uses `SunmiOrange` for the employee-mode action icon, focused field borders, new-product button, and save/create button.
+  - Preserves `Color(0xFFE53935)` for validation errors, delete icons, and destructive confirmation.
+- `mobile-kiosk/app/src/main/java/com/example/kiosco/OrderSummaryScreen.kt`
+  - Uses `SyscomBlue` for the success confirmation surface and ticket card.
+  - Uses `SunmiOrange` for the final `Listo` action and ticket pickup emphasis.
 
 ## Verification
 
+### Required source search
+
+Command:
+
 ```powershell
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
-cd mobile-kiosk
-.\gradlew.bat :app:assembleDebug
+rg "NeonGreen|NeonGreenV2|C6F533|D2FD02" mobile-kiosk/app/src/main
 ```
 
-**Result:** `BUILD SUCCESSFUL` (55s; 36 tasks, 6 executed and 30 up-to-date).
+Result: two out-of-scope matches remain:
 
-IDE diagnostics reported no errors in `MainActivity.kt`. `git diff --check` completed with no whitespace errors (Git emitted only the existing LF-to-CRLF working-copy notice).
+```text
+mobile-kiosk/app/src/main/java/com/example/kiosco/ui/theme/Color.kt
+  14:val NeonGreen = SunmiOrange
+  15:val NeonGreenV2 = SunmiOrange
 
-## Manual verification checklist
+mobile-kiosk/app/src/main/res/drawable/ic_cookie.xml
+  7:android:fillColor="#C6F533"
+```
 
-Code-path review verified:
+The three Task 4 Kotlin files contain no legacy green names or literals. The remaining matches cannot be removed while honoring the instruction to modify only the three implementation files.
 
-1. Empty cart first-add updates totals and creates a flight toward the fallback/measured bag.
-2. A same-product add at quantity 1 or greater updates quantity without creating a flight.
-3. Removing a product returns quantity to zero, allowing the next add to create a flight.
-4. Card-provided root coordinates are forwarded unchanged for products anywhere in the grid.
-5. Rapid first-adds of different products replace `flyEvent`; the completion ID guard preserves the newest flight.
+### Kotlin compilation
 
-Visual motion, exact landing alignment, and bag bounce appearance require launching the app and interacting with it on a device. ADB reported connected devices, but interactive on-device execution was not performed in this task session.
+Command run from `mobile-kiosk`:
 
-## Commit scope
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+./gradlew :app:compileDebugKotlin --console=plain
+```
 
-Committed only:
+Result: `BUILD SUCCESSFUL in 3s` (7 actionable tasks: 2 executed, 5 up-to-date).
 
-- `mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt`
+### Additional checks
 
-Unrelated `backend/dev.db`, `backend/src/seed.ts`, and `.superpowers/` working-tree files remain uncommitted. This report is intentionally left in `.superpowers/` with the other task artifacts.
+- IDE diagnostics: no linter errors in the three changed Kotlin files.
+- `git diff --check`: passed with no whitespace errors; Git emitted LF-to-CRLF working-copy notices only.
+- Scoped diff review: imports and color assignments only; no logic or signatures changed.
 
 ## Self-review
 
-- Animate only on existing quantity 0: Pass
-- Concurrent first-add replaces active event: Pass
-- Overlay is last child of root `Box`: Pass
-- Measured and fallback bag destinations: Pass
-- Current-flight completion triggers one bounce: Pass
-- Product image URL nullability handled as specified: Pass
-- Detail-screen behavior unchanged: Pass
-- Required debug APK build: Pass
+- Shared `SunmiOrange` used for PIN dots and admin action/selected states: Pass.
+- Shared `SunmiOrange` used for primary save/create controls: Pass.
+- Red validation, delete, and destructive confirmation colors preserved: Pass.
+- Shared `SyscomBlue` used for structural order/payment surfaces: Pass.
+- Shared `SunmiOrange` used for final order action emphasis: Pass.
+- Behavior, navigation, and public composable signatures unchanged: Pass.
+- Scoped Kotlin compilation: Pass.
+- Whole-source no-green search: Blocked by two pre-existing out-of-scope matches listed above.
 
 ## Concerns
 
-Interactive device-only visual checks remain outstanding.
+The repository-wide search does not meet the brief's expected no-match result because `Color.kt` still defines two legacy aliases and `ic_cookie.xml` still contains `#C6F533`. Resolving those requires authorization to modify files outside Task 4's three-file implementation scope.
+
+---
+
+## Review Fix Report
+
+**Status:** PASS
+
+### Changed files
+
+- `mobile-kiosk/app/src/main/java/com/example/kiosco/ui/theme/Color.kt`
+  - Removed the migrated `NeonGreen` and `NeonGreenV2` compatibility aliases.
+- `mobile-kiosk/app/src/main/res/drawable/ic_cookie.xml`
+  - Replaced the remaining green `#C6F533` fill with exact SUNMI orange `#FF6900`.
+- `mobile-kiosk/app/src/main/java/com/example/kiosco/OrderSummaryScreen.kt`
+  - Changed the success check tint from `DarkCharcoal` to `Color.White` for readable contrast on `SyscomBlue`.
+
+### Commands and output
+
+```powershell
+rg "NeonGreen|NeonGreenV2|C6F533|D2FD02" mobile-kiosk/app/src/main
+```
+
+Result: `No matches found`.
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+./gradlew :app:compileDebugKotlin --console=plain
+```
+
+Result: `BUILD SUCCESSFUL in 2s` (7 actionable tasks: 6 executed, 1 up-to-date).
+
+Additional verification:
+
+- IDE diagnostics found no linter errors in the three review-fix files.
+- `git diff --check` found no whitespace errors; Git emitted only LF-to-CRLF working-copy notices.
+- Self-review confirmed the changes are limited to legacy color cleanup, the requested XML color replacement, and check-icon contrast.
+
+### Concerns
+
+None. The previously reported whole-source green-search concern is resolved by these authorized review fixes.

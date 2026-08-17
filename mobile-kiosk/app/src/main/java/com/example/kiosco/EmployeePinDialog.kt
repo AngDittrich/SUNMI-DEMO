@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.SunmiOrange
 import com.example.kiosco.ui.theme.TextMuted
 
 private const val PinLength = 4
@@ -88,7 +88,7 @@ fun EmployeePinDialog(
                             modifier = Modifier
                                 .size(18.dp)
                                 .clip(CircleShape)
-                                .background(if (filled) NeonGreen else Color(0xFFE0E0E0))
+                                .background(if (filled) SunmiOrange else Color(0xFFE0E0E0))
                         )
                     }
                 }

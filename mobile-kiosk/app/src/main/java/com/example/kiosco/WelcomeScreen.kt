@@ -32,7 +32,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,6 +49,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -62,16 +62,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.DarkCharcoal
 import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.NeonGreen
+import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.SyscomBlue
 import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
-private val HeroSecondary = Color(0xFF242424)
-private val SoftGreen = Color(0xFFEFFFC1)
 
 @Composable
 fun WelcomeScreen(
@@ -111,7 +110,6 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(if (largeDisplay) 24.dp else 14.dp))
 
             WelcomeHero(
-                productCount = products.size,
                 height = heroHeight,
                 largeDisplay = largeDisplay
             )
@@ -147,41 +145,39 @@ private fun BrandHeader(largeDisplay: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if (largeDisplay) 74.dp else 54.dp),
+            .height(if (largeDisplay) 96.dp else 64.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "SYSCOM - SUNMI",
-                color = DarkCharcoal,
-                fontSize = if (largeDisplay) 30.sp else 22.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = (-0.5).sp
-            )
-            Box(
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = if (largeDisplay) 32.dp else 16.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            AsyncImage(
+                model = "file:///android_asset/brand/syscom-large-logo.png",
+                contentDescription = "Logotipo de SYSCOM",
                 modifier = Modifier
-                    .padding(start = 6.dp)
-                    .size(if (largeDisplay) 14.dp else 10.dp)
-                    .clip(CircleShape)
-                    .background(NeonGreen)
+                    .fillMaxWidth()
+                    .height(if (largeDisplay) 58.dp else 38.dp),
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.CenterStart
             )
         }
 
-        Surface(
-            shape = RoundedCornerShape(50),
-            color = SoftGreen
+        Box(
+            modifier = Modifier.weight(0.72f),
+            contentAlignment = Alignment.CenterEnd
         ) {
-            Text(
-                text = "Auto Servicio",
-                color = DarkCharcoal,
-                fontSize = if (largeDisplay) 13.sp else 9.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 0.8.sp,
-                modifier = Modifier.padding(
-                    horizontal = if (largeDisplay) 18.dp else 12.dp,
-                    vertical = if (largeDisplay) 10.dp else 7.dp
-                )
+            AsyncImage(
+                model = "file:///android_asset/brand/sunmi.webp",
+                contentDescription = "Logotipo de SUNMI",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(if (largeDisplay) 64.dp else 40.dp),
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.CenterEnd
             )
         }
     }
@@ -189,7 +185,6 @@ private fun BrandHeader(largeDisplay: Boolean) {
 
 @Composable
 private fun WelcomeHero(
-    productCount: Int,
     height: Dp,
     largeDisplay: Boolean
 ) {
@@ -202,20 +197,16 @@ private fun WelcomeHero(
                 shape = RoundedCornerShape(if (largeDisplay) 48.dp else 34.dp)
             )
             .clip(RoundedCornerShape(if (largeDisplay) 48.dp else 34.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(DarkCharcoal, HeroSecondary)
-                )
-            )
+            .background(SyscomBlue)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
-                color = NeonGreen.copy(alpha = 0.13f),
+                color = SunmiOrange.copy(alpha = 0.18f),
                 radius = size.minDimension * 0.42f,
                 center = Offset(size.width * 0.92f, size.height * 0.08f)
             )
             drawCircle(
-                color = Color.White.copy(alpha = 0.04f),
+                color = SunmiOrange.copy(alpha = 0.08f),
                 radius = size.minDimension * 0.34f,
                 center = Offset(size.width * 0.04f, size.height * 0.95f)
             )
@@ -226,29 +217,10 @@ private fun WelcomeHero(
                 .fillMaxSize()
                 .padding(if (largeDisplay) 48.dp else 26.dp)
         ) {
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = Color.White.copy(alpha = 0.09f)
-            ) {
-                Text(
-                    text = "$productCount OPCIONES LISTAS",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = if (largeDisplay) 13.sp else 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier.padding(
-                        horizontal = if (largeDisplay) 17.dp else 12.dp,
-                        vertical = if (largeDisplay) 9.dp else 7.dp
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(if (largeDisplay) 24.dp else 16.dp))
-
             Text(
                 text = buildAnnotatedString {
                     append("Tu antojo\n")
-                    withStyle(SpanStyle(color = NeonGreen)) {
+                    withStyle(SpanStyle(color = SunmiOrange)) {
                         append("empieza aquí.")
                     }
                 },
@@ -401,7 +373,7 @@ private fun BenefitPill(
             modifier = Modifier
                 .size(if (largeDisplay) 12.dp else 8.dp)
                 .clip(CircleShape)
-                .background(NeonGreen)
+                .background(SunmiOrange)
         )
         Spacer(modifier = Modifier.width(if (largeDisplay) 12.dp else 7.dp))
         Column {
@@ -483,8 +455,8 @@ private fun SlideToStartButton(
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
-                                NeonGreen.copy(alpha = 0.85f),
-                                NeonGreen.copy(alpha = 0.0f)
+                                SunmiOrange.copy(alpha = 0.85f),
+                                SunmiOrange.copy(alpha = 0.0f)
                             )
                         )
                     )
@@ -511,7 +483,7 @@ private fun SlideToStartButton(
                     .size(thumbSize)
                     .shadow(8.dp, CircleShape)
                     .clip(CircleShape)
-                    .background(NeonGreen)
+                    .background(SunmiOrange)
                     .draggable(
                         orientation = Orientation.Horizontal,
                         state = rememberDraggableState { delta ->
@@ -549,7 +521,7 @@ private fun SlideToStartButton(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = "Deslizar para comenzar",
-                    tint = DarkCharcoal,
+                    tint = SyscomBlue,
                     modifier = Modifier.size(if (largeDisplay) 38.dp else 28.dp)
                 )
             }

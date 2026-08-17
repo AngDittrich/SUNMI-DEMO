@@ -1,4 +1,43 @@
-﻿### Task 4: Orchestrate fly in `MainActivity`
+﻿### Task 4: Migrate PIN, admin, checkout, and remaining shared consumers
+
+**Files:**
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/EmployeePinDialog.kt`
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/AdminProductScreen.kt`
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/OrderSummaryScreen.kt`
+
+**Interfaces:**
+- Do not change behavior, navigation, or public composable signatures.
+- Use global `SyscomBlue` and `SunmiOrange` from `com.example.kiosco.ui.theme`.
+
+- [ ] **Step 1: Update PIN and admin actions**
+
+Use `SunmiOrange` for PIN dots, primary save/create controls, and selected/action states. Keep delete buttons and validation errors red.
+
+- [ ] **Step 2: Update order summary**
+
+Use `SyscomBlue` for structural order/payment surfaces and `SunmiOrange` for final action emphasis, without changing the payment flow.
+
+- [ ] **Step 3: Confirm no green remains**
+
+Run:
+
+```powershell
+rg "NeonGreen|NeonGreenV2|C6F533|D2FD02" mobile-kiosk/app/src/main
+```
+
+Expected: no matches.
+
+- [ ] **Step 4: Validate**
+
+Run from `mobile-kiosk`:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+./gradlew :app:compileDebugKotlin --console=plain
+```
+
+Expected: `BUILD SUCCESSFUL`.
+### Task 4: Orchestrate fly in `MainActivity`
 
 **Files:**
 - Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/MainActivity.kt`

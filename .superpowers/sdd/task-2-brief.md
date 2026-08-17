@@ -1,4 +1,49 @@
-﻿### Task 2: `AddToCartFlyOverlay` composable
+﻿### Task 2: Redesign the welcome brand header and hero
+
+**Files:**
+- Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/WelcomeScreen.kt`
+- Consume local asset: `mobile-kiosk/app/src/main/assets/brand/syscom-large-logo.png`
+- Consume local asset: `mobile-kiosk/app/src/main/assets/brand/sunmi.webp`
+
+**Interfaces:**
+- Keep `WelcomeScreen(products: List<Product>, onGetStarted: () -> Unit)` unchanged.
+- Keep `SlideToStartButton` behavior unchanged.
+- Use `SyscomBlue` and `SunmiOrange` from `com.example.kiosco.ui.theme`.
+
+- [ ] **Step 1: Replace the current text brand header**
+
+Change `BrandHeader` to render both bundled images through Coil `AsyncImage` using:
+
+```kotlin
+model = "file:///android_asset/brand/syscom-large-logo.png"
+model = "file:///android_asset/brand/sunmi.webp"
+```
+
+Place the Syscom logo on the left and SUNMI on the right in a spacious responsive row. Remove the “Auto Servicio” surface and green separator dot. Use `ContentScale.Fit`, clear content descriptions, and bounded responsive sizes.
+
+- [ ] **Step 2: Remove the product-count badge**
+
+Remove `productCount` from the `WelcomeHero` call and signature and delete the `$productCount OPCIONES LISTAS` surface. Preserve the welcome title and supporting copy.
+
+- [ ] **Step 3: Apply the two-brand hierarchy**
+
+Use `SyscomBlue` for the hero background and `SunmiOrange` for the highlighted title span, decorative accents, slide thumb, progress fill, and primary emphasis. Keep snack showcase colors illustrative and avoid green brand accents.
+
+- [ ] **Step 4: Verify responsive composition**
+
+Keep the existing `largeDisplay` layout branches. Ensure the logos do not distort or overflow on phone/tablet widths and keep the existing slide-to-start interaction unchanged.
+
+- [ ] **Step 5: Validate**
+
+Run from `mobile-kiosk`:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+./gradlew :app:compileDebugKotlin --console=plain
+```
+
+Expected: `BUILD SUCCESSFUL`.
+### Task 2: `AddToCartFlyOverlay` composable
 
 **Files:**
 - Modify: `mobile-kiosk/app/src/main/java/com/example/kiosco/AddToCartFly.kt`
