@@ -32,10 +32,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.SunmiOrange
-import com.example.kiosco.ui.theme.SyscomBlue
+import com.example.kiosco.ui.theme.LocalBrandTheme
 import com.example.kiosco.ui.theme.TextMuted
 import kotlin.math.roundToInt
 
@@ -44,6 +41,7 @@ fun OrderSummaryScreen(
     orderItems: List<CartItem>,
     onDone: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     val totalPrice = orderItems.sumOf { it.subtotal }
     val totalItems = orderItems.sumOf { it.quantity }
 
@@ -52,7 +50,7 @@ fun OrderSummaryScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color.White, LightBg)
+                    colors = listOf(brandTheme.surface, brandTheme.background)
                 )
             )
             .statusBarsPadding()
@@ -72,7 +70,7 @@ fun OrderSummaryScreen(
             text = "¡Pago exitoso!",
             fontSize = 32.sp,
             fontWeight = FontWeight.Black,
-            color = DarkCharcoal
+            color = brandTheme.textPrimary
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -101,8 +99,8 @@ fun OrderSummaryScreen(
         Button(
             onClick = onDone,
             colors = ButtonDefaults.buttonColors(
-                containerColor = SunmiOrange,
-                contentColor = DarkCharcoal
+                containerColor = brandTheme.accent,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ),
             shape = RoundedCornerShape(26.dp),
             contentPadding = PaddingValues(horizontal = 48.dp, vertical = 18.dp),
@@ -123,6 +121,7 @@ fun OrderSummaryScreen(
 
 @Composable
 private fun SuccessCheck() {
+    val brandTheme = LocalBrandTheme.current
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -143,13 +142,13 @@ private fun SuccessCheck() {
                 ).value
             )
             .clip(CircleShape)
-            .background(SyscomBlue),
+            .background(brandTheme.base),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Filled.Check,
             contentDescription = null,
-            tint = Color.White,
+            tint = brandTheme.onBase,
             modifier = Modifier.size(72.dp)
         )
     }
@@ -161,9 +160,10 @@ private fun OrderDetailsCard(
     totalPrice: Double,
     totalItems: Int
 ) {
+    val brandTheme = LocalBrandTheme.current
     Card(
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = brandTheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -177,7 +177,7 @@ private fun OrderDetailsCard(
                     text = "Resumen del pedido",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = DarkCharcoal
+                    color = brandTheme.textPrimary
                 )
                 Text(
                     text = "$totalItems ${if (totalItems == 1) "item" else "items"}",
@@ -211,7 +211,7 @@ private fun OrderDetailsCard(
                             text = item.product.name,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = DarkCharcoal,
+                            color = brandTheme.textPrimary,
                             maxLines = 1
                         )
                         Text(
@@ -225,7 +225,7 @@ private fun OrderDetailsCard(
                         text = "$${String.format("%.2f", item.subtotal)}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = DarkCharcoal
+                        color = brandTheme.textPrimary
                     )
                 }
             }
@@ -245,13 +245,13 @@ private fun OrderDetailsCard(
                     text = "Total",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black,
-                    color = DarkCharcoal
+                    color = brandTheme.textPrimary
                 )
                 Text(
                     text = "$${String.format("%.2f", totalPrice)}",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Black,
-                    color = DarkCharcoal
+                    color = brandTheme.textPrimary
                 )
             }
         }
@@ -260,9 +260,10 @@ private fun OrderDetailsCard(
 
 @Composable
 private fun TicketCard() {
+    val brandTheme = LocalBrandTheme.current
     Card(
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = SyscomBlue),
+        colors = CardDefaults.cardColors(containerColor = brandTheme.base),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -276,7 +277,7 @@ private fun TicketCard() {
                 text = "Por favor recoja su ticket recién impreso",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.White,
+                color = brandTheme.onBase,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
@@ -297,7 +298,7 @@ private fun TicketCard() {
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowDown,
                 contentDescription = "Recoja su ticket",
-                tint = SunmiOrange,
+                tint = brandTheme.onBase,
                 modifier = Modifier
                     .offset {
                         IntOffset(0, bounce.roundToInt())

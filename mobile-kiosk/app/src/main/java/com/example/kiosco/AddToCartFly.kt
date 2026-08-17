@@ -23,8 +23,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.LocalBrandTheme
 import kotlin.math.roundToInt
 
 data class AddToCartFlyEvent(
@@ -55,6 +54,7 @@ fun AddToCartFlyOverlay(
     event: AddToCartFlyEvent?,
     onFinished: (Long) -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     if (event == null) return
 
     val progress = remember(event.id) { Animatable(0f) }
@@ -87,7 +87,7 @@ fun AddToCartFlyOverlay(
                 .size(with(LocalDensity.current) { size.toDp() })
                 .clip(CircleShape)
                 .graphicsLayer { this.alpha = alpha }
-                .background(DarkCharcoal.copy(alpha = 0.12f)),
+                .background(brandTheme.textPrimary.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
             if (event.imageUrl.isNotBlank()) {
@@ -102,7 +102,7 @@ fun AddToCartFlyOverlay(
                     Modifier
                         .fillMaxSize(0.55f)
                         .clip(CircleShape)
-                        .background(SunmiOrange)
+                        .background(brandTheme.accent)
                 )
             }
         }

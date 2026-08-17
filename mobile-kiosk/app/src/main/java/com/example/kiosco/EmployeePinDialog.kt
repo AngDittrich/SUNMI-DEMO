@@ -31,8 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.LocalBrandTheme
 import com.example.kiosco.ui.theme.TextMuted
 
 private const val PinLength = 4
@@ -42,6 +41,7 @@ fun EmployeePinDialog(
     onUnlocked: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     var pin by remember { mutableStateOf("") }
 
     fun appendDigit(digit: String) {
@@ -56,7 +56,7 @@ fun EmployeePinDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(28.dp),
-            color = Color.White,
+            color = brandTheme.surface,
             shadowElevation = 12.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -68,7 +68,7 @@ fun EmployeePinDialog(
                     text = "Modo empleado",
                     fontWeight = FontWeight.Black,
                     fontSize = 22.sp,
-                    color = DarkCharcoal
+                    color = brandTheme.textPrimary
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
@@ -88,7 +88,9 @@ fun EmployeePinDialog(
                             modifier = Modifier
                                 .size(18.dp)
                                 .clip(CircleShape)
-                                .background(if (filled) SunmiOrange else Color(0xFFE0E0E0))
+                                .background(
+                                    if (filled) brandTheme.accent else Color(0xFFE0E0E0)
+                                )
                         )
                     }
                 }
@@ -116,7 +118,7 @@ fun EmployeePinDialog(
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.Backspace,
                                         contentDescription = "Borrar",
-                                        tint = DarkCharcoal
+                                        tint = brandTheme.textPrimary
                                     )
                                 }
                                 else -> PinKey(onClick = { appendDigit(key) }) {
@@ -124,7 +126,7 @@ fun EmployeePinDialog(
                                         text = key,
                                         fontSize = 26.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = DarkCharcoal
+                                        color = brandTheme.textPrimary
                                     )
                                 }
                             }

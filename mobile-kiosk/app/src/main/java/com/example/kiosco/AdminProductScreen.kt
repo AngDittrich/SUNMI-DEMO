@@ -36,6 +36,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -61,10 +62,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.kiosco.data.ProductImages
 import com.example.kiosco.data.ProductRepository
-import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.SunmiOrange
-import com.example.kiosco.ui.theme.SyscomBlue
+import com.example.kiosco.ui.theme.LocalBrandTheme
 import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -77,6 +75,7 @@ fun AdminProductListScreen(
     onLogout: () -> Unit,
     onDeleted: suspend () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     var searchQuery by remember { mutableStateOf("") }
     var pendingDelete by remember { mutableStateOf<Product?>(null) }
     var deleting by remember { mutableStateOf(false) }
@@ -98,7 +97,7 @@ fun AdminProductListScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(LightBg)
+            .background(brandTheme.background)
             .statusBarsPadding()
             .navigationBarsPadding()
             .padding(horizontal = 20.dp, vertical = 16.dp)
@@ -113,7 +112,7 @@ fun AdminProductListScreen(
                     text = "Admin productos",
                     fontWeight = FontWeight.Black,
                     fontSize = 28.sp,
-                    color = DarkCharcoal
+                    color = brandTheme.textPrimary
                 )
                 Text(
                     text = "${products.size} en catálogo · escanea para editar o crear",
@@ -127,12 +126,12 @@ fun AdminProductListScreen(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(SyscomBlue)
+                    .background(brandTheme.base)
             ) {
                 Icon(
                     imageVector = Icons.Default.LockOpen,
                     contentDescription = "Salir modo empleado",
-                    tint = SunmiOrange
+                    tint = brandTheme.onBase
                 )
             }
         }
@@ -161,10 +160,10 @@ fun AdminProductListScreen(
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = SunmiOrange,
+                focusedBorderColor = brandTheme.accent,
                 unfocusedBorderColor = Color(0xFFE0E0E0),
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
+                focusedContainerColor = brandTheme.surface,
+                unfocusedContainerColor = brandTheme.surface
             )
         )
 
@@ -196,8 +195,8 @@ fun AdminProductListScreen(
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = SunmiOrange,
-                contentColor = DarkCharcoal
+                containerColor = brandTheme.accent,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
@@ -254,7 +253,7 @@ fun AdminProductListScreen(
                 }
             },
             shape = RoundedCornerShape(24.dp),
-            containerColor = Color.White
+            containerColor = brandTheme.surface
         )
     }
 }
@@ -265,12 +264,13 @@ private fun AdminProductRow(
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = Color.White,
+        color = brandTheme.surface,
         shadowElevation = 1.dp
     ) {
         Row(
@@ -292,7 +292,7 @@ private fun AdminProductRow(
                     text = product.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = DarkCharcoal,
+                    color = brandTheme.textPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -303,7 +303,7 @@ private fun AdminProductRow(
                 )
                 Text(
                     text = String.format(Locale.US, "$%.2f · %s", product.price, product.category),
-                    color = DarkCharcoal,
+                    color = brandTheme.textPrimary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -327,6 +327,7 @@ fun AdminProductFormScreen(
     onBack: () -> Unit,
     onSaved: suspend () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     val existing = editingProductId?.let { id -> products.find { it.id == id } }
     var name by remember(existing?.id, initialBarcode) {
         mutableStateOf(existing?.name.orEmpty())
@@ -358,7 +359,7 @@ fun AdminProductFormScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(LightBg)
+            .background(brandTheme.background)
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
@@ -372,14 +373,14 @@ fun AdminProductFormScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Volver",
-                    tint = DarkCharcoal
+                    tint = brandTheme.textPrimary
                 )
             }
             Text(
                 text = if (isEdit) "Editar producto" else "Nuevo producto",
                 fontWeight = FontWeight.Black,
                 fontSize = 22.sp,
-                color = DarkCharcoal
+                color = brandTheme.textPrimary
             )
         }
 
@@ -461,14 +462,14 @@ fun AdminProductFormScreen(
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = SunmiOrange,
-                contentColor = DarkCharcoal
+                containerColor = brandTheme.accent,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
         ) {
             if (saving) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(22.dp),
-                    color = DarkCharcoal,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     strokeWidth = 2.dp
                 )
             } else {
@@ -490,6 +491,7 @@ private fun AdminField(
     singleLine: Boolean = true,
     onValueChange: (String) -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     Spacer(modifier = Modifier.height(12.dp))
     OutlinedTextField(
         value = value,
@@ -501,10 +503,10 @@ private fun AdminField(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = SunmiOrange,
+            focusedBorderColor = brandTheme.accent,
             unfocusedBorderColor = Color(0xFFE0E0E0),
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White
+            focusedContainerColor = brandTheme.surface,
+            unfocusedContainerColor = brandTheme.surface
         )
     )
 }

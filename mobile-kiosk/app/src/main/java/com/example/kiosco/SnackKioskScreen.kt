@@ -46,12 +46,14 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -71,6 +73,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
@@ -81,10 +84,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.SunmiOrange
-import com.example.kiosco.ui.theme.SyscomBlue
+import com.example.kiosco.ui.theme.LocalBrandTheme
 import com.example.kiosco.ui.theme.TextMuted
 import java.util.Locale
 
@@ -100,8 +100,11 @@ fun SnackKioskScreen(
     onProductClick: (Product) -> Unit,
     onAddToCart: (Product, Offset, Float) -> Unit,
     onCartClick: () -> Unit,
+    onThemeToggle: () -> Unit,
+    targetThemeDisplayName: String,
     onEmployeeLockClick: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
 
@@ -139,7 +142,7 @@ fun SnackKioskScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color.White, LightBg),
+                    colors = listOf(brandTheme.surface, brandTheme.background),
                     endY = 900f
                 )
             )
@@ -189,6 +192,8 @@ fun SnackKioskScreen(
                         largeDisplay = largeDisplay,
                         isEmployee = isEmployee,
                         onCartClick = onCartClick,
+                        onThemeToggle = onThemeToggle,
+                        targetThemeDisplayName = targetThemeDisplayName,
                         onEmployeeLockClick = onEmployeeLockClick
                     )
                     Spacer(modifier = Modifier.height(if (largeDisplay) 26.dp else 18.dp))
@@ -281,12 +286,16 @@ private fun KioskHeader(
     largeDisplay: Boolean,
     isEmployee: Boolean,
     onCartClick: () -> Unit,
+    onThemeToggle: () -> Unit,
+    targetThemeDisplayName: String,
     onEmployeeLockClick: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(if (largeDisplay) 24.dp else 16.dp),
-        color = SyscomBlue
+        color = brandTheme.base
     ) {
         Row(
             modifier = Modifier
@@ -298,27 +307,20 @@ private fun KioskHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "SNACK",
-                        fontSize = if (largeDisplay) 40.sp else 28.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
-                        letterSpacing = (-0.8).sp
-                    )
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 7.dp)
-                            .size(if (largeDisplay) 15.dp else 11.dp)
-                            .clip(CircleShape)
-                            .background(SunmiOrange)
-                    )
-                }
-                Text(
-                    text = "¿Qué se te antoja hoy?",
-                    fontSize = if (largeDisplay) 18.sp else 12.sp,
-                    color = Color.White.copy(alpha = 0.7f)
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                AsyncImage(
+                    model = brandTheme.logoAsset,
+                    contentDescription = "Logotipo ${brandTheme.displayName}",
+                    contentScale = ContentScale.Fit,
+                    colorFilter = ColorFilter.tint(brandTheme.logoTint),
+                    alignment = Alignment.CenterStart,
+                    modifier = Modifier
+                        .widthIn(max = if (largeDisplay) 260.dp else 170.dp)
+                        .fillMaxWidth()
+                        .height(if (largeDisplay) 64.dp else 44.dp)
                 )
             }
 
@@ -326,10 +328,10 @@ private fun KioskHeader(
                 IconButton(
                     onClick = onEmployeeLockClick,
                     modifier = Modifier
-                        .size(if (largeDisplay) 56.dp else 44.dp)
+                        .size(if (largeDisplay) 56.dp else 48.dp)
                         .focusProperties { canFocus = false }
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
+                        .background(brandTheme.onBase.copy(alpha = 0.1f))
                 ) {
                     Icon(
                         imageVector = if (isEmployee) Icons.Default.LockOpen else Icons.Default.Lock,
@@ -338,9 +340,40 @@ private fun KioskHeader(
                         } else {
                             "Modo empleado"
                         },
-                        tint = SunmiOrange,
+                        tint = brandTheme.onBase,
                         modifier = Modifier.size(if (largeDisplay) 26.dp else 20.dp)
                     )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                IconButton(
+                    onClick = onThemeToggle,
+                    modifier = Modifier
+                        .size(if (largeDisplay) 56.dp else 48.dp)
+                        .focusProperties { canFocus = false }
+                        .clip(CircleShape)
+                        .background(brandTheme.onBase.copy(alpha = 0.1f))
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = brandTheme.toggleLabel,
+                            color = brandTheme.onBase,
+                            fontSize = if (largeDisplay) 11.sp else 9.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Icon(
+                            imageVector = Icons.Default.SwapHoriz,
+                            contentDescription = "Cambiar de ${brandTheme.displayName} a $targetThemeDisplayName",
+                            tint = brandTheme.onBase,
+                            modifier = Modifier.size(if (largeDisplay) 23.dp else 19.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -352,12 +385,12 @@ private fun KioskHeader(
                             .size(if (largeDisplay) 66.dp else 48.dp)
                             .focusProperties { canFocus = false }
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
+                            .background(brandTheme.onBase.copy(alpha = 0.1f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.ShoppingBag,
                             contentDescription = "Abrir carrito",
-                            tint = SunmiOrange,
+                            tint = brandTheme.onBase,
                             modifier = Modifier.size(if (largeDisplay) 30.dp else 22.dp)
                         )
                     }
@@ -372,7 +405,7 @@ private fun KioskHeader(
                         Box(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(SunmiOrange)
+                                .background(brandTheme.accent)
                                 .padding(
                                     horizontal = if (largeDisplay) 7.dp else 6.dp,
                                     vertical = if (largeDisplay) 3.dp else 2.dp
@@ -381,7 +414,7 @@ private fun KioskHeader(
                         ) {
                             Text(
                                 text = cartItemCount.toString(),
-                                color = DarkCharcoal,
+                                color = MaterialTheme.colorScheme.onSecondary,
                                 fontSize = if (largeDisplay) 13.sp else 10.sp,
                                 fontWeight = FontWeight.Black
                             )
@@ -399,6 +432,7 @@ private fun SearchBar(
     onQueryChange: (String) -> Unit,
     largeDisplay: Boolean
 ) {
+    val brandTheme = LocalBrandTheme.current
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
@@ -430,7 +464,7 @@ private fun SearchBar(
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Limpiar búsqueda",
-                        tint = DarkCharcoal
+                        tint = brandTheme.textPrimary
                     )
                 }
             }
@@ -438,14 +472,14 @@ private fun SearchBar(
         singleLine = true,
         shape = RoundedCornerShape(if (largeDisplay) 24.dp else 18.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
+            focusedContainerColor = brandTheme.surface,
             unfocusedContainerColor = FilterBackground,
-            focusedBorderColor = DarkCharcoal,
+            focusedBorderColor = brandTheme.textPrimary,
             unfocusedBorderColor = Color(0xFFD7D7D7),
-            cursorColor = DarkCharcoal,
-            focusedTextColor = DarkCharcoal,
-            unfocusedTextColor = DarkCharcoal,
-            focusedLeadingIconColor = DarkCharcoal,
+            cursorColor = brandTheme.textPrimary,
+            focusedTextColor = brandTheme.textPrimary,
+            unfocusedTextColor = brandTheme.textPrimary,
+            focusedLeadingIconColor = brandTheme.textPrimary,
             unfocusedLeadingIconColor = TextMuted
         )
     )
@@ -500,6 +534,7 @@ private fun CategoryChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val brandTheme = LocalBrandTheme.current
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -513,7 +548,7 @@ private fun CategoryChip(
             .scale(scale)
             .animateContentSize()
             .clip(RoundedCornerShape(50))
-            .background(if (selected) SyscomBlue else FilterBackground)
+            .background(if (selected) brandTheme.base else FilterBackground)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -534,7 +569,7 @@ private fun CategoryChip(
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
-                tint = SunmiOrange,
+                tint = brandTheme.onBase,
                 modifier = Modifier
                     .padding(end = 6.dp)
                     .size(if (largeDisplay) 19.dp else 15.dp)
@@ -543,7 +578,7 @@ private fun CategoryChip(
 
         Text(
             text = label,
-            color = if (selected) Color.White else DarkCharcoal,
+            color = if (selected) brandTheme.onBase else brandTheme.textPrimary,
             fontSize = if (largeDisplay) 15.sp else 11.sp,
             fontWeight = FontWeight.Bold
         )
@@ -552,7 +587,7 @@ private fun CategoryChip(
 
         Text(
             text = count.toString(),
-            color = if (selected) Color.White else TextMuted,
+            color = if (selected) brandTheme.onBase else TextMuted,
             fontSize = if (largeDisplay) 13.sp else 10.sp,
             fontWeight = FontWeight.ExtraBold
         )
@@ -566,6 +601,7 @@ fun SnackCard(
     onAdd: (startCenter: Offset, startSize: Float) -> Unit,
     largeDisplay: Boolean = false
 ) {
+    val brandTheme = LocalBrandTheme.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     var imageCenter by remember { mutableStateOf(Offset.Zero) }
@@ -581,7 +617,7 @@ fun SnackCard(
 
     Card(
         shape = RoundedCornerShape(if (largeDisplay) 30.dp else 22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = brandTheme.surface),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isPressed) 9.dp else 2.dp
         ),
@@ -626,11 +662,11 @@ fun SnackCard(
                         .align(Alignment.TopStart)
                         .padding(if (largeDisplay) 12.dp else 8.dp),
                     shape = RoundedCornerShape(50),
-                    color = Color.White.copy(alpha = 0.92f)
+                    color = brandTheme.surface.copy(alpha = 0.92f)
                 ) {
                     Text(
                         text = product.category.displayCategory(),
-                        color = DarkCharcoal,
+                        color = brandTheme.textPrimary,
                         fontSize = if (largeDisplay) 11.sp else 8.sp,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(
@@ -647,7 +683,7 @@ fun SnackCard(
                 text = product.name,
                 fontSize = if (largeDisplay) 20.sp else 14.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = DarkCharcoal,
+                color = brandTheme.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -673,7 +709,7 @@ fun SnackCard(
             ) {
                 Text(
                     text = String.format(Locale.US, "$%.2f", product.price),
-                    color = DarkCharcoal,
+                    color = brandTheme.textPrimary,
                     fontWeight = FontWeight.Black,
                     fontSize = if (largeDisplay) 20.sp else 15.sp
                 )
@@ -687,13 +723,13 @@ fun SnackCard(
                             }
                         ),
                     shape = CircleShape,
-                    color = SunmiOrange
+                    color = brandTheme.accent
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Agregar ${product.name}",
-                            tint = DarkCharcoal,
+                            tint = MaterialTheme.colorScheme.onSecondary,
                             modifier = Modifier.size(if (largeDisplay) 25.dp else 20.dp)
                         )
                     }
@@ -709,6 +745,8 @@ private fun EmptyProductsState(
     onClearFilters: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val brandTheme = LocalBrandTheme.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -735,7 +773,7 @@ private fun EmptyProductsState(
 
         Text(
             text = "No encontramos productos",
-            color = DarkCharcoal,
+            color = brandTheme.textPrimary,
             fontSize = if (largeDisplay) 24.sp else 18.sp,
             fontWeight = FontWeight.Black
         )
@@ -751,12 +789,12 @@ private fun EmptyProductsState(
 
         Button(
             onClick = onClearFilters,
-            colors = ButtonDefaults.buttonColors(containerColor = SunmiOrange),
+            colors = ButtonDefaults.buttonColors(containerColor = brandTheme.accent),
             shape = RoundedCornerShape(50)
         ) {
             Text(
                 text = "Limpiar filtros",
-                color = DarkCharcoal,
+                color = MaterialTheme.colorScheme.onSecondary,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
@@ -774,6 +812,7 @@ fun CartSummaryBar(
     bagBounceTrigger: Int = 0,
     onBagPositioned: (Offset) -> Unit = {}
 ) {
+    val brandTheme = LocalBrandTheme.current
     val bagScale = remember { Animatable(1f) }
     var handledBounce by remember { mutableIntStateOf(bagBounceTrigger) }
     LaunchedEffect(bagBounceTrigger) {
@@ -808,7 +847,7 @@ fun CartSummaryBar(
                 .fillMaxWidth()
                 .height(if (largeBar) 88.dp else 72.dp),
             shape = RoundedCornerShape(50),
-            color = SyscomBlue,
+            color = brandTheme.base,
             shadowElevation = 12.dp
         ) {
             Row(
@@ -830,7 +869,7 @@ fun CartSummaryBar(
                                 scaleY = bagScale.value
                             }
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
+                            .background(brandTheme.onBase.copy(alpha = 0.1f))
                             .onGloballyPositioned { coords ->
                                 val pos = coords.positionInRoot()
                                 val size = coords.size
@@ -846,7 +885,7 @@ fun CartSummaryBar(
                         Icon(
                             imageVector = Icons.Default.ShoppingBag,
                             contentDescription = null,
-                            tint = SunmiOrange,
+                            tint = brandTheme.onBase,
                             modifier = Modifier.size(if (largeBar) 23.dp else 18.dp)
                         )
                     }
@@ -856,12 +895,12 @@ fun CartSummaryBar(
                     Column {
                         Text(
                             text = "$totalItems ${if (totalItems == 1) "producto" else "productos"}",
-                            color = Color.White.copy(alpha = 0.62f),
+                            color = brandTheme.onBase.copy(alpha = 0.62f),
                             fontSize = if (largeBar) 13.sp else 10.sp
                         )
                         Text(
                             text = String.format(Locale.US, "$%.2f", totalPrice),
-                            color = Color.White,
+                            color = brandTheme.onBase,
                             fontWeight = FontWeight.Black,
                             fontSize = if (largeBar) 22.sp else 17.sp
                         )
@@ -871,7 +910,7 @@ fun CartSummaryBar(
                 Button(
                     onClick = onCartClick,
                     enabled = enabled,
-                    colors = ButtonDefaults.buttonColors(containerColor = SunmiOrange),
+                    colors = ButtonDefaults.buttonColors(containerColor = brandTheme.accent),
                     shape = RoundedCornerShape(50),
                     contentPadding = PaddingValues(
                         horizontal = if (largeBar) 28.dp else 18.dp,
@@ -880,7 +919,7 @@ fun CartSummaryBar(
                 ) {
                     Text(
                         text = "Ver carrito",
-                        color = DarkCharcoal,
+                        color = MaterialTheme.colorScheme.onSecondary,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = if (largeBar) 17.sp else 13.sp
                     )

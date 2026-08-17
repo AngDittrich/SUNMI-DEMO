@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -71,10 +73,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.kiosco.data.ProductRepository
-import com.example.kiosco.ui.theme.DarkCharcoal
+import com.example.kiosco.ui.theme.BrandThemes
 import com.example.kiosco.ui.theme.KioscoTheme
-import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.SunmiOrange
+import com.example.kiosco.ui.theme.LocalBrandTheme
 import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.delay
 
@@ -133,7 +134,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            KioscoTheme {
+            var isSunmiTheme by remember { mutableStateOf(false) }
+            val activeBrandTheme =
+                if (isSunmiTheme) BrandThemes.Sunmi else BrandThemes.Syscom
+            val targetBrandTheme =
+                if (isSunmiTheme) BrandThemes.Syscom else BrandThemes.Sunmi
+            KioscoTheme(
+                darkTheme = false,
+                brandTheme = activeBrandTheme
+            ) {
+                val brandTheme = LocalBrandTheme.current
                 var products by remember { mutableStateOf<List<Product>>(emptyList()) }
                 var isLoading by remember { mutableStateOf(true) }
                 var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -191,7 +201,7 @@ class MainActivity : ComponentActivity() {
                     pinDialogVisible = false
                     detailProductId = null
                     navController.navigate(NavRoutes.PRODUCT_LIST) {
-                        popUpTo(0) { inclusive = false }
+                        popUpTo(NavRoutes.WELCOME) { inclusive = false }
                         launchSingleTop = true
                     }
                 }
@@ -338,18 +348,18 @@ class MainActivity : ComponentActivity() {
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = LightBg
+                    color = brandTheme.background
                 ) {
                     when {
                         isLoading -> {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(LightBg),
+                                    .background(brandTheme.background),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                CircularProgressIndicator(color = SunmiOrange)
+                                CircularProgressIndicator(color = brandTheme.accent)
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
                                     text = "Cargando productos...",
@@ -362,14 +372,14 @@ class MainActivity : ComponentActivity() {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(LightBg)
+                                    .background(brandTheme.background)
                                     .padding(32.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
                                     text = "No se pudieron cargar los productos",
-                                    color = DarkCharcoal,
+                                    color = brandTheme.textPrimary,
                                     fontSize = 24.sp,
                                     textAlign = TextAlign.Center
                                 )
@@ -390,6 +400,24 @@ class MainActivity : ComponentActivity() {
                                 currentRoute == NavRoutes.ADMIN_LIST ||
                                     currentRoute?.startsWith("admin_form/") == true ||
                                     currentRoute == NavRoutes.ADMIN_FORM
+                            val catalogOverlayVisible =
+                                pinDialogVisible ||
+                                    productNotFoundVisible ||
+                                    scanSuccess != null ||
+                                    cartSheetVisible
+
+                            BackHandler(
+                                enabled =
+                                    currentRoute == NavRoutes.PRODUCT_LIST &&
+                                        catalogOverlayVisible
+                            ) {
+                                when {
+                                    cartSheetVisible -> cartSheetVisible = false
+                                    productNotFoundVisible -> productNotFoundVisible = false
+                                    scanSuccess != null -> scanSuccess = null
+                                    pinDialogVisible -> pinDialogVisible = false
+                                }
+                            }
 
                             Box(modifier = Modifier.fillMaxSize()) {
                                 NavHost(
@@ -400,9 +428,7 @@ class MainActivity : ComponentActivity() {
                                         WelcomeScreen(
                                             products = products,
                                             onGetStarted = {
-                                                navController.navigate(NavRoutes.PRODUCT_LIST) {
-                                                    popUpTo(NavRoutes.WELCOME) { inclusive = true }
-                                                }
+                                                navController.navigate(NavRoutes.PRODUCT_LIST)
                                             }
                                         )
                                     }
@@ -435,6 +461,11 @@ class MainActivity : ComponentActivity() {
                                                 }
                                             },
                                             onCartClick = { cartSheetVisible = true },
+                                            onThemeToggle = {
+                                                isSunmiTheme = !isSunmiTheme
+                                            },
+                                            targetThemeDisplayName =
+                                                targetBrandTheme.displayName,
                                             onEmployeeLockClick = {
                                                 if (isEmployee) {
                                                     exitEmployeeMode()
@@ -535,7 +566,8 @@ class MainActivity : ComponentActivity() {
                                             },
                                             cartBarVisible = totalItems > 0,
                                             onBack = { detailProductId = null },
-                                            onCartClick = { cartSheetVisible = true }
+                                            onCartClick = { cartSheetVisible = true },
+                                            backEnabled = !catalogOverlayVisible
                                         )
                                     }
                                 }
@@ -614,6 +646,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun ProductNotFoundOverlay(onDismiss: () -> Unit) {
+    val brandTheme = LocalBrandTheme.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -627,7 +660,7 @@ private fun ProductNotFoundOverlay(onDismiss: () -> Unit) {
     ) {
         Surface(
             shape = RoundedCornerShape(28.dp),
-            color = Color.White,
+            color = brandTheme.surface,
             shadowElevation = 16.dp,
             modifier = Modifier
                 .padding(horizontal = 32.dp)
@@ -661,7 +694,7 @@ private fun ProductNotFoundOverlay(onDismiss: () -> Unit) {
                     text = "¡Lo sentimos!",
                     fontWeight = FontWeight.Black,
                     fontSize = 26.sp,
-                    color = DarkCharcoal,
+                    color = brandTheme.textPrimary,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(10.dp))
@@ -680,7 +713,7 @@ private fun ProductNotFoundOverlay(onDismiss: () -> Unit) {
                     Text(
                         text = "Entendido",
                         fontWeight = FontWeight.Bold,
-                        color = DarkCharcoal,
+                        color = brandTheme.textPrimary,
                         fontSize = 16.sp
                     )
                 }
@@ -694,6 +727,7 @@ private fun ScanSuccessOverlay(
     feedback: ScanSuccessFeedback,
     onDismiss: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(feedback) {
         visible = true
@@ -725,7 +759,7 @@ private fun ScanSuccessOverlay(
                     onClick = {}
                 ),
             shape = RoundedCornerShape(32.dp),
-            color = Color.White,
+            color = brandTheme.surface,
             shadowElevation = 20.dp
         ) {
             Column(
@@ -748,13 +782,13 @@ private fun ScanSuccessOverlay(
                             .align(Alignment.BottomEnd)
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(SunmiOrange),
+                            .background(brandTheme.accent),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = DarkCharcoal,
+                            tint = MaterialTheme.colorScheme.onSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -764,7 +798,7 @@ private fun ScanSuccessOverlay(
                     text = "¡Agregado!",
                     fontWeight = FontWeight.Black,
                     fontSize = 28.sp,
-                    color = DarkCharcoal
+                    color = brandTheme.textPrimary
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(

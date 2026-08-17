@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,14 +76,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
-import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.SunmiOrange
-import com.example.kiosco.ui.theme.SyscomBlue
+import com.example.kiosco.ui.theme.LocalBrandTheme
 import java.util.Locale
 import kotlin.math.abs
 
-private val DetailBackground = Color(0xFFF8F8F8)
-private val DetailSheet = Color(0xFFFFFFFF)
 private val ControlBackground = Color(0xFFF2F2F2)
 
 @Composable
@@ -93,8 +90,10 @@ fun ProductDetailScreen(
     onQuantityChange: (Int, Int) -> Unit,
     cartBarVisible: Boolean,
     onBack: () -> Unit,
-    onCartClick: () -> Unit
+    onCartClick: () -> Unit,
+    backEnabled: Boolean = true
 ) {
+    val brandTheme = LocalBrandTheme.current
     val initialIndex = products.indexOfFirst { it.id == initialProductId }
     if (initialIndex < 0) return
 
@@ -148,7 +147,7 @@ fun ProductDetailScreen(
         if (!isDismissing) isDismissing = true
     }
 
-    BackHandler(enabled = !isDismissing) { dismiss() }
+    BackHandler(enabled = backEnabled && !isDismissing) { dismiss() }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -197,7 +196,7 @@ fun ProductDetailScreen(
                     scaleY = contentScale
                     alpha = contentAlpha
                 }
-                .background(DetailBackground)
+                .background(brandTheme.background)
         ) {
             Column(
                 modifier = Modifier
@@ -302,6 +301,7 @@ private fun ProductPagerIndicator(
     currentPosition: Float,
     largeDisplay: Boolean
 ) {
+    val brandTheme = LocalBrandTheme.current
     if (pageCount <= 1) return
 
     Row(
@@ -316,7 +316,7 @@ private fun ProductPagerIndicator(
             val baseWidth = if (largeDisplay) 10.dp else 7.dp
             val activeWidth = if (largeDisplay) 26.dp else 18.dp
             val width = baseWidth + (activeWidth * proximity)
-            val color = lerp(Color(0xFFD7D7D7), SunmiOrange, proximity)
+            val color = lerp(Color(0xFFD7D7D7), brandTheme.accent, proximity)
 
             Box(
                 modifier = Modifier
@@ -336,6 +336,7 @@ private fun DetailTopBar(
     onBack: () -> Unit,
     onCartClick: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -352,7 +353,7 @@ private fun DetailTopBar(
 
         Text(
             text = "Snack Information",
-            color = SyscomBlue,
+            color = brandTheme.base,
             fontSize = if (largeDisplay) 24.sp else 17.sp,
             fontWeight = FontWeight.ExtraBold,
             modifier = Modifier.align(Alignment.Center)
@@ -376,17 +377,18 @@ private fun DetailTopButton(
     largeDisplay: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val brandTheme = LocalBrandTheme.current
     IconButton(
         onClick = onClick,
         modifier = modifier
             .size(if (largeDisplay) 58.dp else 42.dp)
             .clip(CircleShape)
-            .background(SyscomBlue)
+            .background(brandTheme.base)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = SunmiOrange,
+            tint = brandTheme.onBase,
             modifier = Modifier.size(if (largeDisplay) 29.dp else 21.dp)
         )
     }
@@ -402,6 +404,7 @@ private fun ProductHero(
     onDecrease: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val brandTheme = LocalBrandTheme.current
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -470,7 +473,7 @@ private fun ProductHero(
             ) { currentQuantity ->
                 Text(
                     text = currentQuantity.toString(),
-                    color = DarkCharcoal,
+                    color = brandTheme.textPrimary,
                     fontSize = if (largeDisplay) 78.sp else 60.sp,
                     lineHeight = if (largeDisplay) 78.sp else 60.sp,
                     fontWeight = FontWeight.Black
@@ -488,12 +491,12 @@ private fun ProductHero(
 
         Surface(
             shape = RoundedCornerShape(50),
-            color = SyscomBlue,
+            color = brandTheme.base,
             modifier = Modifier.padding(top = 10.dp, bottom = 8.dp)
         ) {
             Text(
                 text = String.format(Locale.US, "$%.2f", product.price),
-                color = Color.White,
+                color = brandTheme.onBase,
                 fontSize = if (largeDisplay) 36.sp else 28.sp,
                 lineHeight = if (largeDisplay) 42.sp else 34.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -514,18 +517,21 @@ private fun QuantityButton(
     enabled: Boolean,
     largeDisplay: Boolean
 ) {
+    val brandTheme = LocalBrandTheme.current
     IconButton(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier
             .size(if (largeDisplay) 104.dp else 80.dp)
             .clip(CircleShape)
-            .background(SunmiOrange)
+            .background(brandTheme.accent)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = DarkCharcoal.copy(alpha = if (enabled) 1f else 0.25f),
+            tint = MaterialTheme.colorScheme.onSecondary.copy(
+                alpha = if (enabled) 1f else 0.25f
+            ),
             modifier = Modifier.size(if (largeDisplay) 58.dp else 46.dp)
         )
     }
@@ -538,6 +544,7 @@ private fun ProductInformationSheet(
     largeDisplay: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val brandTheme = LocalBrandTheme.current
     Surface(
         modifier = modifier
             .padding(horizontal = if (largeDisplay) 32.dp else 20.dp)
@@ -546,7 +553,7 @@ private fun ProductInformationSheet(
             topStart = if (largeDisplay) 42.dp else 30.dp,
             topEnd = if (largeDisplay) 42.dp else 30.dp
         ),
-        color = DetailSheet,
+        color = brandTheme.surface,
         shadowElevation = 12.dp
     ) {
         Column(
@@ -569,7 +576,7 @@ private fun ProductInformationSheet(
                     .width(if (largeDisplay) 68.dp else 48.dp)
                     .height(if (largeDisplay) 7.dp else 5.dp)
                     .clip(CircleShape)
-                    .background(SyscomBlue)
+                    .background(brandTheme.base)
             )
 
             Spacer(modifier = Modifier.height(if (largeDisplay) 20.dp else 13.dp))
@@ -581,7 +588,7 @@ private fun ProductInformationSheet(
             ) {
                 Text(
                     text = product.name,
-                    color = DarkCharcoal,
+                    color = brandTheme.textPrimary,
                     fontSize = if (largeDisplay) 30.sp else 20.sp,
                     fontWeight = FontWeight.Black
                 )
@@ -596,7 +603,7 @@ private fun ProductInformationSheet(
                     Icon(
                         imageVector = Icons.Default.Bookmark,
                         contentDescription = "Guardar",
-                        tint = DarkCharcoal,
+                        tint = brandTheme.textPrimary,
                         modifier = Modifier.size(if (largeDisplay) 28.dp else 20.dp)
                     )
                 }

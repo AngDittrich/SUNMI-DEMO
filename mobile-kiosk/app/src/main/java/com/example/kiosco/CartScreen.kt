@@ -51,10 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.kiosco.ui.theme.DarkCharcoal
-import com.example.kiosco.ui.theme.LightBg
-import com.example.kiosco.ui.theme.SunmiOrange
-import com.example.kiosco.ui.theme.SyscomBlue
+import com.example.kiosco.ui.theme.LocalBrandTheme
 import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -68,6 +65,7 @@ fun CartScreen(
     cartSheetVisible: Boolean,
     onDismiss: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     val totalPrice = cartItems.sumOf { it.subtotal }
     val totalItems = cartItems.sumOf { it.quantity }
     var showClearDialog by remember { mutableStateOf(false) }
@@ -141,7 +139,7 @@ fun CartScreen(
                     .graphicsLayer { translationY = sheetOffset.value }
                     .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                color = LightBg,
+                color = brandTheme.background,
                 shadowElevation = 16.dp
             ) {
                 Column(
@@ -274,6 +272,7 @@ private fun CartTopBar(
     onDismiss: () -> Unit,
     onClear: (() -> Unit)?
 ) {
+    val brandTheme = LocalBrandTheme.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -283,12 +282,12 @@ private fun CartTopBar(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Color.White)
+                .background(brandTheme.surface)
         ) {
             Icon(
                 imageVector = Icons.Filled.Remove,
                 contentDescription = "Cerrar",
-                tint = DarkCharcoal
+                tint = brandTheme.textPrimary
             )
         }
 
@@ -299,7 +298,7 @@ private fun CartTopBar(
                 text = "Tu Carrito",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Black,
-                color = DarkCharcoal
+                color = brandTheme.textPrimary
             )
             Text(
                 text = if (itemCount == 0) "Sin productos" else "$itemCount ${if (itemCount == 1) "producto" else "productos"}",
@@ -334,6 +333,7 @@ private fun CartItemRow(
     onDecrease: () -> Unit,
     onRemove: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     val dismissState = rememberSwipeToDismissBoxState()
 
     LaunchedEffect(dismissState.currentValue) {
@@ -365,7 +365,7 @@ private fun CartItemRow(
     ) {
         Card(
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = brandTheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -391,7 +391,7 @@ private fun CartItemRow(
                         text = item.product.name,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
-                        color = DarkCharcoal,
+                        color = brandTheme.textPrimary,
                         maxLines = 1
                     )
                     Spacer(modifier = Modifier.height(2.dp))
@@ -418,7 +418,7 @@ private fun CartItemRow(
                             text = item.quantity.toString(),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
-                            color = DarkCharcoal
+                            color = brandTheme.textPrimary
                         )
                         SmallQuantityButton(
                             icon = Icons.Default.Add,
@@ -431,7 +431,7 @@ private fun CartItemRow(
                     text = "$${String.format("%.2f", item.subtotal)}",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Black,
-                    color = DarkCharcoal
+                    color = brandTheme.textPrimary
                 )
             }
         }
@@ -443,18 +443,19 @@ private fun SmallQuantityButton(
     icon: ImageVector,
     onClick: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     Box(
         modifier = Modifier
             .size(36.dp)
             .clip(CircleShape)
-            .background(SunmiOrange)
+            .background(brandTheme.accent)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = DarkCharcoal,
+            tint = MaterialTheme.colorScheme.onSecondary,
             modifier = Modifier.size(18.dp)
         )
     }
@@ -462,6 +463,7 @@ private fun SmallQuantityButton(
 
 @Composable
 private fun EmptyCartState(modifier: Modifier = Modifier) {
+    val brandTheme = LocalBrandTheme.current
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -474,8 +476,8 @@ private fun EmptyCartState(modifier: Modifier = Modifier) {
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            SunmiOrange.copy(alpha = 0.3f),
-                            SunmiOrange.copy(alpha = 0.1f)
+                            brandTheme.accent.copy(alpha = 0.3f),
+                            brandTheme.accent.copy(alpha = 0.1f)
                         )
                     )
                 ),
@@ -493,7 +495,7 @@ private fun EmptyCartState(modifier: Modifier = Modifier) {
             text = "Tu carrito está vacío",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = DarkCharcoal
+            color = brandTheme.textPrimary
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -512,13 +514,14 @@ private fun CartBottomBar(
     enabled: Boolean,
     onCheckout: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp)
             .padding(bottom = 8.dp),
         shape = RoundedCornerShape(32.dp),
-        color = SyscomBlue,
+        color = brandTheme.base,
         shadowElevation = 12.dp
     ) {
         Row(
@@ -531,12 +534,12 @@ private fun CartBottomBar(
             Column {
                 Text(
                     text = "Total",
-                    color = Color.White.copy(alpha = 0.6f),
+                    color = brandTheme.onBase.copy(alpha = 0.6f),
                     fontSize = 14.sp
                 )
                 Text(
                     text = "$totalItems ${if (totalItems == 1) "item" else "items"}  •  $${String.format("%.2f", totalPrice)}",
-                    color = Color.White,
+                    color = brandTheme.onBase,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Black
                 )
@@ -546,8 +549,8 @@ private fun CartBottomBar(
                 onClick = onCheckout,
                 enabled = enabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SunmiOrange,
-                    disabledContainerColor = Color.White.copy(alpha = 0.1f)
+                    containerColor = brandTheme.accent,
+                    disabledContainerColor = brandTheme.onBase.copy(alpha = 0.1f)
                 ),
                 shape = RoundedCornerShape(24.dp),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
@@ -555,13 +558,21 @@ private fun CartBottomBar(
                 Icon(
                     imageVector = Icons.Default.ShoppingBag,
                     contentDescription = null,
-                    tint = if (enabled) DarkCharcoal else Color.White.copy(alpha = 0.3f),
+                    tint = if (enabled) {
+                        MaterialTheme.colorScheme.onSecondary
+                    } else {
+                        brandTheme.onBase.copy(alpha = 0.3f)
+                    },
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Pagar",
-                    color = if (enabled) DarkCharcoal else Color.White.copy(alpha = 0.3f),
+                    color = if (enabled) {
+                        MaterialTheme.colorScheme.onSecondary
+                    } else {
+                        brandTheme.onBase.copy(alpha = 0.3f)
+                    },
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 16.sp
                 )
@@ -575,6 +586,7 @@ private fun ClearCartDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -604,7 +616,7 @@ private fun ClearCartDialog(
             }
         },
         shape = RoundedCornerShape(24.dp),
-        containerColor = Color.White
+        containerColor = brandTheme.surface
     )
 }
 
@@ -612,6 +624,7 @@ private fun ClearCartDialog(
 private fun PaymentModal(
     onPaymentComplete: () -> Unit
 ) {
+    val brandTheme = LocalBrandTheme.current
     var phase by remember { mutableStateOf(PaymentPhase.Paying) }
     var approved by remember { mutableStateOf(false) }
 
@@ -646,7 +659,7 @@ private fun PaymentModal(
                 .fillMaxWidth()
                 .padding(horizontal = 28.dp),
             shape = RoundedCornerShape(32.dp),
-            color = Color.White,
+            color = brandTheme.surface,
             shadowElevation = 20.dp
         ) {
             AnimatedContent(
@@ -669,6 +682,7 @@ private enum class PaymentPhase { Paying, Paid }
 
 @Composable
 private fun PayingContent() {
+    val brandTheme = LocalBrandTheme.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -693,7 +707,10 @@ private fun PayingContent() {
                 .clip(CircleShape)
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(SunmiOrange, SunmiOrange.copy(alpha = 0.7f))
+                        colors = listOf(
+                            brandTheme.accent,
+                            brandTheme.accent.copy(alpha = 0.7f)
+                        )
                     )
                 ),
             contentAlignment = Alignment.Center
@@ -701,7 +718,7 @@ private fun PayingContent() {
             Icon(
                 imageVector = Icons.Filled.CreditCard,
                 contentDescription = null,
-                tint = DarkCharcoal,
+                tint = MaterialTheme.colorScheme.onSecondary,
                 modifier = Modifier.size(56.dp)
             )
         }
@@ -712,7 +729,7 @@ private fun PayingContent() {
             text = "Acerque su tarjeta al terminal",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            color = DarkCharcoal,
+            color = brandTheme.textPrimary,
             textAlign = TextAlign.Center
         )
 
@@ -729,6 +746,7 @@ private fun PayingContent() {
 
 @Composable
 private fun PaidContent(approved: Boolean) {
+    val brandTheme = LocalBrandTheme.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -749,13 +767,13 @@ private fun PaidContent(approved: Boolean) {
                 .size(128.dp)
                 .scale(scale)
                 .clip(CircleShape)
-                .background(SyscomBlue),
+                .background(brandTheme.base),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.Check,
                 contentDescription = null,
-                tint = Color.White,
+                tint = brandTheme.onBase,
                 modifier = Modifier.size(72.dp)
             )
         }
@@ -766,7 +784,7 @@ private fun PaidContent(approved: Boolean) {
             text = "Pago aprobado",
             fontSize = 24.sp,
             fontWeight = FontWeight.Black,
-            color = DarkCharcoal,
+            color = brandTheme.textPrimary,
             textAlign = TextAlign.Center
         )
 
