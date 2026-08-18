@@ -5,9 +5,14 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.gestures.Orientation
+import android.graphics.BlurMaskFilter
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
@@ -27,10 +32,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.FactCheck
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,11 +60,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -73,7 +85,9 @@ import kotlin.math.roundToInt
 @Composable
 fun WelcomeScreen(
     products: List<Product>,
-    onGetStarted: () -> Unit
+    selectedService: WelcomeService,
+    onServiceChange: (WelcomeService) -> Unit,
+    onGetStarted: (WelcomeService) -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
     BoxWithConstraints(
@@ -89,6 +103,7 @@ fun WelcomeScreen(
         contentAlignment = Alignment.TopCenter
     ) {
         val largeDisplay = maxWidth >= 700.dp || maxHeight >= 1000.dp
+        val useScrollableLayout = !largeDisplay || maxHeight < 1000.dp
         val contentMaxWidth = if (largeDisplay) 980.dp else 560.dp
         val horizontalPadding = if (largeDisplay) 44.dp else 20.dp
         val heroHeight = if (largeDisplay) {
@@ -96,12 +111,17 @@ fun WelcomeScreen(
         } else {
             (maxHeight * 0.45f).coerceIn(320.dp, 390.dp)
         }
+        val contentModifier = Modifier
+            .fillMaxSize()
+            .widthIn(max = contentMaxWidth)
+            .padding(horizontal = horizontalPadding)
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .widthIn(max = contentMaxWidth)
-                .padding(horizontal = horizontalPadding),
+            modifier = if (useScrollableLayout) {
+                contentModifier.verticalScroll(rememberScrollState())
+            } else {
+                contentModifier
+            },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             BrandHeader(largeDisplay = largeDisplay)
@@ -117,7 +137,21 @@ fun WelcomeScreen(
 
             BenefitRow(largeDisplay = largeDisplay)
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(if (largeDisplay) 20.dp else 12.dp))
+
+            ServiceSelector(
+                selectedService = selectedService,
+                onServiceChange = onServiceChange,
+                largeDisplay = largeDisplay
+            )
+
+            Spacer(
+                modifier = if (largeDisplay && !useScrollableLayout) {
+                    Modifier.weight(1f)
+                } else {
+                    Modifier.height(20.dp)
+                }
+            )
 
             Text(
                 text = "Desliza y descubre tu próximo favorito",
@@ -131,7 +165,7 @@ fun WelcomeScreen(
 
             SlideToStartButton(
                 largeDisplay = largeDisplay,
-                onSlideComplete = onGetStarted
+                onSlideComplete = { onGetStarted(selectedService) }
             )
 
             Spacer(modifier = Modifier.height(if (largeDisplay) 24.dp else 14.dp))
@@ -188,6 +222,33 @@ private fun WelcomeHero(
     largeDisplay: Boolean
 ) {
     val brandTheme = LocalBrandTheme.current
+    val density = LocalDensity.current
+
+    // 1. Memorizamos el px del blur para no recalcular en cada frame
+    val largeBlurPx = remember(density) { with(density) { 70.dp.toPx() } }
+    val smallBlurPx = remember(density) { with(density) { 50.dp.toPx() } }
+
+    // 2. Pre-configuramos los Paints nativos con filtros de desenfoque
+    val paintLarge = remember(brandTheme.highlight, largeBlurPx) {
+        Paint().apply {
+            color = brandTheme.highlight.copy(alpha = 0.22f)
+            asFrameworkPaint().apply {
+                isAntiAlias = true
+                maskFilter = BlurMaskFilter(largeBlurPx, BlurMaskFilter.Blur.NORMAL)
+            }
+        }
+    }
+
+    val paintSmall = remember(brandTheme.highlight, smallBlurPx) {
+        Paint().apply {
+            color = brandTheme.highlight.copy(alpha = 0.12f)
+            asFrameworkPaint().apply {
+                isAntiAlias = true
+                maskFilter = BlurMaskFilter(smallBlurPx, BlurMaskFilter.Blur.NORMAL)
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,16 +261,21 @@ private fun WelcomeHero(
             .background(brandTheme.base)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
-                color = brandTheme.highlight.copy(alpha = 0.18f),
-                radius = size.minDimension * 0.42f,
-                center = Offset(size.width * 0.92f, size.height * 0.08f)
-            )
-            drawCircle(
-                color = brandTheme.highlight.copy(alpha = 0.08f),
-                radius = size.minDimension * 0.34f,
-                center = Offset(size.width * 0.04f, size.height * 0.95f)
-            )
+            drawIntoCanvas { canvas ->
+                // Círculo grande (arriba a la derecha)
+                canvas.drawCircle(
+                    center = Offset(size.width * 0.92f, size.height * 0.08f),
+                    radius = size.minDimension * 0.42f,
+                    paint = paintLarge
+                )
+
+                // Círculo pequeño (abajo a la izquierda)
+                canvas.drawCircle(
+                    center = Offset(size.width * 0.04f, size.height * 0.95f),
+                    radius = size.minDimension * 0.34f,
+                    paint = paintSmall
+                )
+            }
         }
 
         Column(
@@ -255,30 +321,30 @@ private fun SnackShowcase(largeDisplay: Boolean) {
         verticalAlignment = Alignment.Bottom
     ) {
         SnackTile(
-            drawableRes = R.drawable.ic_cookie,
-            label = "Cookies",
-            color = Color(0xFFFFE4B8),
+            icon = Icons.Filled.CreditCard,
+            label = "Cobro",
+            contentDescription = "Cobro en punto de venta",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
         SnackTile(
-            drawableRes = R.drawable.ic_soda,
-            label = "Drinks",
-            color = Color(0xFFFFCFCF),
+            icon = Icons.Filled.QrCodeScanner,
+            label = "Escaneo",
+            contentDescription = "Escaneo de códigos QR",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
         SnackTile(
-            drawableRes = R.drawable.ic_candy,
-            label = "Candy",
-            color = Color(0xFFFFD9EA),
+            icon = Icons.Filled.FactCheck,
+            label = "Encuestas",
+            contentDescription = "Encuestas de satisfacción",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
         SnackTile(
-            drawableRes = R.drawable.ic_chips,
-            label = "Chips",
-            color = Color(0xFFFFF0A8),
+            icon = Icons.Filled.Smartphone,
+            label = "Movilidad",
+            contentDescription = "Movilidad con dispositivos inteligentes",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
@@ -287,9 +353,9 @@ private fun SnackShowcase(largeDisplay: Boolean) {
 
 @Composable
 private fun SnackTile(
-    drawableRes: Int,
+    icon: ImageVector,
     label: String,
-    color: Color,
+    contentDescription: String,
     largeDisplay: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -305,13 +371,14 @@ private fun SnackTile(
             modifier = Modifier
                 .size(if (largeDisplay) 84.dp else 52.dp)
                 .clip(RoundedCornerShape(if (largeDisplay) 23.dp else 15.dp))
-                .background(color),
+                .background(brandTheme.highlight.copy(alpha = 0.18f)),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(drawableRes),
-                contentDescription = label,
-                modifier = Modifier.size(if (largeDisplay) 56.dp else 36.dp)
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = brandTheme.highlight,
+                modifier = Modifier.size(if (largeDisplay) 52.dp else 32.dp)
             )
         }
 
@@ -322,6 +389,77 @@ private fun SnackTile(
             color = brandTheme.onBase.copy(alpha = 0.85f),
             fontSize = if (largeDisplay) 15.sp else 10.sp,
             fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun ServiceSelector(
+    selectedService: WelcomeService,
+    onServiceChange: (WelcomeService) -> Unit,
+    largeDisplay: Boolean
+) {
+    val brandTheme = LocalBrandTheme.current
+    val shape = RoundedCornerShape(if (largeDisplay) 24.dp else 18.dp)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = if (largeDisplay) 560.dp else 420.dp)
+            .clip(shape)
+            .background(brandTheme.surface)
+            .border(1.dp, brandTheme.base.copy(alpha = 0.22f), shape)
+            .padding(if (largeDisplay) 6.dp else 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(if (largeDisplay) 6.dp else 4.dp)
+    ) {
+        ServiceSegment(
+            label = "POS",
+            service = WelcomeService.POS,
+            selectedService = selectedService,
+            onServiceChange = onServiceChange,
+            largeDisplay = largeDisplay,
+            modifier = Modifier.weight(1f)
+        )
+        ServiceSegment(
+            label = "Encuesta",
+            service = WelcomeService.SURVEY,
+            selectedService = selectedService,
+            onServiceChange = onServiceChange,
+            largeDisplay = largeDisplay,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun ServiceSegment(
+    label: String,
+    service: WelcomeService,
+    selectedService: WelcomeService,
+    onServiceChange: (WelcomeService) -> Unit,
+    largeDisplay: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val brandTheme = LocalBrandTheme.current
+    val selected = selectedService == service
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(if (largeDisplay) 19.dp else 14.dp))
+            .background(if (selected) brandTheme.base else Color.Transparent)
+            .selectable(
+                selected = selected,
+                role = Role.RadioButton,
+                onClick = { onServiceChange(service) }
+            )
+            .padding(vertical = if (largeDisplay) 15.dp else 11.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            color = if (selected) brandTheme.onBase else brandTheme.textPrimary,
+            fontSize = if (largeDisplay) 16.sp else 13.sp,
+            fontWeight = FontWeight.ExtraBold
         )
     }
 }

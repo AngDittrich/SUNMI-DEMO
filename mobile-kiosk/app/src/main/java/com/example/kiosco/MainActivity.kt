@@ -82,6 +82,8 @@ import kotlinx.coroutines.delay
 object NavRoutes {
     const val WELCOME = "welcome"
     const val PRODUCT_LIST = "product_list"
+    const val SURVEY = "survey"
+    const val SURVEY_THANK_YOU = "survey_thank_you"
     const val ORDER_SUMMARY = "order_summary"
     const val ADMIN_LIST = "admin_list"
     const val ADMIN_FORM = "admin_form/{productId}/{barcode}"
@@ -135,6 +137,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var isSunmiTheme by remember { mutableStateOf(false) }
+            var selectedService by remember { mutableStateOf(WelcomeService.POS) }
             val activeBrandTheme =
                 if (isSunmiTheme) BrandThemes.Sunmi else BrandThemes.Syscom
             val targetBrandTheme =
@@ -168,6 +171,8 @@ class MainActivity : ComponentActivity() {
                 val focusManager = LocalFocusManager.current
                 val context = LocalContext.current
                 val navController = rememberNavController()
+                val currentDestination = navController.currentBackStackEntryAsState()
+                val currentRoute = currentDestination.value?.destination?.route
                 val repository = remember(context) { ProductRepository(context) }
 
                 fun fallbackBagCenter(): Offset {
@@ -207,6 +212,13 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val onBarcodeScanned by rememberUpdatedState<(String) -> Unit> { code ->
+                    if (
+                        currentRoute == NavRoutes.SURVEY ||
+                        currentRoute == NavRoutes.SURVEY_THANK_YOU
+                    ) {
+                        return@rememberUpdatedState
+                    }
+
                     focusManager.clearFocus(force = true)
                     searchResetToken += 1
 
@@ -393,13 +405,14 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         else -> {
-                            val currentDestination = navController.currentBackStackEntryAsState()
-                            val currentRoute = currentDestination.value?.destination?.route
                             val isWelcomeRoute = currentRoute == NavRoutes.WELCOME
                             val isAdminRoute =
                                 currentRoute == NavRoutes.ADMIN_LIST ||
                                     currentRoute?.startsWith("admin_form/") == true ||
                                     currentRoute == NavRoutes.ADMIN_FORM
+                            val isSurveyRoute =
+                                currentRoute == NavRoutes.SURVEY ||
+                                    currentRoute == NavRoutes.SURVEY_THANK_YOU
                             val catalogOverlayVisible =
                                 pinDialogVisible ||
                                     productNotFoundVisible ||
@@ -427,8 +440,16 @@ class MainActivity : ComponentActivity() {
                                     composable(NavRoutes.WELCOME) {
                                         WelcomeScreen(
                                             products = products,
-                                            onGetStarted = {
-                                                navController.navigate(NavRoutes.PRODUCT_LIST)
+                                            selectedService = selectedService,
+                                            onServiceChange = { selectedService = it },
+                                            onGetStarted = { service ->
+                                                val destination = when (service) {
+                                                    WelcomeService.POS ->
+                                                        NavRoutes.PRODUCT_LIST
+                                                    WelcomeService.SURVEY ->
+                                                        NavRoutes.SURVEY
+                                                }
+                                                navController.navigate(destination)
                                             }
                                         )
                                     }
@@ -473,6 +494,33 @@ class MainActivity : ComponentActivity() {
                                                     pinDialogVisible = true
                                                 }
                                             }
+                                        )
+                                    }
+
+                                    composable(NavRoutes.SURVEY) {
+                                        SurveyScreen(
+                                            onSubmit = {
+                                                navController.navigate(
+                                                    NavRoutes.SURVEY_THANK_YOU
+                                                ) {
+                                                    launchSingleTop = true
+                                                }
+                                            },
+                                            onBack = { navController.popBackStack() }
+                                        )
+                                    }
+
+                                    composable(NavRoutes.SURVEY_THANK_YOU) {
+                                        SurveyThankYouScreen(
+                                            onReturnHome = {
+                                                navController.navigate(NavRoutes.WELCOME) {
+                                                    popUpTo(NavRoutes.WELCOME) {
+                                                        inclusive = false
+                                                    }
+                                                    launchSingleTop = true
+                                                }
+                                            },
+                                            onBack = { navController.popBackStack() }
                                         )
                                     }
 
@@ -572,7 +620,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
-                                if (!isWelcomeRoute && !isAdminRoute && !cartSheetVisible) {
+                                if (
+                                    !isWelcomeRoute &&
+                                    !isAdminRoute &&
+                                    !isSurveyRoute &&
+                                    !cartSheetVisible
+                                ) {
                                     CartSummaryBar(
                                         totalItems = totalItems,
                                         totalPrice = totalPrice,
@@ -589,27 +642,29 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
 
-                                AddToCartFlyOverlay(
-                                    event = flyEvent,
-                                    onFinished = { finishedId ->
-                                        if (flyEvent?.id == finishedId) {
-                                            flyEvent = null
-                                            bagBounceTrigger += 1
+                                if (!isSurveyRoute) {
+                                    AddToCartFlyOverlay(
+                                        event = flyEvent,
+                                        onFinished = { finishedId ->
+                                            if (flyEvent?.id == finishedId) {
+                                                flyEvent = null
+                                                bagBounceTrigger += 1
+                                            }
                                         }
+                                    )
+
+                                    scanSuccess?.let { success ->
+                                        ScanSuccessOverlay(
+                                            feedback = success,
+                                            onDismiss = { scanSuccess = null }
+                                        )
                                     }
-                                )
 
-                                scanSuccess?.let { success ->
-                                    ScanSuccessOverlay(
-                                        feedback = success,
-                                        onDismiss = { scanSuccess = null }
-                                    )
-                                }
-
-                                if (productNotFoundVisible) {
-                                    ProductNotFoundOverlay(
-                                        onDismiss = { productNotFoundVisible = false }
-                                    )
+                                    if (productNotFoundVisible) {
+                                        ProductNotFoundOverlay(
+                                            onDismiss = { productNotFoundVisible = false }
+                                        )
+                                    }
                                 }
                             }
 
