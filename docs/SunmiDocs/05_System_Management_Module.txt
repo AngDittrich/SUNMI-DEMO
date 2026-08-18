@@ -1,0 +1,484 @@
+﻿================================================================================
+SunmiCustomer API - 05 System Management Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xddceghjk502
+Update Time: 2026-04-29 18:25:31
+Content Length: 13309 chars
+================================================================================
+1 概述
+系统管理模块，包含：更新系统版本OTA、设置默认桌面、设置系统语言、启用禁用通用应用锁、设置PCI重启时间等功能。
+2 API列表
+接口
+说明
+接口 | 说明
+void updateSystem(String systemPath,OnSystemUpdateListener listener);
+更新系统版本（OTA）
+void updateSystem(String systemPath,OnSystemUpdateListener listener); | 更新系统版本（OTA）
+booealn setDefaultLauncher(String packageName)
+设置默认桌面
+booealn setDefaultLauncher(String packageName) | 设置默认桌面
+ParcelFileDescriptor doScreenshot();
+设备截屏
+ParcelFileDescriptor doScreenshot(); | 设备截屏
+boolean enableCommonAppLock(boolean enable);
+启用/禁用通用应用锁
+boolean enableCommonAppLock(boolean enable); | 启用/禁用通用应用锁
+boolean setSystemLanguage(String language);
+设置系统语言
+boolean setSystemLanguage(String language); | 设置系统语言
+boolean isCommonAppLockEnabled();
+检查通用应用锁功能启用状态
+boolean isCommonAppLockEnabled(); | 检查通用应用锁功能启用状态
+boolean disableSecurityPCI24HoursReboot(boolean disable);
+打开/关闭金融安全PCI24小时重启时间
+boolean disableSecurityPCI24HoursReboot(boolean disable); | 打开/关闭金融安全PCI24小时重启时间
+int set24HourRebootRegular(int type,int hour,int minute,int second);
+设置PCI24小时重启时间(针对设置-安全中心-24小时重启项设置)
+int set24HourRebootRegular(int type,int hour,int minute,int second); | 设置PCI24小时重启时间(针对设置-安全中心-24小时重启项设置)
+int setSecurityCenterPwd(String pwd);
+修改设置-安全中心密码接口
+int setSecurityCenterPwd(String pwd); | 修改设置-安全中心密码接口
+boolean enableAdbWithResult(boolean enable)
+启用/禁用adb
+boolean enableAdbWithResult(boolean enable) | 启用/禁用adb
+boolean isAdbEnabled()
+检查adb是否可用
+boolean isAdbEnabled() | 检查adb是否可用
+List<String> getSystemPackageList()
+获取系统应用列表
+List<String> getSystemPackageList() | 获取系统应用列表
+3 API详情
+3.1 
+更新系统版本（OTA）
+原型
+void updateSystem(String systemPath,OnSystemUpdateListener listener);
+原型 | void updateSystem(String systemPath,OnSystemUpdateListener listener);
+功能
+更新系统版本（OTA）
+功能 | 更新系统版本（OTA）
+参数
+String systemPath
+待安装的OTA文件路径（例：/sdcard/Download/P3_user_9.9.9_698_20251008_ota.zip）
+参数 | String systemPath | 待安装的OTA文件路径（例：/sdcard/Download/P3_user_9.9.9_698_20251008_ota.zip）
+ 
+OnSystemUpdateListener listener
+接口回调详见
+ 
+OnSystemUpdateListener，校验失败时会通过接口回调失败，相关错误码详见updateSystem 接口相关错误码
+  | OnSystemUpdateListener listener | 接口回调详见   OnSystemUpdateListener，校验失败时会通过接口回调失败，相关错误码详见updateSystem 接口相关错误码
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+文件路径读取如遇到权限问题可参考：FileStorageUtil 文件路径获取类
+备注 | 文件路径读取如遇到权限问题可参考：FileStorageUtil 文件路径获取类
+示例代码
+ try {
+sTmsApi.getSystemManager().updateSystem("/sdcard/xxx/P3_user_9.9.9_698_20251008_ota.zip", new OnSystemUpdateListener.Stub() {
+                @Override
+                public void progress(int progress) throws RemoteException {
+                    }
+                @Override
+                public void verifyPackageFail(String info) throws RemoteException {
+                   }
+                @Override
+                public void updateSystemFail(String info) throws RemoteException {
+                  }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try { sTmsApi.getSystemManager().updateSystem("/sdcard/xxx/P3_user_9.9.9_698_20251008_ota.zip", new OnSystemUpdateListener.Stub() {                 @Override                 public void progress(int progress) throws RemoteException {                     }                 @Override                 public void verifyPackageFail(String info) throws RemoteException {                    }                 @Override                 public void updateSystemFail(String info) throws RemoteException {                   }             });         } catch (Exception e) {             e.printStackTrace();        }
+3.2 
+设置默认桌面
+原型
+booealn setDefaultLauncher(String packageName)
+原型 | booealn setDefaultLauncher(String packageName)
+功能
+设置默认桌面
+功能 | 设置默认桌面
+参数
+String packageName
+桌面应用包名
+参数 | String packageName | 桌面应用包名
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、设置的目标应用需要在AndroidManifest.xml 文件里添加以下配置才能设置默认桌面：
+<activity
+            android:name=".ui.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <!-- 以下两个需要添加的，将应用设置为Launcher-->
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+           
+                <!-- 如果希望该应用也能被Monkey测试工具识别，可添加 -->
+                <category android:name="android.intent.category.MONKEY" />
+            </intent-filter>
+        </activity>
+备注 | 1、设置的目标应用需要在AndroidManifest.xml 文件里添加以下配置才能设置默认桌面： <activity             android:name=".ui.MainActivity"             android:exported="true">             <intent-filter>                 <action android:name="android.intent.action.MAIN" />                 <category android:name="android.intent.category.LAUNCHER" />                 <!-- 以下两个需要添加的，将应用设置为Launcher-->                 <category android:name="android.intent.category.HOME" />                 <category android:name="android.intent.category.DEFAULT" />                             <!-- 如果希望该应用也能被Monkey测试工具识别，可添加 -->                 <category android:name="android.intent.category.MONKEY" />             </intent-filter>         </activity>
+示例代码
+ try {
+          boolean result=sTmsApi.getSystemManager().setDefaultLauncher("com.xxx.xxx")
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {           boolean result=sTmsApi.getSystemManager().setDefaultLauncher("com.xxx.xxx")         } catch (Exception e) {             e.printStackTrace();        }
+3.3 
+设备截屏
+原型
+ParcelFileDescriptor doScreenshot();
+原型 | ParcelFileDescriptor doScreenshot();
+功能
+设备截屏
+功能 | 设备截屏
+参数
+无
+ 
+参数 | 无 |  
+返回值
+设备截屏 ParcelFileDescriptor 对象。
+返回值 | 设备截屏 ParcelFileDescriptor 对象。
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+doScreenshot()
+ 返回的是 
+ParcelFileDescriptor
+，属于系统文件句柄资源。必须在解码完成后及时 close（建议放在 finally/try-with-resources），否则可能造成 fd/内存资源泄露并导致 
+Too many open files
+ 等异常；同时截图 
+Bitmap
+ 体积较大，建议避免频繁调用、用完及时释放引用。
+备注 | doScreenshot()  返回的是  ParcelFileDescriptor ，属于系统文件句柄资源。必须在解码完成后及时 close（建议放在 finally/try-with-resources），否则可能造成 fd/内存资源泄露并导致  Too many open files  等异常；同时截图  Bitmap  体积较大，建议避免频繁调用、用完及时释放引用。
+示例代码
+ try {
+          
+ParcelFileDescriptor parcelFileDescriptor
+=sTmsApi.getSystemManager().
+doScreenshot
+()
+Bitmap bitmap=BitmapFactory.decodeFileDescriptor(parcelFileDescriptor.getFileDescriptor());
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {            ParcelFileDescriptor parcelFileDescriptor =sTmsApi.getSystemManager(). doScreenshot () Bitmap bitmap=BitmapFactory.decodeFileDescriptor(parcelFileDescriptor.getFileDescriptor());         } catch (Exception e) {             e.printStackTrace();        }
+3.4 
+启用/禁用通用应用锁
+原型
+boolean enableCommonAppLock(boolean enable);
+原型 | boolean enableCommonAppLock(boolean enable);
+功能
+启用/禁用通用应用锁
+功能 | 启用/禁用通用应用锁
+参数
+boolean enable
+启用/禁用
+true：
+启用
+false：
+禁用
+参数 | boolean enable | 启用/禁用 true： 启用 false： 禁用
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+如果要添加通用应用锁，详见
+ 
+添加通用应用锁
+备注 | 如果要添加通用应用锁，详见   添加通用应用锁
+示例代码
+ try {
+          boolean result=sTmsApi.getSystemManager().
+enableCommonAppLock
+(true)
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {           boolean result=sTmsApi.getSystemManager(). enableCommonAppLock (true)         } catch (Exception e) {             e.printStackTrace();        }
+3.5 
+设置系统语言
+原型
+boolean setSystemLanguage(String language);
+原型 | boolean setSystemLanguage(String language);
+功能
+设置系统语言
+功能 | 设置系统语言
+参数
+language
+语言代码-国家代码，例如：中文 
+zh-Hans-CN
+; 中国台湾(繁体) zh-Hant-TW;中国香港(繁体) zh-Hant-HK;中国澳门(繁体) zh-Hant-MO;英语(美国) en-US; 英语(英国) en-UK; 波兰语 pl-PL;等等
+参数 | language | 语言代码-国家代码，例如：中文  zh-Hans-CN ; 中国台湾(繁体) zh-Hant-TW;中国香港(繁体) zh-Hant-HK;中国澳门(繁体) zh-Hant-MO;英语(美国) en-US; 英语(英国) en-UK; 波兰语 pl-PL;等等
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result = sTmsApi.getSystemManager().setSystemLanguage("en-US");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result = sTmsApi.getSystemManager().setSystemLanguage("en-US"); } catch (Exception e) {     e.printStackTrace(); }
+3.6 
+检查通用应用锁功能启用状态
+原型
+boolean isCommonAppLockEnabled();
+原型 | boolean isCommonAppLockEnabled();
+功能
+检查通用应用锁功能启用状态
+功能 | 检查通用应用锁功能启用状态
+参数
+无
+ 
+参数 | 无 |  
+返回值
+启用/禁用
+true：
+启用
+false：
+禁用
+返回值 | 启用/禁用 true： 启用 false： 禁用
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result = sTmsApi.getSystemManager().isCommonAppLockEnabled();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result = sTmsApi.getSystemManager().isCommonAppLockEnabled(); } catch (Exception e) {     e.printStackTrace(); }
+3.7 
+打开/关闭金融设备PCI24小时重启
+原型
+boolean disableSecurityPCI24HoursReboot(boolean disable);
+原型 | boolean disableSecurityPCI24HoursReboot(boolean disable);
+功能
+打开/关闭金融设备PCI24小时重启
+功能 | 打开/关闭金融设备PCI24小时重启
+参数
+boolean disable
+打开/关闭
+true：关闭
+false：打开
+参数 | boolean disable | 打开/关闭 true：关闭 false：打开
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result = sTmsApi.getSystemManager().disableSecurityPCI24HoursReboot(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result = sTmsApi.getSystemManager().disableSecurityPCI24HoursReboot(true); } catch (Exception e) {     e.printStackTrace(); }
+3.8 
+设置PCI24小时重启时间
+原型
+int set24HourRebootRegular(int type,int hour,int minute,int second);
+原型 | int set24HourRebootRegular(int type,int hour,int minute,int second);
+功能
+在金融设备上设置PCI24小时重启时间(针对设置-安全中心-24小时重启项设置)
+功能 | 在金融设备上设置PCI24小时重启时间(针对设置-安全中心-24小时重启项设置)
+参数
+type
+ 
+1： 原重启模式，保持原有PCI安全钟的定时重启，从开始时间算起，23小时后开始弹框提醒用户重启；当设为模式1时，时分秒参数不做解析，可填任意值。
+2：定时重启，以用户设置的时间重启。当设为模式2时，时分秒参数必须填写，且必须为24小时制。重启时，弹框提醒，倒计时一分钟，可取消，总共三次取消机会，每次弹框间隔5分钟，第四次弹框倒计时结束后会强制重启。每次开机后仅第一次设置时间有效，后续重复设置如果时间与开机第一次设置时间不一致，将返回1，表示模式切换成功，时间设置未生效。
+参数 | type   | 1： 原重启模式，保持原有PCI安全钟的定时重启，从开始时间算起，23小时后开始弹框提醒用户重启；当设为模式1时，时分秒参数不做解析，可填任意值。 2：定时重启，以用户设置的时间重启。当设为模式2时，时分秒参数必须填写，且必须为24小时制。重启时，弹框提醒，倒计时一分钟，可取消，总共三次取消机会，每次弹框间隔5分钟，第四次弹框倒计时结束后会强制重启。每次开机后仅第一次设置时间有效，后续重复设置如果时间与开机第一次设置时间不一致，将返回1，表示模式切换成功，时间设置未生效。
+ 
+hour
+小时(0-23)
+  | hour | 小时(0-23)
+ 
+minute
+分钟(0-59)
+  | minute | 分钟(0-59)
+ 
+second
+秒钟(0-59)
+  | second | 秒钟(0-59)
+返回值
+1: 模式切换成功，时间设置失败(仅当入参type=2时候，非开机第一次设置时间且设置的时间与第一次不一致时候将返回)  
+0: success
+-1: 接口调用失败(参数错误等)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 1: 模式切换成功，时间设置失败(仅当入参type=2时候，非开机第一次设置时间且设置的时间与第一次不一致时候将返回)   0: success -1: 接口调用失败(参数错误等) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result = sTmsApi.getSystemManager().set24HourRebootRegular(1, 10, 10, 10);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result = sTmsApi.getSystemManager().set24HourRebootRegular(1, 10, 10, 10); } catch (Exception e) {     e.printStackTrace(); }
+3.9 
+设置安全中心密码
+原型
+int setSecurityCenterPwd(String pwd);
+原型 | int setSecurityCenterPwd(String pwd);
+功能
+设置安全中心密码(针对金融设备的设置-安全中心-弹框要求输入的密码)
+功能 | 设置安全中心密码(针对金融设备的设置-安全中心-弹框要求输入的密码)
+参数
+pwd
+设置的密码,密码要求6-16位，只能是数字和字母以及ASCII码表中的可见特殊字符( !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~)
+参数 | pwd | 设置的密码,密码要求6-16位，只能是数字和字母以及ASCII码表中的可见特殊字符( !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~)
+返回值
+0:设置成功
+-1: 失败(参数错误，密码错误等)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+-42:不允许调用该函数，请联系设备供应商
+-43:需要恢复出厂设置
+返回值 | 0:设置成功 -1: 失败(参数错误，密码错误等) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商 -42:不允许调用该函数，请联系设备供应商 -43:需要恢复出厂设置
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、该接口需要恢复出厂设置后才能使用。使用该接口需要联系设备供应商开通权限，直接调用将返回-42.
+2、仅金融设备支持。
+备注 | 1、该接口需要恢复出厂设置后才能使用。使用该接口需要联系设备供应商开通权限，直接调用将返回-42. 2、仅金融设备支持。
+示例代码
+try {
+   boolean result = sTmsApi.getSystemManager().setSecurityCenterPwd("123456");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result = sTmsApi.getSystemManager().setSecurityCenterPwd("123456"); } catch (Exception e) {     e.printStackTrace(); }
+3.10 
+启用/禁用adb
+原型
+boolean enableAdbWithResult(boolean enable)
+原型 | boolean enableAdbWithResult(boolean enable)
+功能
+启用/禁用adb
+功能 | 启用/禁用adb
+参数
+enable
+true：
+启用
+false：
+禁用
+参数 | enable | true： 启用 false： 禁用
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getSystemManager().enableAdbWithResult(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getSystemManager().enableAdbWithResult(true); } catch (Exception e) {     e.printStackTrace(); }
+3.11 
+检查adb是否可用
+原型
+boolean isAdbEnabled()
+原型 | boolean isAdbEnabled()
+功能
+检查adb是否可用
+功能 | 检查adb是否可用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+启用/禁用adb
+true：
+启用
+false：
+禁用
+返回值 | 启用/禁用adb true： 启用 false： 禁用
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getSystemManager().isAdbEnabled();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getSystemManager().isAdbEnabled(); } catch (Exception e) {     e.printStackTrace(); }
+3.12 
+获取有图标的系统应用列表
+原型
+List<String> getSystemPackageList()
+原型 | List<String> getSystemPackageList()
+功能
+获取有图标的系统应用列表
+功能 | 获取有图标的系统应用列表
+参数
+无
+ 
+参数 | 无 |  
+返回值
+有图标的系统应用包名列表
+返回值 | 有图标的系统应用包名列表
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+List<String> result = sTmsApi.getSystemManager().getSystemPackageList();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { List<String> result = sTmsApi.getSystemManager().getSystemPackageList(); } catch (Exception e) {     e.printStackTrace(); }

@@ -1,0 +1,1920 @@
+﻿================================================================================
+SunmiCustomer API - 08 Network Management Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xddfeghjk535
+Update Time: 2026-04-29 18:25:31
+Content Length: 53183 chars
+================================================================================
+1 概述
+网络管理模块，主要包括打开移动数据、设置默认数据流量卡、设置自定义NTP服务器、打开关闭WIFI、连接已保存的WIFI 等功能。
+2 API列表
+接口
+说明
+接口 | 说明
+void enableMobileNetwork(int slotIdx, boolean enable);
+打开/关闭移动数据
+void enableMobileNetwork(int slotIdx, boolean enable); | 打开/关闭移动数据
+int getDefaultDataSlotIndex();
+获取默认数据流量卡
+int getDefaultDataSlotIndex(); | 获取默认数据流量卡
+boolean setMobileDataLocked(boolean locked);
+锁定/解锁移动数据按钮
+boolean setMobileDataLocked(boolean locked); | 锁定/解锁移动数据按钮
+boolean setDefaultDataSlotIndex(int slotIndex);
+设置默认数据流量卡
+boolean setDefaultDataSlotIndex(int slotIndex); | 设置默认数据流量卡
+List<AppDataBucket> getTrafficOfEachApp(int networkType, long startTime, long endTime);
+获取所有应用的网络数据使用情况
+List<AppDataBucket> getTrafficOfEachApp(int networkType, long startTime, long endTime); | 获取所有应用的网络数据使用情况
+boolean getMobileDataStatusBySlot(int slotIndex);
+获取对应卡槽的移动数据开关状态
+boolean getMobileDataStatusBySlot(int slotIndex); | 获取对应卡槽的移动数据开关状态
+boolean getDataRoamingEnabled(int slotIndex);
+获取对应卡槽的漫游数据开关状态
+boolean getDataRoamingEnabled(int slotIndex); | 获取对应卡槽的漫游数据开关状态
+void setDataRoamingEnabled(int slotIndex, boolean enable);
+打开/关闭对应卡槽SIM卡的漫游数据
+void setDataRoamingEnabled(int slotIndex, boolean enable); | 打开/关闭对应卡槽SIM卡的漫游数据
+boolean setCustomNtpServer(String server);
+设置自定义NTP服务器
+boolean setCustomNtpServer(String server); | 设置自定义NTP服务器
+String getCustomNtpServer();
+获取自定义NTP服务器
+String getCustomNtpServer(); | 获取自定义NTP服务器
+void setWifiStaticIpV2(boolean status, String ipAddr, String gateway, int networkPrefixLength, String dns1, String dns2, boolean reconnect, in IUnifiedCallback callback);
+设置WIFI静态IP
+void setWifiStaticIpV2(boolean status, String ipAddr, String gateway, int networkPrefixLength, String dns1, String dns2, boolean reconnect, in IUnifiedCallback callback); | 设置WIFI静态IP
+void forgetSavedWifi();
+遗忘所有已保存的WIFI
+void forgetSavedWifi(); | 遗忘所有已保存的WIFI
+void resetNetworkSettings();
+重置网络配置
+void resetNetworkSettings(); | 重置网络配置
+boolean installWlanCertificate(String name, in byte[] certData, String password);
+安装wlan证书
+boolean installWlanCertificate(String name, in byte[] certData, String password); | 安装wlan证书
+boolean enableWIFI(boolean isEnable);
+打开/关闭WIFI
+boolean enableWIFI(boolean isEnable); | 打开/关闭WIFI
+void connectWifiSsid(String ssid, IUnifiedCallback callBack);
+连接已保存的WIFI
+void connectWifiSsid(String ssid, IUnifiedCallback callBack); | 连接已保存的WIFI
+void removeWifiSsid(String ssid, IUnifiedCallback callBack);
+移除已保存的WIFI
+void removeWifiSsid(String ssid, IUnifiedCallback callBack); | 移除已保存的WIFI
+void turnOffWifiHotspot()
+关闭热点
+void turnOffWifiHotspot() | 关闭热点
+void turnOnWifiHotspot(String ssid, String preShareKey, int keyManagement)
+开启热点
+void turnOnWifiHotspot(String ssid, String preShareKey, int keyManagement) | 开启热点
+boolean isWifiHotspotEnable();
+判断WiFi热点是否打开
+boolean isWifiHotspotEnable(); | 判断WiFi热点是否打开
+void showWifiHotspotSettings();
+显示热点设置菜单
+void showWifiHotspotSettings(); | 显示热点设置菜单
+void disableWifiHotspotAndHideSettings();
+隐藏热点设置菜单
+void disableWifiHotspotAndHideSettings(); | 隐藏热点设置菜单
+void addWifiSsidByWifiConfiguration(WifiConfigurationInfo wifiConfiguration, IUnifiedCallback callBack)
+通过WIFI配置类添加WIFI SSID
+void addWifiSsidByWifiConfiguration(WifiConfigurationInfo wifiConfiguration, IUnifiedCallback callBack) | 通过WIFI配置类添加WIFI SSID
+int enableEthernet(boolean enable);
+开启/关闭以太网
+int enableEthernet(boolean enable); | 开启/关闭以太网
+DataBucket queryTrafficUsageSummary(int networkType,long startTime,long endTime)
+查询设备流量使用汇总
+DataBucket queryTrafficUsageSummary(int networkType,long startTime,long endTime) | 查询设备流量使用汇总
+int addNetwork(in Bundle config)
+保存WIFI ssid
+int addNetwork(in Bundle config) | 保存WIFI ssid
+int updateNetwork(in Bundle config)
+修改已保存的WIFI ssid
+int updateNetwork(in Bundle config) | 修改已保存的WIFI ssid
+boolean removeNetwork(int networkId)
+删除已保存的WIFI ssid
+boolean removeNetwork(int networkId) | 删除已保存的WIFI ssid
+List<Bundle> getConfiguredNetworks()
+获取所有已保存的WIFI信息
+List<Bundle> getConfiguredNetworks() | 获取所有已保存的WIFI信息
+boolean isActiveSlotIndex(int slotIndex)
+检查对应卡槽的sim卡是否可用
+boolean isActiveSlotIndex(int slotIndex) | 检查对应卡槽的sim卡是否可用
+boolean getMobileDataStatus()
+获取移动数据开关状态
+boolean getMobileDataStatus() | 获取移动数据开关状态
+enableMDnsDomainNameChangeToSN(boolean enable);
+开启/关闭mDNS服务查询localhostname显示设备SN的功能
+enableMDnsDomainNameChangeToSN(boolean enable); | 开启/关闭mDNS服务查询localhostname显示设备SN的功能
+isMDnsDomainNameChangeToSNEnabled();
+查询是否开启了mDNS服务查询localhostname 显示设备SN 的功能
+isMDnsDomainNameChangeToSNEnabled(); | 查询是否开启了mDNS服务查询localhostname 显示设备SN 的功能
+void installVPNAndAppUserCertificate(String name, in byte[] certData, String password, IUnifiedCallback callBack);
+安装VPN和应用用户证书
+void installVPNAndAppUserCertificate(String name, in byte[] certData, String password, IUnifiedCallback callBack); | 安装VPN和应用用户证书
+int enableWifiSsidWhiteList(boolean enable)
+打开/关闭 WiFi白名单功能(L2sPro立讯定制)
+int enableWifiSsidWhiteList(boolean enable) | 打开/关闭 WiFi白名单功能(L2sPro立讯定制)
+int isWifiSsidWhiteListEnabled();
+判断是否开启了WiFi白名单功能(L2sPro立讯定制)
+int isWifiSsidWhiteListEnabled(); | 判断是否开启了WiFi白名单功能(L2sPro立讯定制)
+int addSsidToWifiSsidWhiteList(List<String> ssidList);
+添加SSID到WiFi白名单(L2sPro立讯定制)
+int addSsidToWifiSsidWhiteList(List<String> ssidList); | 添加SSID到WiFi白名单(L2sPro立讯定制)
+int removeSsidFromWifiSsidWhiteList(in List<String> ssidList);
+从WiFi白名单移除指定的SSID(L2sPro立讯定制)
+int removeSsidFromWifiSsidWhiteList(in List<String> ssidList); | 从WiFi白名单移除指定的SSID(L2sPro立讯定制)
+List<String> getWifiSsidWhiteList();
+获取已添加的WiFi白名单列表(L2sPro立讯定制)
+List<String> getWifiSsidWhiteList(); | 获取已添加的WiFi白名单列表(L2sPro立讯定制)
+int setDataAutoSwitch(boolean enable);
+打开/关闭 自动选择信号好的SIM卡
+int setDataAutoSwitch(boolean enable); | 打开/关闭 自动选择信号好的SIM卡
+int addApnV3(List<SunmiApnSetting> sunmiApnSettings);
+添加一组APN
+int addApnV3(List<SunmiApnSetting> sunmiApnSettings); | 添加一组APN
+int setApnV3(int apnId);
+有Sim卡插入时设置默认APN
+int setApnV3(int apnId); | 有Sim卡插入时设置默认APN
+SunmiApnSetting getCurrentApnV3();
+获取当前插入卡的默认(正在使用)APN
+SunmiApnSetting getCurrentApnV3(); | 获取当前插入卡的默认(正在使用)APN
+int deleteApnV3(SunmiApnSetting sunmiApnSetting);
+删除指定的APN
+int deleteApnV3(SunmiApnSetting sunmiApnSetting); | 删除指定的APN
+int updateApnV3(SunmiApnSetting sunmiApnSetting);
+更新指定的APN
+int updateApnV3(SunmiApnSetting sunmiApnSetting); | 更新指定的APN
+List<SunmiApnSetting> getApnListV3(SunmiApnSetting sunmiApnSetting);
+查询满足指定条件的APN
+List<SunmiApnSetting> getApnListV3(SunmiApnSetting sunmiApnSetting); | 查询满足指定条件的APN
+int setPreferApnBySlotIndex(int slotIndex, int apn_id);
+设置指定卡槽SIM卡的默认APN
+int setPreferApnBySlotIndex(int slotIndex, int apn_id); | 设置指定卡槽SIM卡的默认APN
+SunmiApnSetting queryPreferApnBySlotIndex(int slotIndex);
+获取指定卡槽SIM卡的默认APN
+SunmiApnSetting queryPreferApnBySlotIndex(int slotIndex); | 获取指定卡槽SIM卡的默认APN
+int requestRouteToIp(String ip,int network,boolean action);
+为指定 IPv4/CIDR 配置出接口路由策略
+int requestRouteToIp(String ip,int network,boolean action); | 为指定 IPv4/CIDR 配置出接口路由策略
+Map getRequestRouteIps();
+获取通过添加并持久化的 IP 路由规则
+Map getRequestRouteIps(); | 获取通过添加并持久化的 IP 路由规则
+CellularNetworkInfo getCellularNetworkInfoBySlotIndex(int slotIndex);
+通过slotIndex获取指定 SIM 卡的移动网络信息
+CellularNetworkInfo getCellularNetworkInfoBySlotIndex(int slotIndex); | 通过slotIndex获取指定 SIM 卡的移动网络信息
+CellularNetworkInfo getCellularNetworkInfoBySubId(int subId);
+通过subId获取指定 SIM 卡的移动网络信息
+CellularNetworkInfo getCellularNetworkInfoBySubId(int subId); | 通过subId获取指定 SIM 卡的移动网络信息
+3 API详情
+3.1 
+打开/关闭移动数据
+原型
+void enableMobileNetwork(int slotIdx, boolean enable);
+原型 | void enableMobileNetwork(int slotIdx, boolean enable);
+功能
+打开/关闭移动数据
+功能 | 打开/关闭移动数据
+参数
+int slotIdx
+0 :sim卡槽1
+；
+1 :sim卡槽2
+参数 | int slotIdx | 0 :sim卡槽1 ； 1 :sim卡槽2
+ 
+boolean enable
+true：打开
+；
+false：关闭
+  | boolean enable | true：打开 ； false：关闭
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().
+enableMobileNetwork
+(0,true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager(). enableMobileNetwork (0,true); } catch (Exception e) {     e.printStackTrace(); }
+3.2 
+获取默认数据流量卡
+原型
+int getDefaultDataSlotIndex();
+原型 | int getDefaultDataSlotIndex();
+功能
+获取默认数据流量卡
+功能 | 获取默认数据流量卡
+参数
+无
+ 
+参数 | 无 |  
+返回值
+默认数据流量卡的卡槽位置
+返回值 | 默认数据流量卡的卡槽位置
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    int result = sTmsApi.getNetworkManager().getDefaultDataSlotIndex();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     int result = sTmsApi.getNetworkManager().getDefaultDataSlotIndex(); } catch (Exception e) {     e.printStackTrace(); }
+3.3 
+锁定/解锁移动数据按钮
+原型
+boolean setMobileDataLocked(boolean locked);
+原型 | boolean setMobileDataLocked(boolean locked);
+功能
+锁定/解锁移动数据按钮
+功能 | 锁定/解锁移动数据按钮
+参数
+boolean locked
+true：锁定
+；
+false：解锁
+参数 | boolean locked | true：锁定 ； false：解锁
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+1、设置成功后可进入设置>网络和互联网>移动网络>移动数据 开关是否锁定
+备注 | 1、设置成功后可进入设置>网络和互联网>移动网络>移动数据 开关是否锁定
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().
+setMobileDataLocked
+(false);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager(). setMobileDataLocked (false); } catch (Exception e) {     e.printStackTrace(); }
+3.4 
+设置默认数据流量卡
+原型
+boolean setDefaultDataSlotIndex(int slotIndex);
+原型 | boolean setDefaultDataSlotIndex(int slotIndex);
+功能
+设置默认数据流量卡为指定卡槽上的SIM
+功能 | 设置默认数据流量卡为指定卡槽上的SIM
+参数
+int slotIndex
+0 :sim卡槽1
+；
+1 :sim卡槽2
+参数 | int slotIndex | 0 :sim卡槽1 ； 1 :sim卡槽2
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().setDefaultDataSlotIndex(0);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager().setDefaultDataSlotIndex(0); } catch (Exception e) {     e.printStackTrace(); }
+3.5 
+获取所有应用的网络数据使用情况
+原型
+List<AppDataBucket> getTrafficOfEachApp(int networkType, long startTime, long endTime);
+原型 | List<AppDataBucket> getTrafficOfEachApp(int networkType, long startTime, long endTime);
+功能
+获取所有应用的网络数据使用情况
+功能 | 获取所有应用的网络数据使用情况
+参数
+int networkType
+网络类型，0：移动数据
+ ；
+1：WIFI
+参数 | int networkType | 网络类型，0：移动数据  ； 1：WIFI
+ 
+long startTime
+开始时间，单位：毫秒
+  | long startTime | 开始时间，单位：毫秒
+ 
+long endTime
+结束时间，单位：毫秒
+  | long endTime | 结束时间，单位：毫秒
+返回值
+所有应用的网络数据使用情况，详见
+ 
+AppDataBucket实体类
+返回值 | 所有应用的网络数据使用情况，详见   AppDataBucket实体类
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    
+List<AppDataBucket>
+ result = sTmsApi.getNetworkManager().
+getTrafficOfEachApp
+(0,
+1751423360408L
+,
+1751509760408L
+);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {      List<AppDataBucket>  result = sTmsApi.getNetworkManager(). getTrafficOfEachApp (0, 1751423360408L , 1751509760408L ); } catch (Exception e) {     e.printStackTrace(); }
+3.6 
+获取对应卡槽的移动数据开关状态
+原型
+boolean getMobileDataStatusBySlot(int slotIndex);
+原型 | boolean getMobileDataStatusBySlot(int slotIndex);
+功能
+获取对应卡槽上SIM卡的移动数据开关状态
+功能 | 获取对应卡槽上SIM卡的移动数据开关状态
+参数
+int slotIndex
+0 :sim卡槽1
+；
+1 :sim卡槽2
+参数 | int slotIndex | 0 :sim卡槽1 ； 1 :sim卡槽2
+返回值
+对应卡槽上SIM卡的移动数据开关状态
+true：打开
+false：关闭
+返回值 | 对应卡槽上SIM卡的移动数据开关状态 true：打开 false：关闭
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().
+getMobileDataStatusBySlot
+(0);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager(). getMobileDataStatusBySlot (0); } catch (Exception e) {     e.printStackTrace(); }
+3.7 
+获取对应卡槽的漫游数据开关状态
+原型
+boolean getDataRoamingEnabled(int slotIndex);
+原型 | boolean getDataRoamingEnabled(int slotIndex);
+功能
+获取对应卡槽上SIM卡的漫游数据开关状态
+功能 | 获取对应卡槽上SIM卡的漫游数据开关状态
+参数
+slotIndex
+0 :sim卡槽1
+；
+1 :sim卡槽2
+参数 | slotIndex | 0 :sim卡槽1 ； 1 :sim卡槽2
+返回值
+对应卡槽上SIM卡的漫游数据开关状态
+true：打开
+false：关闭
+返回值 | 对应卡槽上SIM卡的漫游数据开关状态 true：打开 false：关闭
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().
+getDataRoamingEnabled
+(0);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager(). getDataRoamingEnabled (0); } catch (Exception e) {     e.printStackTrace(); }
+3.8 
+打开/关闭对应卡槽上SIM卡的漫游数据
+原型
+void setDataRoamingEnabled(int slotIndex, boolean enable);
+原型 | void setDataRoamingEnabled(int slotIndex, boolean enable);
+功能
+打开/关闭对应卡槽上SIM卡的漫游数据
+功能 | 打开/关闭对应卡槽上SIM卡的漫游数据
+参数
+slotIndex
+0 :sim卡槽1
+；
+1 :sim卡槽2
+参数 | slotIndex | 0 :sim卡槽1 ； 1 :sim卡槽2
+ 
+enable
+true：
+打开
+；false：
+关闭
+  | enable | true： 打开 ；false： 关闭
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+  sTmsApi.getNetworkManager().
+setDataRoamingEnabled
+(0,true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {   sTmsApi.getNetworkManager(). setDataRoamingEnabled (0,true); } catch (Exception e) {     e.printStackTrace(); }
+3.9 
+设置自定义NTP服务器
+原型
+boolean setCustomNtpServer(String server);
+原型 | boolean setCustomNtpServer(String server);
+功能
+设置自定义NTP服务器(时间同步)
+功能 | 设置自定义NTP服务器(时间同步)
+参数
+server
+NTP服务器地址
+参数 | server | NTP服务器地址
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+可进入设置 > 系统> 日期和时间，查找是否有"NTP服务器"或类似的设置项。如果找不到，说明该设备不支持此方式。
+备注 | 可进入设置 > 系统> 日期和时间，查找是否有"NTP服务器"或类似的设置项。如果找不到，说明该设备不支持此方式。
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().
+setCustomNtpServer
+("pool.ntp.org");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager(). setCustomNtpServer ("pool.ntp.org"); } catch (Exception e) {     e.printStackTrace(); }
+3.10 
+获取自定义NTP服务器
+原型
+String getCustomNtpServer();
+原型 | String getCustomNtpServer();
+功能
+获取自定义NTP服务器
+功能 | 获取自定义NTP服务器
+参数
+无
+ 
+参数 | 无 |  
+返回值
+null = 未设置
+非null = 设置的自定义NTP服务器，例如："
+pool.ntp.org
+"
+返回值 | null = 未设置 非null = 设置的自定义NTP服务器，例如：" pool.ntp.org "
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    String result = sTmsApi.getNetworkManager().getCustomNtpServer();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     String result = sTmsApi.getNetworkManager().getCustomNtpServer(); } catch (Exception e) {     e.printStackTrace(); }
+3.11 
+设置WIFI静态IP
+原型
+void setWifiStaticIpV2(boolean status, String ipAddr, String gateway, int networkPrefixLength, String dns1, String dns2, boolean reconnect, in IUnifiedCallback callback);
+原型 | void setWifiStaticIpV2(boolean status, String ipAddr, String gateway, int networkPrefixLength, String dns1, String dns2, boolean reconnect, in IUnifiedCallback callback);
+功能
+设置WIFI静态IP
+功能 | 设置WIFI静态IP
+参数
+boolean status
+true：静态IP
+false：DHCP
+参数 | boolean status | true：静态IP false：DHCP
+ 
+String ipAddr
+静态IP地址
+  | String ipAddr | 静态IP地址
+ 
+String gateway
+网关（WiFi网络的默认网关地址。例如：常见的家庭路由器网关地址通常是 192.168.1.1 或 192.168.0.1）
+  | String gateway | 网关（WiFi网络的默认网关地址。例如：常见的家庭路由器网关地址通常是 192.168.1.1 或 192.168.0.1）
+ 
+int networkPrefixLength
+网络前缀长度(数值范围：通常为0-32之间的整数，家庭网络通常使用24，企业网络可能使用16或更小的值，对应关系：
+24 对应子网掩码 255.255.255.0
+16 对应子网掩码 255.255.0.0
+8 对应子网掩码 255.0.0.0)
+  | int networkPrefixLength | 网络前缀长度(数值范围：通常为0-32之间的整数，家庭网络通常使用24，企业网络可能使用16或更小的值，对应关系： 24 对应子网掩码 255.255.255.0 16 对应子网掩码 255.255.0.0 8 对应子网掩码 255.0.0.0)
+ 
+String dns1
+dns1：首选DNS服务器
+  | String dns1 | dns1：首选DNS服务器
+ 
+String dns2
+dns2：备用DNS服务器
+  | String dns2 | dns2：备用DNS服务器
+ 
+boolean reconnect
+是否重连
+  | boolean reconnect | 是否重连
+ 
+IUnifiedCallback callback
+结果回调，详见
+ 
+IUnifiedCallback
+  | IUnifiedCallback callback | 结果回调，详见   IUnifiedCallback
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+ 
+备注 |  
+示例代码
+ try {
+        sTmsApi.getNetworkManager().setWifiStaticIpV2(false, "192.168.100.69", "192.168.100.1", 4, "8.8.8.8", "8.8.2.2", false, new IUnifiedCallback.Stub() {
+                @Override
+                public void onCall(String result) {
+                    try {
+                        JSONObject  jsonObject = new JSONObject(result);
+                        int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {         sTmsApi.getNetworkManager().setWifiStaticIpV2(false, "192.168.100.69", "192.168.100.1", 4, "8.8.8.8", "8.8.2.2", false, new IUnifiedCallback.Stub() {                 @Override                 public void onCall(String result) {                     try {                         JSONObject  jsonObject = new JSONObject(result);                         int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败                     } catch (JSONException e) {                         e.printStackTrace();                     }                 }             });         } catch (Exception e) {             e.printStackTrace();        }
+3.12 
+遗忘所有已保存的WIFI
+原型
+void forgetSavedWifi();
+原型 | void forgetSavedWifi();
+功能
+遗忘所有已保存的WIFI
+功能 | 遗忘所有已保存的WIFI
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+        sTmsApi.getNetworkManager().forgetSavedWifi();
+        } catch (Exception e) {
+            e.printStackTrace();
+     }
+示例代码 |  try {         sTmsApi.getNetworkManager().forgetSavedWifi();         } catch (Exception e) {             e.printStackTrace();      }
+3.13 
+重置网络配置
+原型
+void resetNetworkSettings();
+原型 | void resetNetworkSettings();
+功能
+重置网络配置
+功能 | 重置网络配置
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+该功能对应设置>系统>重置选项>重置WLAN
+备注 | 该功能对应设置>系统>重置选项>重置WLAN
+示例代码
+ try {
+        sTmsApi.getNetworkManager().
+resetNetworkSettings
+();
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {         sTmsApi.getNetworkManager(). resetNetworkSettings ();         } catch (Exception e) {             e.printStackTrace();        }
+3.14 
+安装wlan证书
+原型
+boolean installWlanCertificate(String name, in byte[] certData, String password);
+原型 | boolean installWlanCertificate(String name, in byte[] certData, String password);
+功能
+安装wlan证书
+功能 | 安装wlan证书
+参数
+String name
+证书名
+参数 | String name | 证书名
+ 
+byte[] certData
+证书数据
+  | byte[] certData | 证书数据
+ 
+String password
+证书密码
+  | String password | 证书密码
+返回值
+安装结果
+true: 成功
+false: 失败
+返回值 | 安装结果 true: 成功 false: 失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+         boolean result=
+sTmsApi
+.getNetworkManager().installWlanCertificate("testCert", certData, "123456");
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {          boolean result= sTmsApi .getNetworkManager().installWlanCertificate("testCert", certData, "123456");         } catch (Exception e) {             e.printStackTrace();        }
+3.15 
+打开/关闭WIFI
+原型
+boolean enableWIFI(boolean isEnable);
+原型 | boolean enableWIFI(boolean isEnable);
+功能
+打开/关闭WIFI
+功能 | 打开/关闭WIFI
+参数
+boolean isEnable
+打开/关闭
+true：
+打开
+false：
+关闭
+参数 | boolean isEnable | 打开/关闭 true： 打开 false： 关闭
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+         boolean result=
+sTmsApi
+.getNetworkManager().enableWIFI(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 | try {          boolean result= sTmsApi .getNetworkManager().enableWIFI(true);         } catch (Exception e) {             e.printStackTrace();        }
+3.16 
+连接已保存的
+WIFI
+原型
+void connectWifiSsid(String ssid, IUnifiedCallback callBack);
+原型 | void connectWifiSsid(String ssid, IUnifiedCallback callBack);
+功能
+连接已保存的wifi
+功能 | 连接已保存的wifi
+参数
+String ssid
+已保存的wifi ssid
+参数 | String ssid | 已保存的wifi ssid
+ 
+IUnifiedCallback callBack
+结果回调，详见
+ 
+IUnifiedCallback
+  | IUnifiedCallback callBack | 结果回调，详见   IUnifiedCallback
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+        sTmsApi.getNetworkManager().connectWifiSsid("test_wifi", new IUnifiedCallback.Stub() {
+            @Override
+            public void onCall(String result) throws RemoteException {
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {         sTmsApi.getNetworkManager().connectWifiSsid("test_wifi", new IUnifiedCallback.Stub() {             @Override             public void onCall(String result) throws RemoteException {                 try {                     JSONObject jsonObject = new JSONObject(result);                     int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败                 } catch (JSONException e) {                     e.printStackTrace();                 }             }         });         } catch (Exception e) {             e.printStackTrace();        }
+3.17 
+移除已保存的WIFI
+原型
+void removeWifiSsid(String ssid, IUnifiedCallback callBack);
+原型 | void removeWifiSsid(String ssid, IUnifiedCallback callBack);
+功能
+移除已保存的wifi
+功能 | 移除已保存的wifi
+参数
+String ssid
+已保存的wifi ssid
+参数 | String ssid | 已保存的wifi ssid
+ 
+ IUnifiedCallback callBack
+结果回调，详见
+ 
+IUnifiedCallback
+  |  IUnifiedCallback callBack | 结果回调，详见   IUnifiedCallback
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+        sTmsApi.getNetworkManager().
+removeWifiSsid
+("test_wifi", new IUnifiedCallback.Stub() {
+            @Override
+            public void onCall(String result) throws RemoteException {
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {         sTmsApi.getNetworkManager(). removeWifiSsid ("test_wifi", new IUnifiedCallback.Stub() {             @Override             public void onCall(String result) throws RemoteException {                 try {                     JSONObject jsonObject = new JSONObject(result);                     int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败                 } catch (JSONException e) {                     e.printStackTrace();                 }             }         });         } catch (Exception e) {             e.printStackTrace();        }
+3.18 
+关闭热点
+原型
+void turnOffWifiHotspot();
+原型 | void turnOffWifiHotspot();
+功能
+关闭热点
+功能 | 关闭热点
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+只是关闭热点，不会隐藏热点功能按钮。
+备注 | 只是关闭热点，不会隐藏热点功能按钮。
+示例代码
+ try {
+        sTmsApi.getNetworkManager().
+turnOffWifiHotspot
+();
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {         sTmsApi.getNetworkManager(). turnOffWifiHotspot ();         } catch (Exception e) {             e.printStackTrace();        }
+3.19 
+开启热点
+原型
+void turnOnWifiHotspot(String ssid, String preShareKey, int keyManagement);
+原型 | void turnOnWifiHotspot(String ssid, String preShareKey, int keyManagement);
+功能
+开启热点
+功能 | 开启热点
+参数
+ssid
+热点名称
+参数 | ssid | 热点名称
+ 
+preShareKey
+热点密码
+  | preShareKey | 热点密码
+ 
+keyManagement
+加密类型,目前没有意义，默认设置SECURITY_TYPE_WPA2_PSK加密，不可设置无密码ssid
+  | keyManagement | 加密类型,目前没有意义，默认设置SECURITY_TYPE_WPA2_PSK加密，不可设置无密码ssid
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+keyManagement 参数值可引用系统android.net.wifi.SoftApConfiguration类里的常量
+：
+public static final int SECURITY_TYPE_OPEN = 0;
+public static final int SECURITY_TYPE_WPA2_PSK = 1;
+public static final int SECURITY_TYPE_WPA3_OWE = 5;
+public static final int SECURITY_TYPE_WPA3_OWE_TRANSITION = 4;
+public static final int SECURITY_TYPE_WPA3_SAE = 3;
+public static final int SECURITY_TYPE_WPA3_SAE_TRANSITION = 2;
+备注 | keyManagement 参数值可引用系统android.net.wifi.SoftApConfiguration类里的常量 ： public static final int SECURITY_TYPE_OPEN = 0; public static final int SECURITY_TYPE_WPA2_PSK = 1; public static final int SECURITY_TYPE_WPA3_OWE = 5; public static final int SECURITY_TYPE_WPA3_OWE_TRANSITION = 4; public static final int SECURITY_TYPE_WPA3_SAE = 3; public static final int SECURITY_TYPE_WPA3_SAE_TRANSITION = 2;
+示例代码
+ try {
+        sTmsApi.getNetworkManager().
+turnOnWifiHotspot(ssid, "12345678", SECURITY_TYPE_WPA2_PSK);
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {         sTmsApi.getNetworkManager(). turnOnWifiHotspot(ssid, "12345678", SECURITY_TYPE_WPA2_PSK);         } catch (Exception e) {             e.printStackTrace();        }
+3.20 
+判断WiFi热点是否打开
+原型
+boolean isWifiHotspotEnable();
+原型 | boolean isWifiHotspotEnable();
+功能
+判断WiFi热点是否打开
+功能 | 判断WiFi热点是否打开
+参数
+无
+ 
+参数 | 无 |  
+返回值
+true:打开；false关闭
+返回值 | true:打开；false关闭
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+        boolean result=sTmsApi.getNetworkManager().
+isWifiHotspotEnable();
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {         boolean result=sTmsApi.getNetworkManager(). isWifiHotspotEnable();         } catch (Exception e) {             e.printStackTrace();        }
+3.21 
+显示热点设置菜单
+原型
+void showWifiHotspotSettings();
+原型 | void showWifiHotspotSettings();
+功能
+显示热点设置菜单
+功能 | 显示热点设置菜单
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、Android 7.1.1 及以下版本开启网络热点会自动关闭 Wi‑Fi（系统行为无法修改）。
+2、在 Android 10 及以上版本：Wi‑Fi 与热点可同时使用（Concurrent SoftAP 模式）。
+3、是否能正常使用该功能，还取决于：Wi‑Fi 芯片是否支持 AP+STA 并发、厂商是否在系统中启用 Wi‑Fi Sharing / Concurrent SoftAP、某些设备上仅限 2.4 GHz 热点频段启用并发。
+备注 | 1、Android 7.1.1 及以下版本开启网络热点会自动关闭 Wi‑Fi（系统行为无法修改）。 2、在 Android 10 及以上版本：Wi‑Fi 与热点可同时使用（Concurrent SoftAP 模式）。 3、是否能正常使用该功能，还取决于：Wi‑Fi 芯片是否支持 AP+STA 并发、厂商是否在系统中启用 Wi‑Fi Sharing / Concurrent SoftAP、某些设备上仅限 2.4 GHz 热点频段启用并发。
+示例代码
+ try {
+           sTmsApi.getNetworkManager().
+showWifiHotspotSettings();
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {            sTmsApi.getNetworkManager(). showWifiHotspotSettings();         } catch (Exception e) {             e.printStackTrace();        }
+3.22 
+隐藏
+热点设置菜单
+原型
+void disableWifiHotspotAndHideSettings();
+原型 | void disableWifiHotspotAndHideSettings();
+功能
+禁用同时隐藏热点设置菜单
+功能 | 禁用同时隐藏热点设置菜单
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+           sTmsApi.getNetworkManager().
+disableWifiHotspotAndHideSettings();
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {            sTmsApi.getNetworkManager(). disableWifiHotspotAndHideSettings();         } catch (Exception e) {             e.printStackTrace();        }
+3.23 
+通过WIFI配置类添加WIFI SSID
+原型
+void addWifiSsidByWifiConfiguration(WifiConfigurationInfo wifiConfiguration, IUnifiedCallback callBack)
+原型 | void addWifiSsidByWifiConfiguration(WifiConfigurationInfo wifiConfiguration, IUnifiedCallback callBack)
+功能
+通过WIFI配置类添加WIFI SSID
+功能 | 通过WIFI配置类添加WIFI SSID
+参数
+WifiConfigurationInfo wifiConfiguration
+WIFI配置参数，详见
+WIFI 配置实体类
+参数 | WifiConfigurationInfo wifiConfiguration | WIFI配置参数，详见 WIFI 配置实体类
+ 
+IUnifiedCallback callBack
+结果回调，详见
+ 
+IUnifiedCallback
+  | IUnifiedCallback callBack | 结果回调，详见   IUnifiedCallback
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+            WifiConfigurationInfo wifiConfigurationInfo = new WifiConfigurationInfo();
+            wifiConfigurationInfo.ssid="star";
+            wifiConfigurationInfo.pwd="12345678";
+     wifiConfigurationInfo.security_type=SoftApConfiguration.SECURITY_TYPE_WPA2_PSK;
+            wifiConfigurationInfo.hidden_settings=0;
+  sTmsApi.getNetworkManager().addWifiSsidByWifiConfiguration(wifiConfigurationInfo, new IUnifiedCallback.Stub() {
+                @Override
+                public void onCall(String result) throws RemoteException {
+            try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {             WifiConfigurationInfo wifiConfigurationInfo = new WifiConfigurationInfo();             wifiConfigurationInfo.ssid="star";             wifiConfigurationInfo.pwd="12345678";      wifiConfigurationInfo.security_type=SoftApConfiguration.SECURITY_TYPE_WPA2_PSK;             wifiConfigurationInfo.hidden_settings=0;   sTmsApi.getNetworkManager().addWifiSsidByWifiConfiguration(wifiConfigurationInfo, new IUnifiedCallback.Stub() {                 @Override                 public void onCall(String result) throws RemoteException {             try {                     JSONObject jsonObject = new JSONObject(result);                     int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败                 } catch (JSONException e) {                     e.printStackTrace();                 }                 }             });         } catch (Exception e) {             e.printStackTrace();        }
+3.24 
+开启/关闭以太网
+原型
+int enableEthernet(boolean enable);
+原型 | int enableEthernet(boolean enable);
+功能
+开启/关闭以太网
+功能 | 开启/关闭以太网
+参数
+enable
+true：开启
+false：关闭
+参数 | enable | true：开启 false：关闭
+返回值
+  0：成功
+-1：失败
+-40：当前设备或当前ROM不支持该功能
+-41：绑定系统服务失败，请联系商米技术支持
+返回值 |   0：成功 -1：失败 -40：当前设备或当前ROM不支持该功能 -41：绑定系统服务失败，请联系商米技术支持
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+           int result=sTmsApi.getNetworkManager().enableEthernet
+(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {            int result=sTmsApi.getNetworkManager().enableEthernet (true);         } catch (Exception e) {             e.printStackTrace();        }
+3.25 
+查询设备流量使用汇总
+原型
+DataBucket queryTrafficUsageSummary(int networkType,long startTime,long endTime)
+原型 | DataBucket queryTrafficUsageSummary(int networkType,long startTime,long endTime)
+功能
+查询设备流量使用汇总
+功能 | 查询设备流量使用汇总
+参数
+networkType
+网络类型
+0：移动数据
+1：WIFI
+参数 | networkType | 网络类型 0：移动数据 1：WIFI
+ 
+startTime
+开始时间，单位：毫秒
+  | startTime | 开始时间，单位：毫秒
+ 
+lendTime
+结束时间，单位：毫秒
+  | lendTime | 结束时间，单位：毫秒
+返回值
+设备流量使用汇总，可参考 
+DataBucket实体类
+返回值 | 设备流量使用汇总，可参考  DataBucket实体类
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+DataBucket result = sTmsApi.getNetworkManager().queryTrafficUsageSummary(0,1762313961000,1762400361000);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { DataBucket result = sTmsApi.getNetworkManager().queryTrafficUsageSummary(0,1762313961000,1762400361000); } catch (Exception e) {     e.printStackTrace(); }
+3.26 
+保存WIFI ssid
+原型
+int addNetwork(Bundle config)
+原型 | int addNetwork(Bundle config)
+功能
+保存WIFI ssid
+功能 | 保存WIFI ssid
+参数
+Bundle config
+Bundle Key:
+"SSID"：value = wifi名称，String类型
+"preSharedKey"：value = wifi密码，String类型
+参数 | Bundle config | Bundle Key: "SSID"：value = wifi名称，String类型 "preSharedKey"：value = wifi密码，String类型
+返回值
+-1：失败
+非-1：添加成功，返回值=networkId
+返回值 | -1：失败 非-1：添加成功，返回值=networkId
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    Bundle bundle = new Bundle();
+    bundle.putString("SSID", ssid);
+    bundle.putString("preSharedKey", pwd);
+    int result = sTmsApi.getNetworkManager().addNetwork(bundle);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     Bundle bundle = new Bundle();     bundle.putString("SSID", ssid);     bundle.putString("preSharedKey", pwd);     int result = sTmsApi.getNetworkManager().addNetwork(bundle); } catch (Exception e) {     e.printStackTrace(); }
+3.27 
+修改已保存的WIFI ssid
+原型
+int updateNetwork(Bundle config)
+原型 | int updateNetwork(Bundle config)
+功能
+修改已保存的WIFI ssid
+功能 | 修改已保存的WIFI ssid
+参数
+config
+Bundle Key:
+"SSID"：value = wifi名称，String类型
+"preSharedKey"：value = wifi密码，String类型
+"networkId"：value = 
+networkId，int类型
+参数 | config | Bundle Key: "SSID"：value = wifi名称，String类型 "preSharedKey"：value = wifi密码，String类型 "networkId"：value =  networkId，int类型
+返回值
+-1：失败
+非-1：添加成功，返回值=networkId
+返回值 | -1：失败 非-1：添加成功，返回值=networkId
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+仅能修改通过统一SDK添加的WIFI。
+备注 | 仅能修改通过统一SDK添加的WIFI。
+示例代码
+try {
+    Bundle bundle = new Bundle();
+    bundle.putString("SSID", ssid);
+    bundle.putString("preSharedKey", pwd);
+    bundle.putString("networkId", 1);
+    int result = sTmsApi.getNetworkManager().updateNetwork(bundle);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     Bundle bundle = new Bundle();     bundle.putString("SSID", ssid);     bundle.putString("preSharedKey", pwd);     bundle.putString("networkId", 1);     int result = sTmsApi.getNetworkManager().updateNetwork(bundle); } catch (Exception e) {     e.printStackTrace(); }
+3.28 
+删除已保存的WIFI ssid
+原型
+boolean removeNetwork(int networkId)
+原型 | boolean removeNetwork(int networkId)
+功能
+删除已保存的WIFI ssid
+功能 | 删除已保存的WIFI ssid
+参数
+networkId
+需要删除的网络的networkId
+参数 | networkId | 需要删除的网络的networkId
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+仅能删除通过统一SDK添加的WIFI。
+备注 | 仅能删除通过统一SDK添加的WIFI。
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().removeNetwork(1);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager().removeNetwork(1); } catch (Exception e) {     e.printStackTrace(); }
+3.29 
+获取所有已保存的WIFI信息
+原型
+List<Bundle> getConfiguredNetworks()
+原型 | List<Bundle> getConfiguredNetworks()
+功能
+获取所有已保存的WIFI信息
+功能 | 获取所有已保存的WIFI信息
+参数
+无
+ 
+参数 | 无 |  
+返回值
+所有已保存的WIFI信息列表。
+Bundle key如下：
+Key = "SSID"：value=wifi名(String)
+Key = "networkId"：value = 
+NetworkId(int)
+返回值 | 所有已保存的WIFI信息列表。 Bundle key如下： Key = "SSID"：value=wifi名(String) Key = "networkId"：value =  NetworkId(int)
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+必须要打开位置信息才能获取到数据
+备注 | 必须要打开位置信息才能获取到数据
+示例代码
+try {
+    List<Bundle> result = sTmsApi.getNetworkManager().getConfiguredNetworks();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     List<Bundle> result = sTmsApi.getNetworkManager().getConfiguredNetworks(); } catch (Exception e) {     e.printStackTrace(); }
+3.30 
+检查对应卡槽的sim卡是否可用
+原型
+boolean isActiveSlotIndex(int slotIndex)
+原型 | boolean isActiveSlotIndex(int slotIndex)
+功能
+检查对应卡槽的sim卡是否可用
+功能 | 检查对应卡槽的sim卡是否可用
+参数
+slotIndex
+0 = 卡槽1
+1 = 卡槽2
+参数 | slotIndex | 0 = 卡槽1 1 = 卡槽2
+返回值
+执行结果
+true：可用
+false：不可用
+返回值 | 执行结果 true：可用 false：不可用
+适用范围
+通用
+适用范围 | 通用
+备注
+部分机型支持eSIM功能，会默认占用卡槽1
+备注 | 部分机型支持eSIM功能，会默认占用卡槽1
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().isActiveSlotIndex(0);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager().isActiveSlotIndex(0); } catch (Exception e) {     e.printStackTrace(); }
+3.31 
+获取移动数据开关状态
+原型
+boolean getMobileDataStatus()
+原型 | boolean getMobileDataStatus()
+功能
+获取移动数据开关状态
+功能 | 获取移动数据开关状态
+参数
+无
+ 
+参数 | 无 |  
+返回值
+移动数据开关状态
+true：打开
+false：关闭
+返回值 | 移动数据开关状态 true：打开 false：关闭
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+1、获取所有移动数据卡的开关状态。
+2、多张SIM卡，仅当全部SIM卡移动数据都被关闭时会返回false。任意一张移动数据流量打开，即认为是打开。
+3、设备不存在激活的SIM卡，获取状态返回移动数据开关未打开。
+备注 | 1、获取所有移动数据卡的开关状态。 2、多张SIM卡，仅当全部SIM卡移动数据都被关闭时会返回false。任意一张移动数据流量打开，即认为是打开。 3、设备不存在激活的SIM卡，获取状态返回移动数据开关未打开。
+示例代码
+try {
+    boolean result = sTmsApi.getNetworkManager().getMobileDataStatus();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getNetworkManager().getMobileDataStatus(); } catch (Exception e) {     e.printStackTrace(); }
+3.32 开启/关闭mDNS服务查询localhostname 显示设备SN 的功能
+原型
+int enableMDnsDomainNameChangeToSN(boolean enable);
+原型 | int enableMDnsDomainNameChangeToSN(boolean enable);
+功能
+开启/关闭mDNS服务查询localhostname 显示设备SN 的功能
+功能 | 开启/关闭mDNS服务查询localhostname 显示设备SN 的功能
+参数
+enable
+true：开启
+false：关闭
+参数 | enable | true：开启 false：关闭
+返回值
+0：成功
+-1：失败
+-40：当前设备或当前ROM不支持该功能
+返回值 | 0：成功 -1：失败 -40：当前设备或当前ROM不支持该功能
+适用范围
+CPad、T3 、T3Pro
+适用范围 | CPad、T3 、T3Pro
+备注
+设置完成后需要设备重启才会生效。
+备注 | 设置完成后需要设备重启才会生效。
+示例代码
+try { int result = sTmsApi.getNetworkManager().enableMDnsDomainNameChangeToSN(true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getNetworkManager().enableMDnsDomainNameChangeToSN(true); } catch (Exception e) { e.printStackTrace(); }
+3.33 查询是否开启了mDNS服务查询localhostname 显示设备SN 的功能
+原型
+int isMDnsDomainNameChangeToSNEnabled();
+原型 | int isMDnsDomainNameChangeToSNEnabled();
+功能
+查询是否开启了mDNS服务查询localhostname 显示设备SN 的功能
+功能 | 查询是否开启了mDNS服务查询localhostname 显示设备SN 的功能
+参数
+name
+证书名称
+参数 | name | 证书名称
+返回值
+0：开启
+1：关闭
+-40：当前设备或当前ROM不支持该功能
+返回值 | 0：开启 1：关闭 -40：当前设备或当前ROM不支持该功能
+适用范围
+CPad、T3 、T3Pro
+适用范围 | CPad、T3 、T3Pro
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getNetworkManager().isMDnsDomainNameChangeToSNEnabled(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getNetworkManager().isMDnsDomainNameChangeToSNEnabled(); } catch (Exception e) { e.printStackTrace(); }
+3.34 安装VPN和应用用户证书
+原型
+void installVPNAndAppUserCertificate(String name, in byte[] certData, String password, IUnifiedCallback callBack);
+原型 | void installVPNAndAppUserCertificate(String name, in byte[] certData, String password, IUnifiedCallback callBack);
+功能
+安装VPN和应用用户证书
+功能 | 安装VPN和应用用户证书
+参数
+name
+证书名称
+参数 | name | 证书名称
+certData
+证书内容
+certData | 证书内容
+password
+证书密码,无密码传入空或者null
+password | 证书密码,无密码传入空或者null
+callBack
+回调结果返回Json 数据格式:
+{"result": "{"resultCode":0,"message":{}}"}
+解析：
+JSONObject jsonObject = new JSONObject(result);
+int result=jsonObject.getInt("resultCode");
+result 值说明：
+0:success
+-1：fail
+-2：无效证书（正常需要包括一个用户密钥，一个用户证书、一个CA证书），也有可能密码错误导致解析失败。
+-3 ：无效参数，name为空或者证书certData为null
+-40：not support
+callBack | 回调结果返回Json 数据格式: {"result": "{"resultCode":0,"message":{}}"} 解析： JSONObject jsonObject = new JSONObject(result); int result=jsonObject.getInt("resultCode"); result 值说明： 0:success -1：fail -2：无效证书（正常需要包括一个用户密钥，一个用户证书、一个CA证书），也有可能密码错误导致解析失败。 -3 ：无效参数，name为空或者证书certData为null -40：not support
+返回值
+无
+返回值 | 无
+适用范围
+P3 / P2 LITESE
+适用范围 | P3 / P2 LITESE
+备注
+无
+备注 | 无
+示例代码
+try {
+sTmsApi.getNetworkManager().installVPNAndAppUserCertificate("testCert", certData, "123456", new IUnifiedCallback.Stub() {
+@Override
+public void onCall(String result) throws RemoteException {
+}
+});
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { sTmsApi.getNetworkManager().installVPNAndAppUserCertificate("testCert", certData, "123456", new IUnifiedCallback.Stub() { @Override public void onCall(String result) throws RemoteException { } }); } catch (Exception e) { e.printStackTrace(); }
+3.35 打开/关闭 WiFi白名单功能
+原型
+int enableWifiSsidWhiteList(boolean enable);
+原型 | int enableWifiSsidWhiteList(boolean enable);
+功能
+打开/关闭 WiFi白名单功能
+功能 | 打开/关闭 WiFi白名单功能
+参数
+enable
+true：开启
+false：关闭
+参数 | enable | true：开启 false：关闭
+返回值
+0：成功
+-1：打开失败
+-40：当前设备或当前ROM不支持该功能
+返回值 | 0：成功 -1：打开失败 -40：当前设备或当前ROM不支持该功能
+适用范围
+L2sPro
+适用范围 | L2sPro
+备注
+L2sPro 立讯定制
+备注 | L2sPro 立讯定制
+示例代码
+try { int result = sTmsApi.getNetworkManager().enableWifiSsidWhiteList(true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getNetworkManager().enableWifiSsidWhiteList(true); } catch (Exception e) { e.printStackTrace(); }
+3.36 获取WiFi白名单功能状态
+原型
+int isWifiSsidWhiteListEnabled();
+原型 | int isWifiSsidWhiteListEnabled();
+功能
+获取WiFi白名单功能状态
+功能 | 获取WiFi白名单功能状态
+参数
+无
+参数 | 无 | 
+返回值
+0:已开启
+1:未开启
+-40:当前设备或ROM不支持该接口
+返回值 | 0:已开启 1:未开启 -40:当前设备或ROM不支持该接口
+适用范围
+L2sPro
+适用范围 | L2sPro
+备注
+L2sPro立讯定制
+备注 | L2sPro立讯定制
+示例代码
+try { int result = sTmsApi.getNetworkManager().isWifiSsidWhiteListEnabled(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getNetworkManager().isWifiSsidWhiteListEnabled(); } catch (Exception e) { e.printStackTrace(); }
+3.37 添加SSID到WiFi白名单
+原型
+int addSsidToWifiSsidWhiteList(List<String> ssidList);
+原型 | int addSsidToWifiSsidWhiteList(List<String> ssidList);
+功能
+添加SSID到WiFi白名单
+功能 | 添加SSID到WiFi白名单
+参数
+ssidList
+添加到白名单的SSID列表
+参数 | ssidList | 添加到白名单的SSID列表
+返回值
+0:添加成功
+-1:添加失败
+-40:当前设备或ROM不支持该接口
+返回值 | 0:添加成功 -1:添加失败 -40:当前设备或ROM不支持该接口
+适用范围
+L2sPro
+适用范围 | L2sPro
+备注
+L2sPro立讯定制
+备注 | L2sPro立讯定制
+示例代码
+try {
+List<String> addSSIDList = new ArrayList<>();
+addPackageList.add("testSSID");
+ int result = sTmsApi.getNetworkManager().addSsidToWifiSsidWhiteList(
+addSSIDList
+); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { List<String> addSSIDList = new ArrayList<>(); addPackageList.add("testSSID");  int result = sTmsApi.getNetworkManager().addSsidToWifiSsidWhiteList( addSSIDList ); } catch (Exception e) { e.printStackTrace(); }
+3.38 从WiFi白名单移除指定的SSID
+原型
+int removeSsidFromWifiSsidWhiteList(List<String> ssidList);
+原型 | int removeSsidFromWifiSsidWhiteList(List<String> ssidList);
+功能
+从WiFi白名单移除指定的SSID
+功能 | 从WiFi白名单移除指定的SSID
+参数
+ssidList
+需要移除的SSID列表
+参数 | ssidList | 需要移除的SSID列表
+返回值
+0:移除成功
+-1:移除失败
+-40:当前设备或ROM不支持该接口
+返回值 | 0:移除成功 -1:移除失败 -40:当前设备或ROM不支持该接口
+适用范围
+L2sPro
+适用范围 | L2sPro
+备注
+L2sPro立讯定制
+备注 | L2sPro立讯定制
+示例代码
+try {
+List<String> removeSSIDList = new ArrayList<>();
+removeSSIDList.add("testSSID");
+ int result = sTmsApi.getNetworkManager().removeSsidFromWifiSsidWhiteList(
+removeSSIDList
+); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { List<String> removeSSIDList = new ArrayList<>(); removeSSIDList.add("testSSID");  int result = sTmsApi.getNetworkManager().removeSsidFromWifiSsidWhiteList( removeSSIDList ); } catch (Exception e) { e.printStackTrace(); }
+3.39 获取已添加的WiFi白名单列表
+原型
+List<String> getWifiSsidWhiteList();
+原型 | List<String> getWifiSsidWhiteList();
+功能
+获取已添加的WiFi白名单列表
+功能 | 获取已添加的WiFi白名单列表
+参数
+无
+参数 | 无 | 
+返回值
+null:当前设备或ROM不支持该接口；
+List<String>:WiFi白名单列表，大小可为0。
+返回值 | null:当前设备或ROM不支持该接口； List<String>:WiFi白名单列表，大小可为0。
+适用范围
+L2sPro
+适用范围 | L2sPro
+备注
+L2sPro立讯定制
+备注 | L2sPro立讯定制
+示例代码
+try { List<String> result = sTmsApi.getNetworkManager().getWifiSsidWhiteList(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { List<String> result = sTmsApi.getNetworkManager().getWifiSsidWhiteList(); } catch (Exception e) { e.printStackTrace(); }
+3.40 打开/关闭 自动选择信号好的SIM卡
+原型
+int setDataAutoSwitch(boolean enable);
+原型 | int setDataAutoSwitch(boolean enable);
+功能
+打开/关闭 两张SIM卡，信号强度小于某个DB值，自动选择信号好的那张SIM卡
+功能 | 打开/关闭 两张SIM卡，信号强度小于某个DB值，自动选择信号好的那张SIM卡
+参数
+enable
+true：开启数据自动切换
+false：关闭数据自动切换
+参数 | enable | true：开启数据自动切换 false：关闭数据自动切换
+返回值
+0:成功
+-1:失败
+-40:当前设备或ROM不支持该接口
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -40:当前设备或ROM不支持该接口 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getNetworkManager().setDataAutoSwitch(true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getNetworkManager().setDataAutoSwitch(true); } catch (Exception e) { e.printStackTrace(); }
+3.41 添加一组APN
+原型
+int addApnV3(List<SunmiApnSetting> sunmiApnSettings);
+原型 | int addApnV3(List<SunmiApnSetting> sunmiApnSettings);
+功能
+同时添加多个APN
+功能 | 同时添加多个APN
+参数
+sunmiApnSettings
+多个SunmiApnSetting 列表，详见
+5.6 SunmiApnSetting.class
+参数 | sunmiApnSettings | 多个SunmiApnSetting 列表，详见 5.6 SunmiApnSetting.class
+返回值
+0:成功
+-1:失败
+-2:name、mcc、mnc、apn 字段需要赋值
+-3:已经存在
+-9:numeric不等于mcc+mnc
+-12:添加apn的时候不能携带id
+-40:当前设备或ROM不支持该接口
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -2:name、mcc、mnc、apn 字段需要赋值 -3:已经存在 -9:numeric不等于mcc+mnc -12:添加apn的时候不能携带id -40:当前设备或ROM不支持该接口 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+支持P3设备注意，因android版本差异，SunmiApnSetting中android 11及以下不支持设置以下项： public Integer lingering_network_type_bitmask = null; public Integer mtu_v4 = null; public Integer mtu_v6 = null; public Integer always_on = null;
+备注 | 支持P3设备注意，因android版本差异，SunmiApnSetting中android 11及以下不支持设置以下项： public Integer lingering_network_type_bitmask = null; public Integer mtu_v4 = null; public Integer mtu_v6 = null; public Integer always_on = null;
+示例代码
+try {
+SunmiApnSetting sunmiApnSetting=new SunmiApnSetting();
+sunmiApnSetting.setName("test");
+sunmiApnSetting.setMcc("460");
+sunmiApnSetting.setMnc("01");
+sunmiApnSetting.setApn("cmnet");
+List<SunmiApnSetting> apnList = new ArrayList<>();
+apnList.add(sunmiApnSetting);
+int result = sTmsApi.getNetworkManager().addApnV3(apnList);
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { SunmiApnSetting sunmiApnSetting=new SunmiApnSetting(); sunmiApnSetting.setName("test"); sunmiApnSetting.setMcc("460"); sunmiApnSetting.setMnc("01"); sunmiApnSetting.setApn("cmnet"); List<SunmiApnSetting> apnList = new ArrayList<>(); apnList.add(sunmiApnSetting); int result = sTmsApi.getNetworkManager().addApnV3(apnList); } catch (Exception e) { e.printStackTrace(); }
+3.42 有Sim卡插入时设置默认APN
+原型
+int setApnV3(int apnId);
+原型 | int setApnV3(int apnId);
+功能
+有Sim卡插入时设置默认APN
+功能 | 有Sim卡插入时设置默认APN
+参数
+apnId
+APN 记录 id
+参数 | apnId | APN 记录 id
+返回值
+0:成功
+-1:失败
+-5:传入的id不在数据库中,属于无效
+-6:输入的id查出来的apn里的mccmnc不是当前数据卡的
+-7:调用此接口的时候，设备里没有卡
+-40:当前设备或ROM不支持该接口
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -5:传入的id不在数据库中,属于无效 -6:输入的id查出来的apn里的mccmnc不是当前数据卡的 -7:调用此接口的时候，设备里没有卡 -40:当前设备或ROM不支持该接口 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getNetworkManager().setApnV3(1); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getNetworkManager().setApnV3(1); } catch (Exception e) { e.printStackTrace(); }
+3.43 获取当前插入卡的默认(正在使用)APN
+原型
+SunmiApnSetting getCurrentApnV3();
+原型 | SunmiApnSetting getCurrentApnV3();
+功能
+获取当前插入卡的默认(正在使用)APN
+功能 | 获取当前插入卡的默认(正在使用)APN
+参数
+无
+参数 | 无 | 
+返回值
+有卡有优先APN的时候返回正确的SunmiApnSetting；
+没卡没有优先APN的时候返回null。
+返回值 | 有卡有优先APN的时候返回正确的SunmiApnSetting； 没卡没有优先APN的时候返回null。
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try { SunmiApnSetting result = sTmsApi.getNetworkManager().getCurrentApnV3(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { SunmiApnSetting result = sTmsApi.getNetworkManager().getCurrentApnV3(); } catch (Exception e) { e.printStackTrace(); }
+3.44 删除指定的APN
+原型
+int deleteApnV3(SunmiApnSetting sunmiApnSetting);
+原型 | int deleteApnV3(SunmiApnSetting sunmiApnSetting);
+功能
+删除指定的APN（删除的时候根据其中只要一个字段匹配时，对应查询匹配到的都会删除掉）
+功能 | 删除指定的APN（删除的时候根据其中只要一个字段匹配时，对应查询匹配到的都会删除掉）
+参数
+sunmiApnSetting
+用于匹配的 APN 配置（可只填部分字段如 id/name/apn 等），详见
+5.6 SunmiApnSetting.class
+参数 | sunmiApnSetting | 用于匹配的 APN 配置（可只填部分字段如 id/name/apn 等），详见 5.6 SunmiApnSetting.class
+返回值
+0:成功 -1:失败 -4:查出来的APN,部分删除失败-5:传入的id不在数据库中,属于无效 -40:当前设备或ROM不支持该接口-41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -4:查出来的APN,部分删除失败-5:传入的id不在数据库中,属于无效 -40:当前设备或ROM不支持该接口-41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+支持P3设备注意，因android版本差异，SunmiApnSetting中android 11及以下不支持设置以下项：
+public Integer lingering_network_type_bitmask = null;
+public Integer mtu_v4 = null;
+public Integer mtu_v6 = null;
+public Integer always_on = null;
+备注 | 支持P3设备注意，因android版本差异，SunmiApnSetting中android 11及以下不支持设置以下项： public Integer lingering_network_type_bitmask = null; public Integer mtu_v4 = null; public Integer mtu_v6 = null; public Integer always_on = null;
+示例代码
+try {
+SunmiApnSetting sunmiApnSetting=new SunmiApnSetting();
+sunmiApnSetting.setName("test");
+sunmiApnSetting.setMcc("460");
+int result = sTmsApi.getNetworkManager().deleteApnV3(sunmiApnSetting);
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { SunmiApnSetting sunmiApnSetting=new SunmiApnSetting(); sunmiApnSetting.setName("test"); sunmiApnSetting.setMcc("460"); int result = sTmsApi.getNetworkManager().deleteApnV3(sunmiApnSetting); } catch (Exception e) { e.printStackTrace(); }
+3.45 更新指定的APN
+原型
+int updateApnV3(SunmiApnSetting sunmiApnSetting);
+原型 | int updateApnV3(SunmiApnSetting sunmiApnSetting);
+功能
+更新指定的APN
+功能 | 更新指定的APN
+参数
+sunmiApnSetting
+SunmiApnSetting 必须带上 id、name、mcc、mnc、apn 字段，详见
+5.6 SunmiApnSetting.class
+参数 | sunmiApnSetting | SunmiApnSetting 必须带上 id、name、mcc、mnc、apn 字段，详见 5.6 SunmiApnSetting.class
+返回值
+0:成功
+-1:失败
+-9:numeric不等于mcc+mnc
+-2:name、mcc、mnc、apn 字段需要赋值
+-40:当前设备或ROM不支持该接口
+41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -9:numeric不等于mcc+mnc -2:name、mcc、mnc、apn 字段需要赋值 -40:当前设备或ROM不支持该接口 41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try {
+SunmiApnSetting sunmiApnSetting=new SunmiApnSetting();
+sunmiApnSetting.setName("test");
+sunmiApnSetting.setMcc("460");
+int result = sTmsApi.getNetworkManager().updateApnV3(sunmiApnSetting);
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { SunmiApnSetting sunmiApnSetting=new SunmiApnSetting(); sunmiApnSetting.setName("test"); sunmiApnSetting.setMcc("460"); int result = sTmsApi.getNetworkManager().updateApnV3(sunmiApnSetting); } catch (Exception e) { e.printStackTrace(); }
+3.46 查询满足指定条件的APN
+原型
+List<SunmiApnSetting> getApnListV3(SunmiApnSetting sunmiApnSetting);
+原型 | List<SunmiApnSetting> getApnListV3(SunmiApnSetting sunmiApnSetting);
+功能
+查询满足指定条件的APN,查询条件（可只填部分字段）
+功能 | 查询满足指定条件的APN,查询条件（可只填部分字段）
+参数
+sunmiApnSetting
+SunmiApnSetting 相关字段，详见
+5.6 SunmiApnSetting.class
+参数 | sunmiApnSetting | SunmiApnSetting 相关字段，详见 5.6 SunmiApnSetting.class
+返回值
+有数据：正常返回列表数据上限50个；
+new ArrayList<>() : 成功但无数据，APN 表为空/无匹配项；
+null :当前设备或ROM不支持该接口；
+返回值 | 有数据：正常返回列表数据上限50个； new ArrayList<>() : 成功但无数据，APN 表为空/无匹配项； null :当前设备或ROM不支持该接口；
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try {
+SunmiApnSetting sunmiApnSetting=new SunmiApnSetting();
+sunmiApnSetting.setName("test");
+sunmiApnSetting.setMcc("460"); List<SunmiApnSetting> result = sTmsApi.getNetworkManager().getApnListV3(sunmiApnSetting); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { SunmiApnSetting sunmiApnSetting=new SunmiApnSetting(); sunmiApnSetting.setName("test"); sunmiApnSetting.setMcc("460"); List<SunmiApnSetting> result = sTmsApi.getNetworkManager().getApnListV3(sunmiApnSetting); } catch (Exception e) { e.printStackTrace(); }
+3.47 设置指定卡槽SIM卡的默认APN
+原型
+int setPreferApnBySlotIndex(int slotIndex, int apn_id);
+原型 | int setPreferApnBySlotIndex(int slotIndex, int apn_id);
+功能
+设置指定卡槽SIM卡的默认APN
+功能 | 设置指定卡槽SIM卡的默认APN
+参数
+int slotIndex
+卡槽，0/1：(该卡需是激活状态)
+参数 | int slotIndex | 卡槽，0/1：(该卡需是激活状态)
+int apn_id
+指定 apn 的 id
+int apn_id | 指定 apn 的 id
+返回值
+0:成功
+-1:失败
+-5: apnid错误
+-10: subid错误
+-11: subid的mccmnc和apnid的mccmnc不对应
+-40:当前设备或ROM不支持该接口
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -5: apnid错误 -10: subid错误 -11: subid的mccmnc和apnid的mccmnc不对应 -40:当前设备或ROM不支持该接口 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getNetworkManager().setPreferApnBySlotIndex(0,1); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getNetworkManager().setPreferApnBySlotIndex(0,1); } catch (Exception e) { e.printStackTrace(); }
+3.48 获取指定卡槽SIM卡的默认APN
+原型
+SunmiApnSetting queryPreferApnBySlotIndex(int slotIndex);
+原型 | SunmiApnSetting queryPreferApnBySlotIndex(int slotIndex);
+功能
+获取指定卡槽SIM卡的默认APN
+功能 | 获取指定卡槽SIM卡的默认APN
+参数
+int slotIndex
+卡槽，0/1
+参数 | int slotIndex | 卡槽，0/1
+返回值
+有卡有优先APN的时候返回正确的SunmiApnSetting；
+没卡没有优先APN的时候返回null。
+返回值 | 有卡有优先APN的时候返回正确的SunmiApnSetting； 没卡没有优先APN的时候返回null。
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try { SunmiApnSetting result = sTmsApi.getNetworkManager().queryPreferApnBySlotIndex(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { SunmiApnSetting result = sTmsApi.getNetworkManager().queryPreferApnBySlotIndex(0); } catch (Exception e) { e.printStackTrace(); }
+3.49 为指定 IPv4/CIDR 配置出接口路由策略
+原型
+int requestRouteToIp(String ip,int network,boolean action);
+原型 | int requestRouteToIp(String ip,int network,boolean action);
+功能
+为指定 IPv4/CIDR 配置出接口路由策略
+功能 | 为指定 IPv4/CIDR 配置出接口路由策略
+参数
+ip
+目标 IPv4 地址或 CIDR，如：192.168.1.0
+参数 | ip | 目标 IPv4 地址或 CIDR，如：192.168.1.0
+network
+0：移动数据/蜂窝
+1：Wi-Fi
+9：有线以太网
+network | 0：移动数据/蜂窝 1：Wi-Fi 9：有线以太网
+action
+true：添加
+false：删除
+action | true：添加 false：删除
+返回值
+0:成功
+-1:失败
+-2: 非法参数
+-40:当前设备或ROM不支持该接口
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -2: 非法参数 -40:当前设备或ROM不支持该接口 -41:未找到系统服务，请联系设备供应商
+适用范围
+CPad-A14
+适用范围 | CPad-A14
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getNetworkManager().requestRouteToIp("
+192.168.1.0
+",0,true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getNetworkManager().requestRouteToIp(" 192.168.1.0 ",0,true); } catch (Exception e) { e.printStackTrace(); }
+3.50 获取通过添加并持久化的 IP 路由规则
+原型
+Map getRequestRouteIps();
+原型 | Map getRequestRouteIps();
+功能
+获取通过添加并持久化的 IP 路由规则
+功能 | 获取通过添加并持久化的 IP 路由规则
+参数
+无
+参数 | 无 | 
+返回值
+返回 Map 包含 mobile、 wifi、ethernet 三个 key，value 为 IP/CIDR 列表。
+如：{mobile=[100.15.58.66], ethernet=[192.168.2.1, 192.168.2.12], wifi=[10.14.88.69, 100.14.88.69]}；
+返回值 | 返回 Map 包含 mobile、 wifi、ethernet 三个 key，value 为 IP/CIDR 列表。 如：{mobile=[100.15.58.66], ethernet=[192.168.2.1, 192.168.2.12], wifi=[10.14.88.69, 100.14.88.69]}；
+适用范围
+CPad-A14
+适用范围 | CPad-A14
+备注
+无
+备注 | 无
+示例代码
+try { Map result = sTmsApi.getNetworkManager().getRequestRouteIps(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { Map result = sTmsApi.getNetworkManager().getRequestRouteIps(); } catch (Exception e) { e.printStackTrace(); }
+3.51 通过slotIndex获取指定 SIM 卡的移动网络信息
+原型
+CellularNetworkInfo getCellularNetworkInfoBySlotIndex(int slotIndex);
+原型 | CellularNetworkInfo getCellularNetworkInfoBySlotIndex(int slotIndex);
+功能
+通过slotIndex获取指定 SIM 卡的移动网络信息
+功能 | 通过slotIndex获取指定 SIM 卡的移动网络信息
+参数
+slotIndex
+卡槽，0/1
+参数 | slotIndex | 卡槽，0/1
+返回值
+null:当前 ROM 不支持；
+CellularNetworkInfo:移动网络信息，详见
+5.7 CellularNetworkInfo.class
+返回值 | null:当前 ROM 不支持； CellularNetworkInfo:移动网络信息，详见 5.7 CellularNetworkInfo.class
+适用范围
+P3HA14-BKD、P3A14-BKD、P3KHA14-BKD、P3KA14-BKD
+适用范围 | P3HA14-BKD、P3A14-BKD、P3KHA14-BKD、P3KA14-BKD
+备注
+无
+备注 | 无
+示例代码
+try { CellularNetworkInfo result = sTmsApi.getNetworkManager().getCellularNetworkInfoBySlotIndex(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { CellularNetworkInfo result = sTmsApi.getNetworkManager().getCellularNetworkInfoBySlotIndex(0); } catch (Exception e) { e.printStackTrace(); }
+3.52 通过subId获取指定 SIM 卡的移动网络信息
+原型
+CellularNetworkInfo getCellularNetworkInfoBySubId(int subId);
+原型 | CellularNetworkInfo getCellularNetworkInfoBySubId(int subId);
+功能
+通过subId获取指定 SIM 卡的移动网络信息
+功能 | 通过subId获取指定 SIM 卡的移动网络信息
+参数
+subId
+对应卡槽的 subId
+参数 | subId | 对应卡槽的 subId
+返回值
+null:当前 ROM 不支持；
+CellularNetworkInfo:移动网络信息，详见
+5.7 CellularNetworkInfo.class
+返回值 | null:当前 ROM 不支持； CellularNetworkInfo:移动网络信息，详见 5.7 CellularNetworkInfo.class
+适用范围
+P3HA14-BKD、P3A14-BKD、P3KHA14-BKD、P3KA14-BKD
+适用范围 | P3HA14-BKD、P3A14-BKD、P3KHA14-BKD、P3KA14-BKD
+备注
+无
+备注 | 无
+示例代码
+try { CellularNetworkInfo result = sTmsApi.getNetworkManager().getCellularNetworkInfoBySubId(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { CellularNetworkInfo result = sTmsApi.getNetworkManager().getCellularNetworkInfoBySubId(0); } catch (Exception e) { e.printStackTrace(); }

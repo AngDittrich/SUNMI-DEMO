@@ -1,0 +1,1039 @@
+﻿================================================================================
+SunmiCustomer API - 04 Software Management Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xddxeghjk491
+Update Time: 2026-07-29 16:08:34
+Content Length: 29881 chars
+================================================================================
+1 概述
+软件管理模块，包含：静默安装、静默卸载、启用禁用应用、获取应用申请权限、设置默启应用、添加通用应用锁等功能。
+2 API列表
+接口
+描述
+接口 | 描述
+void installAppV2(in String appFilePath, boolean autoStart, in OnInstallAppListener listener);
+静默安装应用（安装完成后是否自动拉起应用）
+void installAppV2(in String appFilePath, boolean autoStart, in OnInstallAppListener listener); | 静默安装应用（安装完成后是否自动拉起应用）
+void uninstallApp(String packageName, OnUninstallAppListener listener);
+静默卸载应用
+void uninstallApp(String packageName, OnUninstallAppListener listener); | 静默卸载应用
+void killApp(String packageName);
+强制结束应用
+void killApp(String packageName); | 强制结束应用
+void restartApp(String packageName);
+重启应用
+void restartApp(String packageName); | 重启应用
+boolean setBatteryOptimizationWhitelist(String whitelist);
+设置电池优化白名单
+boolean setBatteryOptimizationWhitelist(String whitelist); | 设置电池优化白名单
+boolean setAppEnabled(String packageName, boolean enabled)
+启用/禁用应用
+boolean setAppEnabled(String packageName, boolean enabled) | 启用/禁用应用
+boolean grantAppPermissions(String packageName, String permissions)
+赋予应用权限（仅动态权限，需要用户代码声明）
+boolean grantAppPermissions(String packageName, String permissions) | 赋予应用权限（仅动态权限，需要用户代码声明）
+String getRequestPermissions(String packageName)
+获取应用申请的权限
+String getRequestPermissions(String packageName) | 获取应用申请的权限
+boolean allowAlertWindowPermission(String packageName)
+授予应用悬浮窗权限
+boolean allowAlertWindowPermission(String packageName) | 授予应用悬浮窗权限
+void prohibitUninstall(String packageName, boolean allowUninstall)
+设置应用禁止被卸载
+void prohibitUninstall(String packageName, boolean allowUninstall) | 设置应用禁止被卸载
+String getProhibitUninstallList()
+获取禁止被卸载的应用列表(只能获取prohibitUninstall设置的不可卸载应用)
+String getProhibitUninstallList() | 获取禁止被卸载的应用列表(只能获取prohibitUninstall设置的不可卸载应用)
+boolean enableAutoStartApp(boolean enable)
+启用/禁用默启应用
+boolean enableAutoStartApp(boolean enable) | 启用/禁用默启应用
+boolean isAutoStartAppEnabled()
+检测默启应用是否可用
+boolean isAutoStartAppEnabled() | 检测默启应用是否可用
+boolean setAutoStartApp(String packageName)
+设置默启应用
+boolean setAutoStartApp(String packageName) | 设置默启应用
+String getAutoStartApp()
+获取默启应用
+String getAutoStartApp() | 获取默启应用
+boolean clearAutoStartApp()
+清空默启应用
+boolean clearAutoStartApp() | 清空默启应用
+void clearApplicationUserDataWithResult(String packageName, IUnifiedCallback callback)
+清空应用用户数据（有结果回调）
+void clearApplicationUserDataWithResult(String packageName, IUnifiedCallback callback) | 清空应用用户数据（有结果回调）
+void deleteApplicationCacheFiles(String packageName, IUnifiedCallback callback)
+删除应用缓存数据（有结果回调）
+void deleteApplicationCacheFiles(String packageName, IUnifiedCallback callback) | 删除应用缓存数据（有结果回调）
+boolean isForeground(String packageName);
+查看应用是否是前台应用
+boolean isForeground(String packageName); | 查看应用是否是前台应用
+boolean addAppToCommonAppLockList(in List<String> packageNames, int type, String password);
+添加通用应用锁
+boolean addAppToCommonAppLockList(in List<String> packageNames, int type, String password); | 添加通用应用锁
+boolean removeAppFromCommonAppLockList(in List<String> packageNames);
+移除通用应用锁
+boolean removeAppFromCommonAppLockList(in List<String> packageNames); | 移除通用应用锁
+List<String> getCommonAppLockList();
+获取通用应用锁应用列表
+List<String> getCommonAppLockList(); | 获取通用应用锁应用列表
+boolean isCommonAppLock(String packageName);
+检查应用是否设置了通用应用锁
+boolean isCommonAppLock(String packageName); | 检查应用是否设置了通用应用锁
+void installApp(String appFilePath, OnInstallAppListener listener);
+静默安装应用
+void installApp(String appFilePath, OnInstallAppListener listener); | 静默安装应用
+void revokeAppPermission(String packageName, String permissions);
+移除应用申请的动态权限
+void revokeAppPermission(String packageName, String permissions); | 移除应用申请的动态权限
+boolean setNotificationsEnabledForPackage(String packageName, boolean enabled);
+设置应用是否能使用通知
+boolean setNotificationsEnabledForPackage(String packageName, boolean enabled); | 设置应用是否能使用通知
+int removeAllRecentTasks();
+清除最近任务列表
+int removeAllRecentTasks(); | 清除最近任务列表
+3 API详情
+3.1 
+静默安装应用（安装完成后是否自动拉起应用）
+原型
+void installAppV2(String appFilePath, boolean autoStart, inOnInstallAppListener listener);
+原型 | void installAppV2(String appFilePath, boolean autoStart, inOnInstallAppListener listener);
+功能
+静默安装应用（安装完成后自动拉起应用）
+功能 | 静默安装应用（安装完成后自动拉起应用）
+参数
+String appFilePath
+目标apk本地地址
+参数 | String appFilePath | 目标apk本地地址
+ 
+boolean autoStart
+安装成功后是否自动拉起应用
+  | boolean autoStart | 安装成功后是否自动拉起应用
+ 
+OnInstallAppListener listener
+应用安装回调
+  | OnInstallAppListener listener | 应用安装回调
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1. 安装成功将会回调onInstallFinished与onInstallSuccess。任选其一判定为安装成功即可。
+2. 安装失败将会回调onInstallError与onInstallFail。错误码一致，任选其一判定为安装失败即可。
+3. 设置autoStart 为true 时
+仅对activity生效，某些应用可能并没有设置默认的启动Activity（即没有LAUNCHER category的Activity）这时通过 getLaunchIntentForPackage() 得到的Intent也是空的，因此不能启动该应用。
+4. 错误码详见4.2 静默安装应用错误码
+5. 文件路径读取如遇到权限问题可参考：5.4 FileStorageUtil 文件路径获取类
+备注 | 1. 安装成功将会回调onInstallFinished与onInstallSuccess。任选其一判定为安装成功即可。 2. 安装失败将会回调onInstallError与onInstallFail。错误码一致，任选其一判定为安装失败即可。 3. 设置autoStart 为true 时 仅对activity生效，某些应用可能并没有设置默认的启动Activity（即没有LAUNCHER category的Activity）这时通过 getLaunchIntentForPackage() 得到的Intent也是空的，因此不能启动该应用。 4. 错误码详见4.2 静默安装应用错误码 5. 文件路径读取如遇到权限问题可参考：5.4 FileStorageUtil 文件路径获取类
+示例代码
+try{
+       sTmsApi.getSoftwareManager().installAppV2("/sdcard/xxx/test.apk", true, new OnInstallAppListener.Stub() {
+            @Override
+            public void onInstallFinished() throws RemoteException {
+            }
+            @Override
+            public void onInstallError(int errorId) throws RemoteException {
+            }
+            @Override
+            public void onInstallSuccess(String packagename) throws RemoteException {
+            }
+            @Override
+            public void onInstallFail(String packagename, int errorId) throws RemoteException {
+            }
+        });
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try{        sTmsApi.getSoftwareManager().installAppV2("/sdcard/xxx/test.apk", true, new OnInstallAppListener.Stub() {             @Override             public void onInstallFinished() throws RemoteException {             }             @Override             public void onInstallError(int errorId) throws RemoteException {             }             @Override             public void onInstallSuccess(String packagename) throws RemoteException {             }             @Override             public void onInstallFail(String packagename, int errorId) throws RemoteException {             }         }); } catch (Exception e) {     e.printStackTrace(); }
+3.2 
+静默卸载应用
+原型
+void uninstallApp(String packageName, OnUninstallAppListener listener);
+原型 | void uninstallApp(String packageName, OnUninstallAppListener listener);
+功能
+静默卸载应用
+功能 | 静默卸载应用
+参数
+packageName
+待卸载的应用包名
+参数 | packageName | 待卸载的应用包名
+ 
+listener
+接口回调，卸载完成后会回调结果，传null不会执行静默卸载。
+  | listener | 接口回调，卸载完成后会回调结果，传null不会执行静默卸载。
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+1. 卸载成功将会回调onUnInstallFinished与onUnInstallSuccess。任选其一判定为卸载成功即可。
+2. 卸载失败将会回调onUnInstallError与onUnInstallFail。错误码一致，任选其一判定为卸载失败即可。
+3. 错误码详见
+ 
+静默卸载应用错误码
+备注 | 1. 卸载成功将会回调onUnInstallFinished与onUnInstallSuccess。任选其一判定为卸载成功即可。 2. 卸载失败将会回调onUnInstallError与onUnInstallFail。错误码一致，任选其一判定为卸载失败即可。 3. 错误码详见   静默卸载应用错误码
+示例代码
+try{
+    sTmsApi.getSoftwareManager().uninstallApp(packageName, new OnInstallAppListener.Stub() {
+        @Override
+        public void onUnInstallFinished() throws RemoteException {
+        }
+        @Override
+        public void onUnInstallError(int errorId) throws RemoteException {
+        }
+        @Override
+        public void onUnInstallSuccess(String packagename) throws RemoteException {
+        }
+        @Override
+        public void onUnInstallFail(String packagename, int errorId) throws RemoteException {
+        }
+    });
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try{     sTmsApi.getSoftwareManager().uninstallApp(packageName, new OnInstallAppListener.Stub() {         @Override         public void onUnInstallFinished() throws RemoteException {         }         @Override         public void onUnInstallError(int errorId) throws RemoteException {         }         @Override         public void onUnInstallSuccess(String packagename) throws RemoteException {         }         @Override         public void onUnInstallFail(String packagename, int errorId) throws RemoteException {         }     }); } catch (Exception e) {     e.printStackTrace(); }
+3.3 
+强制结束应用
+原型
+void killApp(String packageName);
+原型 | void killApp(String packageName);
+功能
+强制结束应用
+功能 | 强制结束应用
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    sTmsApi.getSoftwareManager().killApp("com.xx.xx.xx");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getSoftwareManager().killApp("com.xx.xx.xx"); } catch (Exception e) {     e.printStackTrace(); }
+3.4 
+重启应用
+原型
+void restartApp(String packageName);
+原型 | void restartApp(String packageName);
+功能
+重启应用
+功能 | 重启应用
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+应用无法启动可能有以下几种原因：
+1、应用未安装：如果指定的包名没有对应的应用安装。
+2、应用没有启动Activity：有些应用可能没有定义主启动Activity（例如，一些库项目或者没有UI的应用）。
+3、应用被禁用：如果应用被禁用（比如在设置中禁用），则可能无法启动应用。
+4、启动Activity被禁用：如果应用的启动Activity被禁用，也可能无法启动应用。
+5、安装后未完成：有时候应用安装后可能没有完全配置好，导致无法启动。
+6、系统应用没有公开的启动Intent：一些系统应用可能没有提供标准的启动Intent。
+备注 | 应用无法启动可能有以下几种原因： 1、应用未安装：如果指定的包名没有对应的应用安装。 2、应用没有启动Activity：有些应用可能没有定义主启动Activity（例如，一些库项目或者没有UI的应用）。 3、应用被禁用：如果应用被禁用（比如在设置中禁用），则可能无法启动应用。 4、启动Activity被禁用：如果应用的启动Activity被禁用，也可能无法启动应用。 5、安装后未完成：有时候应用安装后可能没有完全配置好，导致无法启动。 6、系统应用没有公开的启动Intent：一些系统应用可能没有提供标准的启动Intent。
+示例代码
+try {
+    sTmsApi.getSoftwareManager().restartApp("com.xx.xx.xx");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getSoftwareManager().restartApp("com.xx.xx.xx"); } catch (Exception e) {     e.printStackTrace(); }
+3.5 
+设置电池优化白名单
+原型
+boolean setBatteryOptimizationWhitelist(String whitelist);
+原型 | boolean setBatteryOptimizationWhitelist(String whitelist);
+功能
+设置电池优化白名单
+功能 | 设置电池优化白名单
+参数
+whiteList
+电池优化白名单
+，传入应用包名，多个应用使用英文逗号分隔
+参数 | whiteList | 电池优化白名单 ，传入应用包名，多个应用使用英文逗号分隔
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+多次设置会叠加
+备注 | 多次设置会叠加
+示例代码
+try {
+  boolean result = sTmsApi.getSoftwareManager().setBatteryOptimizationWhitelist("com.xx.xx.xx");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {   boolean result = sTmsApi.getSoftwareManager().setBatteryOptimizationWhitelist("com.xx.xx.xx"); } catch (Exception e) {     e.printStackTrace(); }
+3.6 
+启用/禁用应用
+原型
+boolean setAppEnabled(String packageName, boolean enabled)
+原型 | boolean setAppEnabled(String packageName, boolean enabled)
+功能
+启用/禁用应用，
+但是不能操作系统预制应用包名以android、vendor、
+com.android
+开头的应用
+功能 | 启用/禁用应用， 但是不能操作系统预制应用包名以android、vendor、 com.android 开头的应用
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+ 
+enabled
+true：启用
+false：禁用
+  | enabled | true：启用 false：禁用
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+1、金融设备：新增不能禁用L1 & CS组件 & SPManager（
+包名分别为com.sunmi.pay
+.hardware_v3 & com.sunmi.tmservice & com.sunmi.sunmisecurityservice_v3）
+2、传入的应用包名在设备里有安装时，调用该接口才会生效。
+备注 | 1、金融设备：新增不能禁用L1 & CS组件 & SPManager（ 包名分别为com.sunmi.pay .hardware_v3 & com.sunmi.tmservice & com.sunmi.sunmisecurityservice_v3） 2、传入的应用包名在设备里有安装时，调用该接口才会生效。
+示例代码
+try {
+  boolean result = sTmsApi.getSoftwareManager().setAppEnabled("com.xx.xx.xx",true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {   boolean result = sTmsApi.getSoftwareManager().setAppEnabled("com.xx.xx.xx",true); } catch (Exception e) {     e.printStackTrace(); }
+3.7 
+赋予应用动态权限
+原型
+boolean grantAppPermissions(String packageName, String permissions)
+原型 | boolean grantAppPermissions(String packageName, String permissions)
+功能
+赋予应用动态权限
+功能 | 赋予应用动态权限
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+ 
+permissions
+应用动态权限列表
+，多个权限使用英文逗号分隔，例：android.permission.CAMERA
+  | permissions | 应用动态权限列表 ，多个权限使用英文逗号分隔，例：android.permission.CAMERA
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+1. 该接口返回值仅代表函数执行状态，需要调用方自行保证第二点描述的必要条件，否则返回True也无法正确授予权限。
+2. 清单文件中需要正确声明悬浮窗权限
+3. Android原生悬浮窗权限申请需跳转到设置手动赋予，通过调用该接口只需要在清单文件声明悬浮窗权限，即可赋予应用悬浮窗权限。
+备注 | 1. 该接口返回值仅代表函数执行状态，需要调用方自行保证第二点描述的必要条件，否则返回True也无法正确授予权限。 2. 清单文件中需要正确声明悬浮窗权限 3. Android原生悬浮窗权限申请需跳转到设置手动赋予，通过调用该接口只需要在清单文件声明悬浮窗权限，即可赋予应用悬浮窗权限。
+示例代码
+try {
+  boolean result = sTmsApi.getSoftwareManager().grantAppPermissions("com.xx.xx.xx","android.permission.CAMERA");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {   boolean result = sTmsApi.getSoftwareManager().grantAppPermissions("com.xx.xx.xx","android.permission.CAMERA"); } catch (Exception e) {     e.printStackTrace(); }
+3.8 
+获取应用申请的权限
+原型
+String getRequestPermissions(String packageName)
+原型 | String getRequestPermissions(String packageName)
+功能
+获取应用申请的权限
+功能 | 获取应用申请的权限
+参数
+String packageName
+目标应用包名
+参数 | String packageName | 目标应用包名
+返回值
+应用申请的权限，
+多个权限使用英文逗号分隔
+返回值 | 应用申请的权限， 多个权限使用英文逗号分隔
+适用范围
+通用
+适用范围 | 通用
+备注
+Android高版本的权限变更会对返回值产生影响，例如"android.permission.POST_NOTIFICATIONS"权限，在Android13以上，清单文件未添加，通过接口获取到的值包含该权限，此为Android的兼容行为。
+备注 | Android高版本的权限变更会对返回值产生影响，例如"android.permission.POST_NOTIFICATIONS"权限，在Android13以上，清单文件未添加，通过接口获取到的值包含该权限，此为Android的兼容行为。
+示例代码
+try {
+  
+String
+ result = sTmsApi.getSoftwareManager().
+getRequestPermissions
+("com.xx.xx.xx");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    String  result = sTmsApi.getSoftwareManager(). getRequestPermissions ("com.xx.xx.xx"); } catch (Exception e) {     e.printStackTrace(); }
+3.9 
+授予应用悬浮窗权限
+原型
+boolean allowAlertWindowPermission(String packageName)
+原型 | boolean allowAlertWindowPermission(String packageName)
+功能
+授予应用悬浮窗权限
+功能 | 授予应用悬浮窗权限
+参数
+String packageName
+目标应用包名
+参数 | String packageName | 目标应用包名
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+该接口返回值仅代表函数执行状态，需要调用方自行保证第二点描述的必要条件，否则返回True也无法正确授予权限。
+应用AndroidManifest.xml文件中需要正确声明悬浮窗权限 android.permission.SYSTEM_ALERT_WINDOW。
+Android原生悬浮窗权限申请需跳转到设置手动赋予，通过调用该接口只需要在AndroidManifest.xml文件声明悬浮窗权限，即可赋予应用悬浮窗权限。
+备注 | 该接口返回值仅代表函数执行状态，需要调用方自行保证第二点描述的必要条件，否则返回True也无法正确授予权限。 应用AndroidManifest.xml文件中需要正确声明悬浮窗权限 android.permission.SYSTEM_ALERT_WINDOW。 Android原生悬浮窗权限申请需跳转到设置手动赋予，通过调用该接口只需要在AndroidManifest.xml文件声明悬浮窗权限，即可赋予应用悬浮窗权限。
+示例代码
+try {
+ boolean result = sTmsApi.getSoftwareManager().allowAlertWindowPermission("com.xx.xx.xx");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {  boolean result = sTmsApi.getSoftwareManager().allowAlertWindowPermission("com.xx.xx.xx"); } catch (Exception e) {     e.printStackTrace(); }
+3.10 
+设置应用禁止被卸载
+原型
+void prohibitUninstall(String packageName, boolean allowUninstall)
+原型 | void prohibitUninstall(String packageName, boolean allowUninstall)
+功能
+设置应用禁止被卸载
+功能 | 设置应用禁止被卸载
+参数
+String packageName
+目标应用包名
+参数 | String packageName | 目标应用包名
+ 
+boolean allowUninstall
+允许卸载
+true：允许
+false：不允许
+  | boolean allowUninstall | 允许卸载 true：允许 false：不允许
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、如果相同包名有调用setDeviceOwner(String packageName, String classFullPathName) 接口，然后再调这个接口设置允许卸载时，实际该应用是不会被卸载。
+2、预装应用和系统应用是不能卸载的。
+备注 | 1、如果相同包名有调用setDeviceOwner(String packageName, String classFullPathName) 接口，然后再调这个接口设置允许卸载时，实际该应用是不会被卸载。 2、预装应用和系统应用是不能卸载的。
+示例代码
+try {
+   sTmsApi.getSoftwareManager().
+prohibitUninstall
+("com.xx.xx.xx",true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSoftwareManager(). prohibitUninstall ("com.xx.xx.xx",true); } catch (Exception e) {     e.printStackTrace(); }
+3.11 
+获取禁止被卸载的应用列表
+原型
+String getProhibitUninstallList()
+原型 | String getProhibitUninstallList()
+功能
+获取禁止被卸载的应用列表
+功能 | 获取禁止被卸载的应用列表
+参数
+无
+ 
+参数 | 无 |  
+返回值
+禁止被卸载的应用列表
+返回值 | 禁止被卸载的应用列表
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、返回多个应用包名时中间用分号隔开，例如：com.a:com.b:com.c
+备注 | 1、返回多个应用包名时中间用分号隔开，例如：com.a:com.b:com.c
+示例代码
+try {
+  String result = sTmsApi.getSoftwareManager().
+getProhibitUninstallList
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {   String result = sTmsApi.getSoftwareManager(). getProhibitUninstallList (); } catch (Exception e) {     e.printStackTrace(); }
+3.12 
+启用/禁用默启应用
+原型
+boolean enableAutoStartApp(boolean enable)
+原型 | boolean enableAutoStartApp(boolean enable)
+功能
+启用/禁用默认启动应用功能
+功能 | 启用/禁用默认启动应用功能
+参数
+enable
+true：启用
+false：禁用
+参数 | enable | true：启用 false：禁用
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+  
+boolean
+ result = sTmsApi.getSoftwareManager().
+enableAutoStartApp
+(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean  result = sTmsApi.getSoftwareManager(). enableAutoStartApp (true); } catch (Exception e) {     e.printStackTrace(); }
+3.13 
+检测默启应用是否可用
+原型
+boolean isAutoStartAppEnabled()
+原型 | boolean isAutoStartAppEnabled()
+功能
+【获取默认启动应用】该功能状态是否启用
+功能 | 【获取默认启动应用】该功能状态是否启用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+true：启用
+false：禁用
+返回值 | true：启用 false：禁用
+适用范围
+通用
+ 
+适用范围 | 通用  
+备注
+无
+备注 | 无
+示例代码
+try {
+  
+boolean
+ result = sTmsApi.getSoftwareManager().
+isAutoStartAppEnabled
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean  result = sTmsApi.getSoftwareManager(). isAutoStartAppEnabled (); } catch (Exception e) {     e.printStackTrace(); }
+3.14 
+设置默启应用
+原型
+boolean setAutoStartApp(String packageName)
+原型 | boolean setAutoStartApp(String packageName)
+功能
+设置默认启动的应用，仅能设置一个默启应用
+功能 | 设置默认启动的应用，仅能设置一个默启应用
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+返回值
+true：启用
+false：禁用
+返回值 | true：启用 false：禁用
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getSoftwareManager().setAutoStartApp("com.xx.xx.xx");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getSoftwareManager().setAutoStartApp("com.xx.xx.xx"); } catch (Exception e) {     e.printStackTrace(); }
+3.15 
+获取默启应用
+原型
+String getAutoStartApp()
+原型 | String getAutoStartApp()
+功能
+获取当前设置的默启应用
+功能 | 获取当前设置的默启应用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+默启应用包名，例如："com.sunmi.test"
+返回值 | 默启应用包名，例如："com.sunmi.test"
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getSoftwareManager().getAutoStartApp();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getSoftwareManager().getAutoStartApp(); } catch (Exception e) {     e.printStackTrace(); }
+3.16 
+清空默启应用
+原型
+boolean clearAutoStartApp()
+原型 | boolean clearAutoStartApp()
+功能
+清空默启应用
+功能 | 清空默启应用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+true：成功
+false：失败
+返回值 | true：成功 false：失败
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result = sTmsApi.getSoftwareManager().clearAutoStartApp();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result = sTmsApi.getSoftwareManager().clearAutoStartApp(); } catch (Exception e) {     e.printStackTrace(); }
+3.17 
+清空应用用户数据（有结果回调）
+原型
+void clearApplicationUserDataWithResult(String packageName, IUnifiedCallback callback)
+原型 | void clearApplicationUserDataWithResult(String packageName, IUnifiedCallback callback)
+功能
+清空应用用户数据，用户数据与缓存数据均会被清除
+功能 | 清空应用用户数据，用户数据与缓存数据均会被清除
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+ 
+callback
+结果回调，详见 IUnifiedCallback
+  | callback | 结果回调，详见 IUnifiedCallback
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+对应设置清除存储空间按钮功能，会清除用户数据和缓存
+备注 | 对应设置清除存储空间按钮功能，会清除用户数据和缓存
+示例代码
+ try {                 sTmsApi.getSoftwareManager().clearApplicationUserDataWithResult("com.xxx.xxx", new IUnifiedCallback.Stub() {
+                        @Override
+                        public void onCall(String result) throws RemoteException {
+                            try {
+                                JSONObject jsonObject = new JSONObject(result);
+                                int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+示例代码 |  try {                 sTmsApi.getSoftwareManager().clearApplicationUserDataWithResult("com.xxx.xxx", new IUnifiedCallback.Stub() {                         @Override                         public void onCall(String result) throws RemoteException {                             try {                                 JSONObject jsonObject = new JSONObject(result);                                 int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败                             } catch (JSONException e) {                                 e.printStackTrace();                             }                         }                     });                 } catch (Exception e) {                     e.printStackTrace();                 }
+3.18 
+删除应用缓存数据（有结果回调）
+原型
+void deleteApplicationCacheFiles(String packageName, IUnifiedCallback callback)
+原型 | void deleteApplicationCacheFiles(String packageName, IUnifiedCallback callback)
+功能
+删除应用缓存数据
+功能 | 删除应用缓存数据
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+ 
+callback
+结果回调，详见 IUnifiedCallback
+  | callback | 结果回调，详见 IUnifiedCallback
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+对应设置清除缓存功能
+备注 | 对应设置清除缓存功能
+示例代码
+try {
+sTmsApi.getSoftwareManager().deleteApplicationCacheFiles("com.xxx.xxx", new IUnifiedCallback.Stub() {
+                @Override
+                public void onCall(String result) throws RemoteException {
+                    try {
+                                JSONObject jsonObject = new JSONObject(result);
+                                int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                }
+            });
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { sTmsApi.getSoftwareManager().deleteApplicationCacheFiles("com.xxx.xxx", new IUnifiedCallback.Stub() {                 @Override                 public void onCall(String result) throws RemoteException {                     try {                                 JSONObject jsonObject = new JSONObject(result);                                 int resultCode = jsonObject.getInt("resultCode");//0：成功，-1：失败                             } catch (JSONException e) {                                 e.printStackTrace();                             }                 }             }); } catch (Exception e) {     e.printStackTrace(); }
+3.19 
+查看应用是否是前台应用
+原型
+boolean isForeground(String packageName);
+原型 | boolean isForeground(String packageName);
+功能
+查看应用是否是前台应用
+功能 | 查看应用是否是前台应用
+参数
+String packageName
+目标应用包名
+参数 | String packageName | 目标应用包名
+返回值
+应用是否是前台应用
+true：是
+false：否
+返回值 | 应用是否是前台应用 true：是 false：否
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result = sTmsApi.getSoftwareManager().isForeground("com.xxx.xxx");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result = sTmsApi.getSoftwareManager().isForeground("com.xxx.xxx"); } catch (Exception e) {     e.printStackTrace(); }
+3.20 
+添加通用应用锁
+原型
+boolean addAppToCommonAppLockList(List<String> packageNames, int type, String password);
+原型 | boolean addAppToCommonAppLockList(List<String> packageNames, int type, String password);
+功能
+添加通用应用锁
+功能 | 添加通用应用锁
+参数
+List<String> packageNames
+目标应用包名列表
+参数 | List<String> packageNames | 目标应用包名列表
+ 
+int type
+密码类型
+-1：混合密码（支持8位及以下）
+0：4位数字密码
+1：混合密码（支持8位及以下）
+  | int type | 密码类型 -1：混合密码（支持8位及以下） 0：4位数字密码 1：混合密码（支持8位及以下）
+ 
+String password
+type=0或者1，密码md5值；type=-1时，不需要md5，直接传明文
+  | String password | type=0或者1，密码md5值；type=-1时，不需要md5，直接传明文
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+如果要启用禁用通用锁，详见启用/禁用通用应用锁接口
+备注 | 如果要启用禁用通用锁，详见启用/禁用通用应用锁接口
+示例代码
+ try {
+             List<String> addPackageList = new ArrayList<>();
+            addPackageList.add("com.xxx.xxx");
+            boolean result =  sTmsApi.getSoftwareManager().addAppToCommonAppLockList(addPackageList, -1, "00000000");
+            } catch (Exception e) {
+                 e.printStackTrace();
+           }
+示例代码 |  try {              List<String> addPackageList = new ArrayList<>();             addPackageList.add("com.xxx.xxx");             boolean result =  sTmsApi.getSoftwareManager().addAppToCommonAppLockList(addPackageList, -1, "00000000");             } catch (Exception e) {                  e.printStackTrace();            }
+3.21 
+移除通用应用锁
+原型
+boolean removeAppFromCommonAppLockList(List<String> packageNames);
+原型 | boolean removeAppFromCommonAppLockList(List<String> packageNames);
+功能
+移除通用应用锁
+功能 | 移除通用应用锁
+参数
+List<String> packageNames
+目标应用包名列表
+参数 | List<String> packageNames | 目标应用包名列表
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+如果要启用禁用通用锁，
+详见启用/禁用通用应用锁接口
+备注 | 如果要启用禁用通用锁， 详见启用/禁用通用应用锁接口
+示例代码
+ try {
+             List<String> addPackageList = new ArrayList<>();
+            addPackageList.add("com.xxx.xxx");
+            boolean result =  sTmsApi.getSoftwareManager().removeAppFromCommonAppLockList(addPackageList);
+            } catch (Exception e) {
+                 e.printStackTrace();
+           }
+示例代码 |  try {              List<String> addPackageList = new ArrayList<>();             addPackageList.add("com.xxx.xxx");             boolean result =  sTmsApi.getSoftwareManager().removeAppFromCommonAppLockList(addPackageList);             } catch (Exception e) {                  e.printStackTrace();            }
+3.22 
+获取通用应用锁应用列表
+原型
+List<String> getCommonAppLockList();
+原型 | List<String> getCommonAppLockList();
+功能
+获取通用应用锁应用列表
+功能 | 获取通用应用锁应用列表
+参数
+无
+ 
+参数 | 无 |  
+返回值
+通用应用锁应用包名列表
+返回值 | 通用应用锁应用包名列表
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+            List<String> packageList =  sTmsApi.getSoftwareManager().getCommonAppLockList();
+            } catch (Exception e) {
+                 e.printStackTrace();
+           }
+示例代码 |  try {             List<String> packageList =  sTmsApi.getSoftwareManager().getCommonAppLockList();             } catch (Exception e) {                  e.printStackTrace();            }
+3.23 
+检查应用是否设置了通用应用锁
+原型
+boolean isCommonAppLock(String packageName);
+原型 | boolean isCommonAppLock(String packageName);
+功能
+检查应用是否设置了通用应用锁
+功能 | 检查应用是否设置了通用应用锁
+参数
+String packageName
+目标应用包名
+参数 | String packageName | 目标应用包名
+返回值
+已设置/未设置
+true：已设置
+false：未设置
+返回值 | 已设置/未设置 true：已设置 false：未设置
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+           boolean result =  sTmsApi.getSoftwareManager().isCommonAppLock("com.xxx.xxx");
+            } catch (Exception e) {
+                 e.printStackTrace();
+           }
+示例代码 |  try {            boolean result =  sTmsApi.getSoftwareManager().isCommonAppLock("com.xxx.xxx");             } catch (Exception e) {                  e.printStackTrace();            }
+3.24 
+静默安装应用
+原型
+void installApp(String appFilePath, OnInstallAppListener listener)
+原型 | void installApp(String appFilePath, OnInstallAppListener listener)
+功能
+静默安装应用
+功能 | 静默安装应用
+参数
+appFilePath
+待安装的应用文件路径
+参数 | appFilePath | 待安装的应用文件路径
+ 
+listener
+接口回调，安装完成后会回调结果，传null不会执行静默安装。详见 OnInstallAppListener
+  | listener | 接口回调，安装完成后会回调结果，传null不会执行静默安装。详见 OnInstallAppListener
+返回值
+无
+返回值 | 无
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+待安装文件需要放在/sdcard/路径下，不能放在应用私有路径下。Android的机制如此，私有路径别的应用无权限访问
+备注 | 待安装文件需要放在/sdcard/路径下，不能放在应用私有路径下。Android的机制如此，私有路径别的应用无权限访问
+示例代码
+try{
+    sTmsApi.getSoftwareManager().installApp("/sdcard/xxx/test.apk, new OnInstallAppListener.Stub() {
+        @Override
+        public void onInstallFinished() throws RemoteException {
+        }
+        @Override
+        public void onInstallError(int errorId) throws RemoteException {
+        }
+        @Override
+        public void onInstallSuccess(String packagename) throws RemoteException {
+        }
+        @Override
+        public void onInstallFail(String packagename, int errorId) throws RemoteException {
+        }
+    });
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try{     sTmsApi.getSoftwareManager().installApp("/sdcard/xxx/test.apk, new OnInstallAppListener.Stub() {         @Override         public void onInstallFinished() throws RemoteException {         }         @Override         public void onInstallError(int errorId) throws RemoteException {         }         @Override         public void onInstallSuccess(String packagename) throws RemoteException {         }         @Override         public void onInstallFail(String packagename, int errorId) throws RemoteException {         }     }); } catch (Exception e) {     e.printStackTrace(); }
+3.25 
+移除应用动态权限
+原型
+void revokeAppPermission(String packageName, String permissions)
+原型 | void revokeAppPermission(String packageName, String permissions)
+功能
+移除应用申请的动态权限
+功能 | 移除应用申请的动态权限
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+ 
+permissions
+目标权限，通过英文逗号分隔
+  | permissions | 目标权限，通过英文逗号分隔
+返回值
+无
+返回值 | 无
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+sTmsApi.getSoftwareManager().revokeAppPermission("com.xx.xx.xx","android.permission.CAMERA");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { sTmsApi.getSoftwareManager().revokeAppPermission("com.xx.xx.xx","android.permission.CAMERA"); } catch (Exception e) {     e.printStackTrace(); }
+3.26 
+设置应用是否能使用通知
+原型
+boolean setNotificationsEnabledForPackage(String packageName, boolean enabled)
+原型 | boolean setNotificationsEnabledForPackage(String packageName, boolean enabled)
+功能
+设置应用是否能使用通知
+功能 | 设置应用是否能使用通知
+参数
+packageName
+目标应用包名
+参数 | packageName | 目标应用包名
+ 
+enabled
+true：可以使用通知
+false：不能使用通知
+  | enabled | true：可以使用通知 false：不能使用通知
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getSoftwareManager().setNotificationsEnabledForPackage("com.xxx.xxx",true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getSoftwareManager().setNotificationsEnabledForPackage("com.xxx.xxx",true); } catch (Exception e) {     e.printStackTrace(); }
+3.27 清除最近任务列表
+原型
+int removeAllRecentTasks()
+原型 | int removeAllRecentTasks()
+功能
+清除最近任务列表
+功能 | 清除最近任务列表
+参数
+无
+参数 | 无 | 
+返回值
+0：成功
+1：失败
+-40：接口在当前设备或ROM不支持
+-41：未找到系统服务，请联系设备供应商
+返回值 | 0：成功 1：失败 -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商
+适用范围
+V3
+适用范围 | V3
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getSoftwareManager().removeAllRecentTasks(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getSoftwareManager().removeAllRecentTasks(); } catch (Exception e) { e.printStackTrace(); }

@@ -1,0 +1,1631 @@
+﻿================================================================================
+SunmiCustomer API - 01 Overview of SDK
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xdcxeghjk491
+Update Time: 2026-07-29 17:10:31
+Content Length: 31081 chars
+================================================================================
+1. 版本控制
+版本
+修改内容
+修改人
+修改时间
+版本 | 修改内容 | 修改人 | 修改时间
+1.3.4
+初版，定义非金融通用接口
+blanks
+2024.8.8
+1.3.4 | 初版，定义非金融通用接口 | blanks | 2024.8.8
+2.0.0
+增加金融通用接口。
+star
+2026.2.4
+2.0.0 | 增加金融通用接口。 | star | 2026.2.4
+2.0.1
+新增51个已适配指定机型的接口。
+star
+2026.7.15
+2.0.1 | 新增51个已适配指定机型的接口。 | star | 2026.7.15
+2. 概述
+2.1 引言
+SunmiCustomer API SDK是Sunmi基于Android系统封装的贴近java开发者的一套调用设备系统能力的接口，开发者通过该SDK可以快速调用Sunmi设备系统相应接口，实现自己相关的业务逻辑开发。
+SDK主要包含：设备信息模块、设备管理模块、软件管理模块、系统管理模块、系统UI管理模块、设备运行时信息模块、网络管理模块、设备软件信息模块。
+2.1.1 名词解释
+API 详情里的接口有适用范围区分，以下是相关定义：
+金融通用
+：仅适用于金融 P 系列产品。（
+见附录7.2金融支持的产品型号
+）
+非金融通用
+：适用于非金融 D、T、S、K、F 系列产品。（
+见附录7.1非金融支持的产品型号
+）
+通用
+：无限制，金融与非金融产品均可使用。
+指定机型：
+该接口仅适配了当前列出的机型。
+2.2 快速集成SunmiCustomerAPI SDK
+2.2.1 快速集成商米支付SDK
+本文是SunmiCustomer API SDK标准的集成开发指南文档。用以指导SDK的使用方法，默认读者已经熟悉IDE（AndroidStudio）的基本使用方法，具有一定的Android 编程基础。目前本文档仅适用于商米非金融设备的三代机，使用SDK前，请务必仔细阅读该文档。使用前请检查以下前提条件：
+本地依赖导入
+将SUNMI_CUSTOMER_API_vx.x.x_release.aar文件放在libs目录下。
+在项目根目录的build.gradle中增加以下代码：
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+在app/build.gradle中增加以下代码：
+implementation files('libs/SUNMI_CUSTOMER_API_v1.x.x_release.aar')
+导入aar包完成后，重新build项目。
+2.2.2 SDK所支持的系统版本以及IDE
+目前SDK支持API-19(Android 4.4+)
+目前SDK只支持Android studio、Intellij的集成
+2.3 
+使用Sunmi Customer API
+最佳实践:推荐在Applicaiton的onCreate()初始化API对象，通过进程全局唯一的引用对象调用API。请注意，绑定SunmiCustomerServiced服务为异步回调，请注意在回调连接成功后才能使用API。出现绑定SunmiCustomerServiced失败请先检查设备是否已经安装SunmiCustomerService。其次在项目AndroidManifest清单文件中添加
+ <queries>
+        <package android:name="com.sunmi.tmservice"/>
+ </queries>
+然后重新尝试。
+2.3.1 初始化Sunmi Customer API
+TMSApi sTmsApi = new TMSApi();
+2.3.2 绑定Sunmi Customer Service
+ /**
+     * connect sunmi customer service
+     */
+    private void connectTmsService() {
+        // connect tms service
+        sTmsApi.connect(this, new TMSServiceConnection() {
+            @Override
+            public void onServiceConnected() {
+                // tms service is connected
+            }
+
+            @Override
+            public void onServiceDisconnected() {
+                // tms service is disconnected
+            }
+        });
+    }
+2.3.3 使用Sunmi Customer API
+例1
+：根据卡槽打开/关闭移动数据开关
+/**
+     * enable the mobile network data of slotIndex simCard
+     */
+    public void enableMobileNetwork() {
+        try {
+            sTmsApi.getNetworkManager().enableMobileNetwork(0, true);
+        } catch (RemoteException | TmsServiceDisconnectedException e) {
+            e.printStackTrace();
+        }
+    }
+例2
+：获取设备型号
+    /**
+     * Get Device Model
+     */
+    public void getModel() {
+        try {
+            sTmsApi.getDeviceInfo().getModel();
+        } catch (RemoteException | TmsServiceDisconnectedException e) {
+            e.printStackTrace();
+        }
+    }
+
+例3
+：静默安装应用
+    /**
+     * Install Apk
+     */
+    public void installApp() {
+        try {
+        tmsApi.getSoftwareManager().installAppV2("/sdcard/test.apk", true, new OnInstallAppListener.Stub() {
+            @Override
+            public void onInstallFinished() throws RemoteException {
+                
+            }
+
+            @Override
+            public void onInstallError(int errorId) throws RemoteException {
+
+            }
+
+            @Override
+            public void onInstallSuccess(String packagename) throws RemoteException {
+
+            }
+
+            @Override
+            public void onInstallFail(String packagename, int errorId) throws RemoteException {
+
+            }
+        });
+        } catch (RemoteException | TmsServiceDisconnectedException e) {
+            e.printStackTrace();
+        }
+    }
+
+2.3.4 解绑Sunmi Customer Service
+    /**
+     * disconnect sunmi customer service
+     */
+    private void disconnectSunmiCustomerService() {
+        // disconnect sunmi customer service
+        sTmsApi.disconnect();
+    }
+
+3. API详情
+3.1 功能模块获取
+接口
+说明
+接口 | 说明
+IDeviceInfo getDeviceInfoBinder();
+设备信息模块
+IDeviceInfo getDeviceInfoBinder(); | 设备信息模块
+IDeviceManager getDeviceManagerBinder();
+设备管理模块
+IDeviceManager getDeviceManagerBinder(); | 设备管理模块
+ISoftwareManager getSoftwareManagerBinder();
+软件管理模块
+ISoftwareManager getSoftwareManagerBinder(); | 软件管理模块
+ISystemManager getSystemManagerBinder();
+系统管理模块
+ISystemManager getSystemManagerBinder(); | 系统管理模块
+ISystemUIManager getSystemUIManagerBinder();
+系统UI管理模块
+ISystemUIManager getSystemUIManagerBinder(); | 系统UI管理模块
+IDeviceRunningInfo getDeviceRunningInfoBinder();
+设备运行时信息模块
+IDeviceRunningInfo getDeviceRunningInfoBinder(); | 设备运行时信息模块
+INetworkManager getNetworkManagerBinder();
+网络管理模块
+INetworkManager getNetworkManagerBinder(); | 网络管理模块
+IPackageCTPA getAllPackageInfo();
+设备软件信息模块
+IPackageCTPA getAllPackageInfo(); | 设备软件信息模块
+IKioskManager getKioskManagerBinder()
+霸屏管理模块
+IKioskManager getKioskManagerBinder() | 霸屏管理模块
+ICertificateManager getCertificateManagerBinder()
+证书管理模块
+ICertificateManager getCertificateManagerBinder() | 证书管理模块
+ILogcatManager getLogcatManagerBinder();
+日志管理模块
+ILogcatManager getLogcatManagerBinder(); | 日志管理模块
+4.错误码
+4.1 Crp 资源包相关错误码
+错误码
+描述
+错误码 | 描述
+-1
+商米验签失败
+-1 | 商米验签失败
+-2
+客户证书验签失败
+-2 | 客户证书验签失败
+-3
+RAR解压失败
+-3 | RAR解压失败
+-4
+资源包不适用于当前设备
+-4 | 资源包不适用于当前设备
+-5
+资源包ZIP文件不存在
+-5 | 资源包ZIP文件不存在
+-6
+资源包信息文件不存
+-6 | 资源包信息文件不存
+-7
+资源包ZIP文件解压失败
+-7 | 资源包ZIP文件解压失败
+-8
+读取OWNER_VERSION失败
+-8 | 读取OWNER_VERSION失败
+-9
+拒绝替换资源包
+-9 | 拒绝替换资源包
+-10
+脚本执行失败
+-10 | 脚本执行失败
+4.2 静默安装应用错误码
+错误码
+描述
+错误码 | 描述
+-1
+安装失败：软件包已存在
+-1 | 安装失败：软件包已存在
+-2
+安装失败：APK 文件无效
+-2 | 安装失败：APK 文件无效
+-3
+安装失败：提供的 URI 无效
+-3 | 安装失败：提供的 URI 无效
+-4
+安装失败：设备存储空间不足
+-4 | 安装失败：设备存储空间不足
+-5
+安装失败：已存在同名软件包
+-5 | 安装失败：已存在同名软件包
+-6
+安装失败：请求的共享用户不存在
+-6 | 安装失败：请求的共享用户不存在
+-7
+安装失败：更新不兼容（签名不一致且旧包数据未移除）
+-7 | 安装失败：更新不兼容（签名不一致且旧包数据未移除）
+-8
+安装失败：共享用户不兼容（已安装的共享用户签名不匹配）
+-8 | 安装失败：共享用户不兼容（已安装的共享用户签名不匹配）
+-9
+安装失败：缺少所需的共享库
+-9 | 安装失败：缺少所需的共享库
+-10
+安装失败：无法替换系统应用（未提供 DELETE_SYSTEM_APP 标志）
+-10 | 安装失败：无法替换系统应用（未提供 DELETE_SYSTEM_APP 标志）
+-11
+安装失败：DEX 文件优化或验证失败（存储空间不足或验证错误）
+-11 | 安装失败：DEX 文件优化或验证失败（存储空间不足或验证错误）
+-12
+安装失败：当前系统 SDK 版本低于应用所需版本
+-12 | 安装失败：当前系统 SDK 版本低于应用所需版本
+-13
+安装失败：内容提供者（content provider）权限与已安装应用冲突
+-13 | 安装失败：内容提供者（content provider）权限与已安装应用冲突
+-14
+安装失败：当前系统 SDK 版本高于应用所需版本
+-14 | 安装失败：当前系统 SDK 版本高于应用所需版本
+-15
+安装失败：是仅用于测试的软件包（未提供 INSTALL_ALLOW_TEST 标志）
+-15 | 安装失败：是仅用于测试的软件包（未提供 INSTALL_ALLOW_TEST 标志）
+-16
+安装失败：包含与本设备 CPU ABI 不兼容的原生代码
+-16 | 安装失败：包含与本设备 CPU ABI 不兼容的原生代码
+-17
+安装失败：需要使用设备不支持的功能
+-17 | 安装失败：需要使用设备不支持的功能
+-18
+安装失败：无法访问外部介质上的安全容器挂载点
+-18 | 安装失败：无法访问外部介质上的安全容器挂载点
+-19
+安装失败：指定的安装位置无效
+-19 | 安装失败：指定的安装位置无效
+-20
+安装失败：指定的安装位置介质不可用
+-20 | 安装失败：指定的安装位置介质不可用
+-21
+安装失败：验证超时
+-21 | 安装失败：验证超时
+-22
+安装失败：验证未通过
+-22 | 安装失败：验证未通过
+-23
+安装失败：软件包与调用程序预期的不一致
+-23 | 安装失败：软件包与调用程序预期的不一致
+-24
+安装失败：软件包被分配了与之前不同的 UID
+-24 | 安装失败：软件包被分配了与之前不同的 UID
+-25
+安装失败：尝试安装的版本号低于当前已安装版本
+-25 | 安装失败：尝试安装的版本号低于当前已安装版本
+-26
+安装失败：权限模型降级（旧包支持运行时权限，新包不支持）
+-26 | 安装失败：权限模型降级（旧包支持运行时权限，新包不支持）
+-27
+安装失败：沙盒版本降级
+-27 | 安装失败：沙盒版本降级
+-28
+安装失败：缺少必需的拆分 APK
+-28 | 安装失败：缺少必需的拆分 APK
+-29
+安装失败：目标 SDK 版本已弃用
+-29 | 安装失败：目标 SDK 版本已弃用
+-100
+解析失败：提供的路径不是文件或文件不存在或不以 .apk 结尾
+-100 | 解析失败：提供的路径不是文件或文件不存在或不以 .apk 结尾
+-101
+解析失败：无法检索或解析 AndroidManifest.xml 文件
+-101 | 解析失败：无法检索或解析 AndroidManifest.xml 文件
+-102
+解析失败：遇到意外异常
+-102 | 解析失败：遇到意外异常
+-103
+解析失败：APK 中未找到证书
+-103 | 解析失败：APK 中未找到证书
+-104
+解析失败：APK 中的文件证书不一致
+-104 | 解析失败：APK 中的文件证书不一致
+-105
+解析失败：处理证书时遇到 CertificateEncodingException
+-105 | 解析失败：处理证书时遇到 CertificateEncodingException
+-106
+解析失败：Manifest 中的包名错误或缺失
+-106 | 解析失败：Manifest 中的包名错误或缺失
+-107
+解析失败：Manifest 中的共享用户 ID 名称错误
+-107 | 解析失败：Manifest 中的共享用户 ID 名称错误
+-108
+解析失败：Manifest 结构错误（格式不良）
+-108 | 解析失败：Manifest 结构错误（格式不良）
+-109
+解析失败：Manifest 中没有任何可操作标签（如 application 或 instrumentation）
+-109 | 解析失败：Manifest 中没有任何可操作标签（如 application 或 instrumentation）
+-110
+安装失败：系统内部错误
+-110 | 安装失败：系统内部错误
+-111
+安装失败：用户被限制安装应用
+-111 | 安装失败：用户被限制安装应用
+-112
+安装失败：尝试定义已存在的权限
+-112 | 安装失败：尝试定义已存在的权限
+-113
+安装失败：软件包包含的原生代码与系统支持的任何 ABI 都不匹配
+-113 | 安装失败：软件包包含的原生代码与系统支持的任何 ABI 都不匹配
+-114
+（内部代码）软件包不包含任何原生代码
+-114 | （内部代码）软件包不包含任何原生代码
+-115
+安装失败：安装被中止
+-115 | 安装失败：安装被中止
+-116
+安装失败：安装会话无效（安装类型与标志不兼容，或尝试通过增量安装/即时应用安装升级系统应用等）
+-116 | 安装失败：安装会话无效（安装类型与标志不兼容，或尝试通过增量安装/即时应用安装升级系统应用等）
+-117
+解析失败：Dex 元数据文件无效，或没有与之匹配的 APK 文件
+-117 | 解析失败：Dex 元数据文件无效，或没有与之匹配的 APK 文件
+-118
+解析失败：签名问题
+-118 | 解析失败：签名问题
+-119
+安装失败：已有其他暂存的会话正在进行，或新会话中的软件包已被暂存
+-119 | 安装失败：已有其他暂存的会话正在进行，或新会话中的软件包已被暂存
+-120
+安装失败：子会话与父会话在暂存或启用回滚参数方面不一致
+-120 | 安装失败：子会话与父会话在暂存或启用回滚参数方面不一致
+-121
+安装失败：所需的已安装版本号与当前已安装包的版本号不匹配
+-121 | 安装失败：所需的已安装版本号与当前已安装包的版本号不匹配
+-122
+安装失败：使用了未在 <processes> 标签中明确定义的进程
+-122 | 安装失败：使用了未在 <processes> 标签中明确定义的进程
+-124
+解析失败：某个 APK 的 resources.arsc 被压缩或未按 4 字节边界对齐
+-124 | 解析失败：某个 APK 的 resources.arsc 被压缩或未按 4 字节边界对齐
+-125
+解析失败：软件包被跳过（原因未定义）
+-125 | 解析失败：软件包被跳过（原因未定义）
+-126
+安装失败：尝试定义已存在的权限组
+-126 | 安装失败：尝试定义已存在的权限组
+-127
+安装失败：尝试将权限定义到不存在的权限组，或由证书不兼容的包定义的权限组
+-127 | 安装失败：尝试将权限定义到不存在的权限组，或由证书不兼容的包定义的权限组
+-128
+安装失败：会话激活阶段出错
+-128 | 安装失败：会话激活阶段出错
+4.3 静默卸载应用错误码
+错误码
+描述
+错误码 | 描述
+-1
+由于未指定的原因，系统无法删除该软件包。
+-1 | 由于未指定的原因，系统无法删除该软件包。
+-2
+因为该软件包是活跃的设备策略管理器，系统无法删除它。
+-2 | 因为该软件包是活跃的设备策略管理器，系统无法删除它。
+-3
+因为用户受到限制，系统无法删除该软件包。
+-3 | 因为用户受到限制，系统无法删除该软件包。
+-4
+因为配置文件或设备所有者已将该软件包标记为不可卸载。
+-4 | 因为配置文件或设备所有者已将该软件包标记为不可卸载。
+-5
+删除操作被中止。
+-5 | 删除操作被中止。
+-6
+因为该软件包是其他已安装软件包使用的共享库，系统无法删除它。
+-6 | 因为该软件包是其他已安装软件包使用的共享库，系统无法删除它。
+-7
+因为有应用被固定（例如在分屏或画中画模式），系统无法删除该软件包。
+-7 | 因为有应用被固定（例如在分屏或画中画模式），系统无法删除该软件包。
+-8
+因为任何具有 getDeleteAppWithParent() 为 true 的子配置文件，系统无法删除该软件包。
+-8 | 因为任何具有 getDeleteAppWithParent() 为 true 的子配置文件，系统无法删除该软件包。
+-201
+要卸载的APP不存在
+-201 | 要卸载的APP不存在
+4.4 应用验签证书相关错误码
+错误码
+描述
+错误码 | 描述
+2
+导入证书失败
+2 | 导入证书失败
+3
+要导入证书的上一级证书不存在
+3 | 要导入证书的上一级证书不存在
+4
+要导入的证书不存在
+4 | 要导入的证书不存在
+10
+证书回退成功
+10 | 证书回退成功
+11
+证书回退失败
+11 | 证书回退失败
+40
+缺少权限
+40 | 缺少权限
+-1000
+文件不存在
+-1000 | 文件不存在
+-1001
+硬件错误
+-1001 | 硬件错误
+-1002
+设备或地址错误
+-1002 | 设备或地址错误
+ -1003
+内存溢出错误，文件名超长
+ -1003 | 内存溢出错误，文件名超长
+-1004
+权限错误
+-1004 | 权限错误
+-1005
+设备忙
+-1005 | 设备忙
+-1006
+文件已存在
+-1006 | 文件已存在
+-1007
+设备不存在
+-1007 | 设备不存在
+-1008
+参数错误
+-1008 | 参数错误
+-1009
+当作操作被信号中断 (不严重)
+-1009 | 当作操作被信号中断 (不严重)
+-1010
+重试 (不严重)
+-1010 | 重试 (不严重)
+-1012
+网络已断开
+-1012 | 网络已断开
+-1013
+Flash空间已满
+-1013 | Flash空间已满
+-1014
+证书检验失败
+-1014 | 证书检验失败
+-1015
+不支持
+-1015 | 不支持
+-1016
+证书格式错误
+-1016 | 证书格式错误
+ -1017
+证书校验错误
+ -1017 | 证书校验错误
+-1018
+链接错误
+-1018 | 链接错误
+-1019
+重复初始化
+-1019 | 重复初始化
+-1020
+没有验签证书
+-1020 | 没有验签证书
+-1021
+证书已存在重复安装错误
+-1021 | 证书已存在重复安装错误
+-1022
+hash错误
+-1022 | hash错误
+-1023
+证书有效期错误
+-1023 | 证书有效期错误
+-1024
+证书已经吊销
+-1024 | 证书已经吊销
+-1030
+随机数长度错误或随机数重复
+-1030 | 随机数长度错误或随机数重复
+-1031
+SN错误
+-1031 | SN错误
+-1032
+公钥模数据在有效证书中没有查到
+-1032 | 公钥模数据在有效证书中没有查到
+-1040
+RSA参数错误
+-1040 | RSA参数错误
+4.5 updateSystem 接口相关错误码
+错误码
+描述
+错误码 | 描述
+1
+校验通过
+1 | 校验通过
+2
+校验失败-更新包文件有误(version.txt文件不存在，或者from/to不成对出现)，请更换后重试
+2 | 校验失败-更新包文件有误(version.txt文件不存在，或者from/to不成对出现)，请更换后重试
+3
+校验失败-更新包和当前机型不匹配，请更换
+3 | 校验失败-更新包和当前机型不匹配，请更换
+4
+校验失败-更新包版本必须大于当前系统版本，请更换
+4 | 校验失败-更新包版本必须大于当前系统版本，请更换
+5
+校验失败-更新包为不适用于当前设备的增量包，请更换后重试
+5 | 校验失败-更新包为不适用于当前设备的增量包，请更换后重试
+11
+电量不足
+11 | 电量不足
+12
+升级包文件不存在
+12 | 升级包文件不存在
+13
+存储空间不足
+13 | 存储空间不足
+14
+无法识别U盘
+14 | 无法识别U盘
+15
+不支持安装资源包功能
+15 | 不支持安装资源包功能
+16
+资源包校验失败
+16 | 资源包校验失败
+17
+拷贝异常
+17 | 拷贝异常
+-101
+重启失败
+-101 | 重启失败
+-100
+applyPayload error，正在处理更新，请先取消。
+-100 | applyPayload error，正在处理更新，请先取消。
+-99
+绑定UpdateEngine 服务失败
+-99 | 绑定UpdateEngine 服务失败
+-98
+updateEngine 为空
+-98 | updateEngine 为空
+-97
+当前正在升级中，请稍后重试。
+-97 | 当前正在升级中，请稍后重试。
+-96
+安装升级包失败
+-96 | 安装升级包失败
+-95
+校验升级包失败
+-95 | 校验升级包失败
+5.实体类
+5.1 自定义按键参数
+public class KeyConstants {
+    /**
+     * 音量键
+     */
+    public static final String VOLUME_1 = "volume_1";
+    public static final String VOLUME_2 = "volume_2";
+    /**
+     * 专用功能键
+     */
+    public static final String FUNCTION_1 = "function_1";
+    public static final String FUNCTION_2 = "function_2";
+    public static final String FUNCTION_3 = "function_3";
+    public static final String FUNCTION_P1 = "function_p1";
+    public static final String FUNCTION_P2 = "function_p2";
+    public static final String HEADSET_HOOK = "headset_hook";
+    /**
+     * 功能键盘
+     */
+    public static final String FN_MODE = "fn_mode";
+    public static final String FN = "fn";
+    public static final String F1 = "f1";
+    public static final String F2 = "f2";
+    public static final String F3 = "f3";
+    public static final String F4 = "f4";
+    public static final String F5 = "f5";
+    public static final String F6 = "f6";
+    public static final String F7 = "f7";
+    public static final String F8 = "f8";
+    public static final String F9 = "f9";
+    /**
+     * 按键对应的功能type
+     */
+    public static final String TYPE_NONE = "none";
+    public static final String TYPE_NATIVE = "native";
+    public static final String TYPE_FUNCTION = "function";
+    public static final String TYPE_FN_MODE = "fn_mode";
+    public static final String TYPE_APP_LAUNCH = "app_launch";
+    public static final String TYPE_FN_OPEN = "fn_open";
+    /**
+     * 按键对应的值value数据
+     */
+    public static final String VALUE_NO_SETTING = "none";
+    public static final String VALUE_NATIVE_ACTION = "native_action";
+    public static final String VALUE_VOLUME_UP = "volume_up";
+    public static final String VALUE_VOLUME_DOWN = "volume_down";
+    public static final String VALUE_SCAN = "scan";
+    public static final String VALUE_INTERCOM = "intercom";
+
+    public static final String FN_MODE_1 = "1";
+    public static final String FN_MODE_2 = "2";
+
+    public static final String FN_OPEN_0 = "close";
+    public static final String FN_OPEN_1 = "open";
+
+    public static final String PACKAGE_TOOLBOX = "com.sunmi.toolbox";
+    /**
+     * 音量
+     */
+    public static final String ACTION_VOLUME_KEY = "com.sunmi.volume.key";
+    /**
+     * 对讲机
+     */
+    public static final String ACTION_PPT_KEY_DOWN = "com.sunmi.ptt.key.down";
+    public static final String ACTION_PPT_KEY_UP = "com.sunmi.ptt.key.up";
+    /**
+     * 扫码
+     */
+    public static final String ACTION_SCANNER_KEY = "com.sunmi.scanner.key";
+    /**
+     * FN模式切换
+     */
+    public static final String ACTION_FN_OPEN = "com.sunmi.fn.open";
+    public static final String ACTION_FN_CLOSE = "com.sunmi.fn.close";
+    /**
+     * 打开应用
+     */
+    public static final String ACTION_LAUNCH_APP = "com.sunmi.launch_app";
+    public static final String PACKAGE_NAME = "package_name";
+    /**
+     * 未定义默认动作
+     */
+    public static final String ACTION_NO_SETTINGS = "com.sunmi.no_settings";
+    /**
+     * 数据收集
+     */
+    static final String EVENT_KEY = "event_key";
+    static final String EVENT_TYPE = "event_type";
+    static final String EVENT_VALUE = "event_value";
+
+}
+5.2 
+WifiConfigurationInfo实体类
+public class WifiConfigurationInfo  {
+    /**
+     * 网络名称，SSID_ASCII_MAX_LENGTH = 32
+     */
+    public String ssid;
+
+    /**
+     * 安全性
+     * SECURITY_NONE = 1                    无
+     * SECURITY_PSK = 3                     WPA/WPA2-Personal
+     * SECURITY_SAE = 6                     WPA3-Personal
+     * SECURITY_EAP_WPA3_ENTERPRISE = 8     WPA3-Enterprise
+     */
+    public int security_type;
+
+    /**
+     * EAP方法
+     * 0:PEAP
+     * 1:TLS
+     * 2:TTLS
+     * 3:PWD
+     * 4:SIM
+     * 5:AKA
+     * 6:AKA'
+     */
+    public int method;
+
+    /**
+     * SIM卡
+     * 0:卡1
+     * 1:卡2
+     */
+    public int sim;
+
+    /**
+     * 阶段2身份验证
+     * NONE = 0
+     * PAP = 1
+     * MSCHAP = 2
+     * MSCHAPV2 = 3
+     * GTC = 4
+     * SIM = 5
+     * AKA = 6
+     * AKA_PRIME   = 7;
+     */
+    public int phase2;
+
+    /**
+     * CA证书
+     * 0:请选择
+     * 1:使用系统证书
+     * 2:首次使用时信任
+     * 3:使用下发的证书
+     */
+    public int ca_cert;
+
+    /**
+     * 下发安装证书时，证书安装的路径
+     */
+    public String ca_cert_upload_path;
+
+    /**
+     * 下发安装证书时，证书安装的文件名
+     */
+    public String ca_cert_upload_name;
+
+    /**
+     * 下发安装证书时，证书安装的密码
+     */
+    public String ca_cert_upload_password;
+
+    /**
+     * 本地已经安装了证书的名字
+     */
+    public String ca_cert_name;
+
+    /**
+     * 在线证书状态
+     * 0:OCSP_NONE 不要验证
+     * 1:OCSP_REQUEST_CERT_STATUS 要求证书状态(非强制)
+     * 2:OCSP_REQUIRE_CERT_STATUS 需要证书状态
+     */
+    public int ocsp;
+
+    /**
+     * 域名
+     */
+    public String domain;
+
+    /**
+     * 用户证书
+     */
+    public String user_cert;
+
+    /**
+     * 身份
+     */
+    public String identity;
+
+    /**
+     * 匿名身份
+     */
+    public String anonymous;
+
+    /**
+     * 密码
+     */
+    public String pwd;
+
+    /**
+     * 隐藏的网络
+     * 0:NOT_HIDDEN
+     * 1:HIDDEN
+     */
+    public int hidden_settings;
+
+    /**
+     * GBK Encoding
+     * 0:NOT_HIDDEN
+     * 1:HIDDEN
+     */
+    public int hidden_gbk_settings;
+
+    /**
+     * 按流量计费
+     * 0:自动检测
+     * 1:视为按流量计费
+     * 2:视为不按流量计费
+     */
+    public int metered_settings;
+
+    /**
+     * 代理
+     * 无, PROXY_NONE = 0
+     * 手动, PROXY_STATIC = 1
+     * 代理自动配置(PAC), PROXY_PAC = 2
+     */
+    public int proxy_settings;
+
+    /**
+     * PAC网址
+     */
+    public String proxy_pac;
+
+    /**
+     * 代理主机名
+     */
+    public String proxy_hostname;
+
+    /**
+     * 代理端口
+     */
+    public int proxy_port;
+
+    /**
+     * 对以下网址不使用代理
+     */
+    public List<String> proxy_exclusionlist;
+
+    /**
+     * IP设置
+     * DHCP = 0
+     * 静态 STATIC_IP = 1
+     */
+    public int ip_settings;
+
+    /**
+     * IP地址
+     */
+    public String ipaddress;
+
+    /**
+     * 网关
+     */
+    public String gateway;
+
+    /**
+     * 网络前缀长度
+     */
+    public int network_prefix_length;
+
+    /**
+     * DNS 1（除非已被专用 DNS 替换）
+     */
+    public String dns1;
+
+    /**
+     * DNS 2（除非已被专用 DNS 替换）
+     */
+    public String dns2;
+
+    /**
+     * 隐私
+     * 0:设备MAC
+     * 1:随机MAC
+     */
+    public int privacy_settings;
+   
+}
+5.3 AppDataBucket实体类
+public class AppDataBucket implements Parcelable {
+    /**
+     * 应用包名
+     */
+    private String packageName;
+    /**
+     * 应用uid
+     */
+    private int uid;
+    /**
+     * 应用数据
+     */
+    private DataBucket dataBucket;
+    
+    ....
+}
+5.3.1 DataBucket 实体类
+public class DataBucket implements Parcelable {
+    /**
+     * 开始的时间戳
+     */
+    private long mBeginTimeStamp;
+
+    /**
+     * 结束的时间戳
+     */
+    private long mEndTimeStamp;
+
+    /**
+     * 在时间间隔内接收的字节数
+     */
+    private long mRxBytes;
+
+    /**
+     * 在时间间隔内接收的包数量
+     */
+    private long mRxPackets;
+
+    /**
+     * 在时间间隔内发送的字节数
+     */
+    private long mTxBytes;
+
+    /**
+     * 在时间间隔内发送的包数量
+     */
+    private long mTxPackets;
+
+    ....
+}
+5.4 FileStorageUtil 文件路径获取类
+直接访问 /sdcard 路径在 Android 10 及以上版本受限，通过以下方式可解决：
+<!--Android 10 以下权限读取外部存储权限-->
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<!--Android 10 以下写入外部存储权限（如果需要写入文件）-->
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<!-- Android 10 需要声明 legacy external storage -->
+<application android:requestLegacyExternalStorage="true"
+方式一：使用 Storage Access Framework 启动选择文件。
+/ 1. 启动文件选择器让用户选择文件
+private void selectFileFromSdcard() {
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+    intent.setType("*/*");
+    // 可以指定初始目录（如果知道路径）
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, 
+            Uri.fromFile(Environment.getExternalStorageDirectory()));
+    }
+    startActivityForResult(intent, REQUEST_CODE_SELECT_FILE);
+}
+
+// 2. 处理选择结果
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_CODE_SELECT_FILE && resultCode == RESULT_OK) {
+        Uri uri = data.getData();
+        // 通过获取到的uri处理文件
+    }
+}
+方式二：避免硬编码 /sdcard 路径，使用 Environment.getExternalStorageDirectory() 获取。
+方式三：对于安装应用等操作，建议先将文件复制到应用内部存储目录。
+public class FileStorageUtil {
+    /**
+     * 获取兼容性的外部存储文件路径
+     *
+     * @param context      应用上下文
+     * @param externalPath 外部存储路径（如/sdcard/xxx.apk）
+     * @return 兼容当前系统版本的安全文件路径
+     */
+    public static String getCompatibleExternalPath(Context context, String externalPath) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10及以上版本，需要将文件复制到应用内部存储
+            return copyToAppInternalStorage(context, externalPath);
+        } else {
+            // Android 10以下版本可以直接使用外部存储路径
+            return externalPath;
+        }
+    }
+
+    /**
+     * 将外部存储文件复制到应用内部存储目录
+     *
+     * @param context      应用上下文
+     * @param externalPath 外部存储文件路径
+     * @return 应用内部存储中的文件路径
+     */
+    private static String copyToAppInternalStorage(Context context, String externalPath) {
+        try {
+            File sourceFile = new File(externalPath);
+            if (!sourceFile.exists()) {
+                return null;
+            }
+
+            // 创建应用内部存储目录
+            File internalDir = new File(context.getFilesDir(), "external_copied");
+            if (!internalDir.exists()) {
+                internalDir.mkdirs();
+            }
+
+            // 目标文件路径
+            File targetFile = new File(internalDir, sourceFile.getName());
+
+            // 复制文件
+            copyFile(externalPath, targetFile.getAbsolutePath());
+
+            return targetFile.getAbsolutePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 文件复制工具方法
+     *
+     * @param sourcePath 源文件路径
+     * @param targetPath 目标文件路径
+     * @throws IOException 文件操作异常
+     */
+    private static void copyFile(String sourcePath, String targetPath) throws IOException {
+        try (FileInputStream fis = new FileInputStream(sourcePath);
+             FileOutputStream fos = new FileOutputStream(targetPath);
+             FileChannel sourceChannel = fis.getChannel();
+             FileChannel targetChannel = fos.getChannel()) {
+            targetChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
+        }
+    }
+
+    /**
+     * 清理复制的外部文件
+     *
+     * @param context 应用上下文
+     */
+    public static void cleanCopiedExternalFiles(Context context) {
+        File internalDir = new File(context.getFilesDir(), "external_copied");
+        if (internalDir.exists()) {
+            File[] files = internalDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    /**
+     * 检查外部存储是否可用
+     *
+     * @return 外部存储是否可读写
+     */
+    public static boolean isExternalStorageAvailable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state);
+    }
+
+    /**
+     * 获取标准的外部存储目录路径
+     *
+     * @return 外部存储根目录路径
+     */
+    public static String getExternalStoragePath() {
+        return Environment.getExternalStorageDirectory().getAbsolutePath();
+    }
+}
+5.5 LocationInfoConstant
+public interface LocationInfoConstant {
+    /**
+     * 经度
+     */
+    String LONGITUDE = "longitude";
+    /**
+     * 纬度
+     */
+    String LATITUDE = "latitude";
+    /**
+     * 海拔
+     */
+    String ALTITUDE = "altitude";
+    /**
+     * 速度
+     */
+    String SPEED = "speed";
+    /**
+     * 方位角
+     */
+    String BEARING = "bearing";
+}
+5.6 SunmiApnSetting.class 实体类
+public class SunmiApnSetting implements Parcelable {
+
+    /** APN 数据库主键 id */
+    public Integer _id = null;
+
+    /**
+     * APN 中文描述
+     */
+    public String name = null;
+
+    /** 网络运营商代码 (mcc+mnc) */
+    public String numeric = null;
+
+    /**
+     * 移动设备国家代码(3位)
+     */
+    public String mcc = null;
+
+    /**
+     * 移动设备网络代码(2位)
+     */
+    public String mnc = null;
+
+    /** 运营商 id */
+    public Integer carrier_id = null;
+
+    /**
+     * APN
+     */
+    public String apn = null;
+
+    /**
+     * 用户名
+     */
+    public String user = null;
+
+    /**
+     * 服务器
+     */
+    public String server = null;
+
+    /**
+     * 密码
+     */
+    public String password = null;
+
+    /**
+     * 代理
+     */
+    public String proxy = null;
+
+    /**
+     * 端口
+     */
+    public String port = null;
+
+    /**
+     * 彩信代理
+     */
+    public String mmsproxy = null;
+
+    /**
+     * 彩信端口
+     */
+    public String mmsport = null;
+
+    /**
+     * 彩信中心地址
+     */
+    public String mmsc = null;
+
+    /**
+     * 身份验证类型
+     * -1 未设置
+     * 0 无
+     * 1 PAP
+     * 2 CHAP
+     * 3 PAP 或 CHAP
+     */
+    public Integer authtype = null;
+
+    /**
+     * APN 类型
+     */
+    public String type = null;
+
+    /** 当前使用的 APN 标记 (1=当前默认) */
+    public Integer current = null;
+
+    /** 协议 (IP/IPv4/IPv6等) */
+    public String protocol = null;
+
+    /** 漫游协议 */
+    public String roaming_protocol = null;
+
+    /** 运营商是否启用 */
+    public Boolean carrier_enabled = null;
+
+    /** 承载类型 */
+    public Integer bearer = null;
+
+    /** 承载类型位掩码 */
+    public Integer bearer_bitmask = null;
+
+    /** 网络类型位掩码 */
+    public Integer network_type_bitmask = null;
+
+    /** 持续保留网络类型位掩码 */
+    public Integer lingering_network_type_bitmask = null;
+
+    /** MVNO 类型 */
+    public String mvno_type = null;
+
+    /** MVNO 匹配数据 */
+    public String mvno_match_data = null;
+
+    /** SIM 卡订阅 id */
+    public Integer sub_id = null;
+
+    /** 配置 profile id */
+    public Integer profile_id = null;
+
+    /** 调制解调器认知 */
+    public Boolean modem_cognitive = null;
+
+    /** 最大连接数 */
+    public Integer max_conns = null;
+
+    /** 等待时间 */
+    public Integer wait_time = null;
+
+    /** 最大连接持续时间 */
+    public Integer max_conns_time = null;
+
+    /** MTU */
+    public Integer mtu = null;
+
+    /** IPv4 MTU */
+    public Integer mtu_v4 = null;
+
+    /** IPv6 MTU */
+    public Integer mtu_v6 = null;
+
+    /** 编辑状态 */
+    public Integer edited = null;
+
+    /** 用户可见 */
+    public Boolean user_visible = null;
+
+    /** 用户可编辑 */
+    public Boolean user_editable = null;
+
+    /** 所有者 */
+    public Integer owned_by = null;
+
+    /** APN 集合 id */
+    public Integer apn_set_id = null;
+
+    /** 是否跳过 464XLAT 转换 */
+    public Integer skip_464xlat = null;
+
+    /** 是否保持 APN 常久在线 */
+    public Integer always_on = null;
+}
+5.7 CellularNetworkInfo.class 实体类
+public class CellularNetworkInfo implements Parcelable {
+ /**
+ * 仅支持 Wi-Fi，不支持 SIM 卡。
+ * 该设备不支持蜂窝通信，因此此类中的大多数字段通常没有实际意义。
+ */
+ public static final int SUPPORT_TYPE_WIFI_ONLY = 1;
+
+/**
+ * 仅支持蜂窝网络（SIM）。
+ * 该设备支持蜂窝通信，但并不是以 Wi-Fi 组合场景为重点。
+ */
+public static final int SUPPORT_TYPE_SIM_ONLY = 2;
+
+/**
+ * 同时支持 Wi-Fi 和 SIM。
+ */
+public static final int SUPPORT_TYPE_WIFI_AND_SIM = 3;
+
+/**
+ * 设备支持类型。
+ *
+ * 取值：
+ * 1：仅 Wi-Fi
+ * 2：仅 SIM
+ * 3：Wi-Fi + SIM
+ * -1：未知
+ *
+ * 当取值为 SUPPORT_TYPE_WIFI_ONLY 时，与蜂窝网络相关的字段通常没有实际意义。
+ */
+public int supportType = -1;
+
+/**
+ * SIM 卡槽对应的订阅 ID。
+ *
+ * 通常对应 Android 中 SubscriptionInfo 或 TelephonyManager 里的 subId，
+ * 用于标识这份数据来自哪一张 SIM 卡。
+ *
+ * -1 表示不可用。
+ */
+public int subId = -1;
+
+/**
+ * 网络注册状态。
+ *
+ * 取值：
+ * 0：STATE_IN_SERVICE，已注册且在网
+ * 1：STATE_OUT_OF_SERVICE，离网/无服务
+ * 2：STATE_EMERGENCY_ONLY，仅限紧急呼叫
+ * 3：STATE_POWER_OFF，无线电已关闭
+ * -1：不可用
+ */
+public int registrationState = -1;
+
+/**
+ * 当前服务小区的无线信道号。
+ *
+ * 需要结合无线接入技术一起理解，例如 NR / LTE / WCDMA / GSM。
+ *
+ * 常见范围：
+ * NR：0 ~ 3279165（NR-ARFCN）
+ * LTE：0 ~ 65535（EARFCN）
+ * WCDMA：大约 0 ~ 65535（UARFCN）
+ * GSM：0 ~ 1023（GSM ARFCN）
+ *
+ * -1 表示不可用。
+ */
+public int arfcn = -1;
+
+/**
+ * 物理小区 ID（PCI）。
+ *
+ * 表示当前 arfcn 频点上的具体小区标识。
+ *
+ * 常见范围：
+ * NR：0 ~ 1007
+ * LTE：0 ~ 503
+ *
+ * -1 表示不可用。
+ */
+public int pci = -1;
+
+/**
+ * 频段号。
+ *
+ * 是一个正整数，其具体含义取决于无线制式。
+ *
+ * 例如：
+ * 3：LTE Band 3，大约 1800 MHz
+ * 41：LTE Band 41 或 NR n41
+ * 78：NR n78，大约 3.5 GHz
+ *
+ * -1 表示不可用。
+ */
+public int band = -1;
+
+/**
+ * RSRP，参考信号接收功率。
+ *
+ * 单位：dBm。数值越大、越接近 0，表示信号越强。
+ *
+ * 常见参考：
+ * >= -70 dBm：极好
+ * -70 ~ -85 dBm：很好
+ * -85 ~ -95 dBm：良好
+ * -95 ~ -110 dBm：一般
+ * -110 ~ -120 dBm：较差
+ * < -120 dBm：很弱
+ *
+ * 理论范围通常大约是 -156 ~ -44 dBm。
+ * -1 表示不可用。
+ */
+public int rsrp = -1;
+
+/**
+ * RSRQ，参考信号接收质量。
+ *
+ * 单位：dB。反映信号质量，需要结合无线制式一起理解。
+ *
+ * 典型范围：
+ * LTE：-19.5 ~ -3 dB
+ * NR：-43 ~ +20 dB
+ *
+ * 常见 NR 参考：
+ * >= -8 dB：极好
+ * -8 ~ -12 dB：良好
+ * -12 ~ -16 dB：一般
+ * -16 ~ -20 dB：较差
+ * < -20 dB：很差
+ *
+ * -1 表示不可用。
+ */
+public int rsrq = -1;
+
+/**
+ * SINR，信号与干扰加噪声比。
+ *
+ * 单位：dB。数值越大，表示干扰越低，网络质量越好。
+ *
+ * 常见参考：
+ * >= 20 dB：极好
+ * 13 ~ 20 dB：很好
+ * 6 ~ 13 dB：良好
+ * 0 ~ 6 dB：一般
+ * -10 ~ 0 dB：较差
+ * < -10 dB：很差
+ *
+ * 理论范围大约是 -20 ~ +40 dB。
+ * -1 表示不可用。
+ */
+public int sinr = -1;
+
+/**
+ * 信号等级。
+ *
+ * 取值范围：
+ * 4：极好
+ * 3：良好
+ * 2：一般
+ * 1：较差
+ * 0：无信号
+ * -1：不可用
+ *
+ * 含义与系统信号格一致。
+ */
+public int signalLevel = -1;
+
+/**
+ * 网络模式。
+ *
+ * 用于描述当前或配置的网络模式字符串，例如：
+ * "NR/LTE"、"仅 LTE"、"WCDMA 优先" 等。
+ *
+ * 具体格式取决于实现方式。
+ * null 表示不可用。
+ */
+public String networkMode = null;
+
+/**
+ * 当前网络类型。
+ *
+ * 表示设备当前驻留的单一网络类型。
+ * 一次只返回一个值，不会组合多个值。
+ * 取值通常对应 Android TelephonyManager.NETWORK_TYPE_*。
+ *
+ * 可用于判断当前网络是 5G / 4G / 3G / 2G。
+ *
+ * -1 表示不可用。
+ */
+public int currentNetworkType = -1;
+
+/**
+ * 允许使用的网络类型位掩码。
+ *
+ * 表示设备或当前订阅允许使用的网络类型集合。
+ * 取值通常对应 Android TelephonyManager.NETWORK_TYPE_BITMASK_*。
+ *
+ * 与 currentNetworkType 的区别：
+ * currentNetworkType 表示当前正在使用的单一网络类型。
+ * allowedNetworkTypesBitmask 表示配置上允许使用的多个网络类型集合。
+ *
+ * 0L 表示不可用或为空。
+ */
+public long allowedNetworkTypesBitmask = 0L;
+
+/**
+ * 当前运营商名称。
+ *
+ * 例如：中国移动。
+ *
+ * 表示当前已注册网络的运营商名称，
+ * 不一定等同于 SIM 卡所属的归属运营商。
+ */
+public String operatorName = null;
+
+/**
+ * 当前已注册网络的 MCC+MNC（PLMN）。
+ *
+ * 表示设备当前连接到的网络运营商代码，
+ * 也就是当前注册的 PLMN。
+ * 格式通常是 5 位或 6 位数字字符串。
+ *
+ * 例如：
+ * 46000 / 46002 / 46007：不同制式或场景下的中国移动
+ * 46001 / 46006：中国联通
+ * 46003 / 46011：中国电信
+ * 310260：美国 T-Mobile
+ * 310410：美国 AT&T
+ * 23415：英国 Vodafone
+ * 44010：日本 NTT DOCOMO
+ * 45005：韩国 SKT
+ * 52501：新加坡 Singtel
+ *
+ * 说明：
+ * 在本地网或未漫游时，它可能与 simOperatorNumeric 相同。
+ * 在国内或国际漫游时，它可能与 simOperatorNumeric 不同。
+ * 通常在无网络服务时为空。
+ */
+public String networkOperatorNumeric = null;
+
+/**
+ * SIM 卡所属运营商的 MCC+MNC。
+ *
+ * 表示 SIM 卡本身归属的运营商代码，而不是当前注册网络。
+ *
+ * MCC = Mobile Country Code，移动国家代码，为 3 位数字。
+ * MNC = Mobile Network Code，移动网络代码，为 2 到 3 位数字。
+ *
+ * 中国常见示例：
+ * 46000：中国移动（GSM）
+ * 46001：中国联通（GSM）
+ * 46002：中国移动（TD-SCDMA）
+ * 46003：中国电信（CDMA）
+ * 46007：中国移动（4G/5G）
+ * 46006：中国联通（4G/5G）
+ * 46011：中国电信（4G/5G）
+ *
+ * 简单理解：
+ * MCC = 国家
+ * MNC = 运营商
+ */
+public String simOperatorNumeric = null;
+
+/**
+ * SIM 卡状态。
+ *
+ * 常见取值范围：0 ~ 8。
+ *
+ * 0：SIM_STATE_UNKNOWN，未知
+ * 1：SIM_STATE_ABSENT，未插卡
+ * 2：SIM_STATE_PIN_REQUIRED，需要 PIN
+ * 3：SIM_STATE_PUK_REQUIRED，需要 PUK
+ * 4：SIM_STATE_NETWORK_LOCKED，网络锁定
+ * 5：SIM_STATE_READY，就绪
+ * 6：SIM_STATE_NOT_READY，已插卡但未就绪
+ * 7：SIM_STATE_PERM_DISABLED，永久禁用
+ * 8：SIM_STATE_CARD_IO_ERROR，卡 I/O 错误
+ * -1：不可用
+ *
+ * 一个简单记忆方式：
+ * 0 未知，1 未插卡，2 PIN，3 PUK，4 锁定，5 就绪，6 未就绪，7/8 故障。
+ */
+public int simState = -1;
+
+...
+}
+6.回调函数
+6.1
+IUnifiedCallback
+interface IUnifiedCallback {
+    /**
+     * 返回Json格式的字符串，例如:{"resultCode":0}
+     * resultCode = 0表示成功
+     * resultCode = -1表示失败
+     */
+    void onCall(String result);
+}
+6.2 OnSystemUpdateListener
+interface OnSystemUpdateListener {
+       /**
+         * 更新进度
+         * @param progress
+         */
+        void progress(int progress);
+
+        /**
+         * 校验包失败
+         * @param info
+         */
+        void verifyPackageFail(String info);
+
+        /**
+         * 更新失败
+         * @param info
+         */
+        void updateSystemFail(String info);
+}
+6.3 OnInstallAppListener
+1. 安装成功将会回调onInstallFinished与onInstallSuccess。任选其一判定为安装成功即可。
+2. 安装失败将会回调onInstallError与onInstallFail。错误码一致，任选其一判定为安装失败即可。
+interface OnInstallAppListener {
+  
+        /**
+        * 安装完成
+        */
+       void onInstallFinished();
+  
+        /**
+        * 安装错误
+        * @param errorId 错误码，详见4.2静默安装应用错误码
+        */
+       void onInstallError(int errorId);
+  
+        /**
+        * 安装成功
+        * @param packagename 包名
+        */
+       void onInstallSuccess(String packagename);
+       
+        /**
+        * 安装失败
+        * @param packagename 包名，可能为空
+        * @param errorId 错误码，详见4.2静默安装应用错误码
+        */
+       void onInstallFail(String packagename,int errorId);
+}
+7.附录
+7.1 
+非金融支持的产品型号
+D3 MINI、D3 PRO、D3、D3 80MM、T3 PRO、T3 PRO MAX、T3、T3 80MM、V3 MIX、V3、V3e、V3 PLUS、K2(Android 13)、FLEX 3、CPad、L3、M3 等。
+7.2 
+金融支持的产品型号
+P3、
+P3H-A11、P3KH-A11
+等。

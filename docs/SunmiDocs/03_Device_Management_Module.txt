@@ -1,0 +1,1973 @@
+﻿================================================================================
+SunmiCustomer API - 03 Device Management Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xddaeghjk480
+Update Time: 2026-07-29 17:06:58
+Content Length: 45475 chars
+================================================================================
+1 概述
+设备管理器，包括:修改系统时间、重启设备、设备休眠,、恢复出厂设置、设置屏幕亮度、设置壁纸、设置位置开关、蓝牙开关、自动获取时区开关、获取USB免授权白名单等。
+2 API列表
+接口
+描述
+接口 | 描述
+void setSystemTime(int second,int minute,int hour,int day,int month,int year);
+修改系统时间
+void setSystemTime(int second,int minute,int hour,int day,int month,int year); | 修改系统时间
+void powerReboot();
+重启设备
+void powerReboot(); | 重启设备
+void shutdown();
+关机
+void shutdown(); | 关机
+void setTimeZone(String timeZone);
+设置时区
+void setTimeZone(String timeZone); | 设置时区
+void factoryReset();
+恢复出厂设置
+void factoryReset(); | 恢复出厂设置
+void toSleep();
+设备休眠
+void toSleep(); | 设备休眠
+void toWakeUp();
+唤醒设备
+void toWakeUp(); | 唤醒设备
+void setBootAnimation(String filePath);
+设置开机动画
+void setBootAnimation(String filePath); | 设置开机动画
+void enableBluetooth(boolean enable);
+打开/关闭蓝牙
+void enableBluetooth(boolean enable); | 打开/关闭蓝牙
+void setCustomKeyFunction(String key, String type, String value
+自定义按键功能
+void setCustomKeyFunction(String key, String type, String value | 自定义按键功能
+boolean setPowerButtonEnabled(boolean enabled);
+启用/禁用亮屏状态下电源键短按功能
+boolean setPowerButtonEnabled(boolean enabled); | 启用/禁用亮屏状态下电源键短按功能
+boolean isPowerButtonEnabled()
+检查亮屏状态下的电源键短按是否可用
+boolean isPowerButtonEnabled() | 检查亮屏状态下的电源键短按是否可用
+void setWallpaper(String filePath)
+设置壁纸
+void setWallpaper(String filePath) | 设置壁纸
+boolean setScreenBrightness(int value)
+设置屏幕亮度
+boolean setScreenBrightness(int value) | 设置屏幕亮度
+boolean setScreenTimeout(int timeout)
+设置屏幕超时时间
+boolean setScreenTimeout(int timeout) | 设置屏幕超时时间
+int getScreenBrightness()
+获取屏幕亮度值
+int getScreenBrightness() | 获取屏幕亮度值
+void setBrightnessMode(int mode);
+设置自动调节屏幕亮度模式
+void setBrightnessMode(int mode); | 设置自动调节屏幕亮度模式
+int getMinimumScreenBrightnessSetting();
+获取可设置的最小屏幕亮度
+int getMinimumScreenBrightnessSetting(); | 获取可设置的最小屏幕亮度
+int getMaximumScreenBrightnessSetting();
+获取可设置的最大屏幕亮度
+int getMaximumScreenBrightnessSetting(); | 获取可设置的最大屏幕亮度
+boolean setDeviceOwner(String packageName, String classFullPathName)
+设置设备拥有者
+boolean setDeviceOwner(String packageName, String classFullPathName) | 设置设备拥有者
+boolean clearDeviceOwner();
+清除设备拥有者
+boolean clearDeviceOwner(); | 清除设备拥有者
+boolean switchBTModuleEnable(boolean enable);
+启用/禁用蓝牙模块
+boolean switchBTModuleEnable(boolean enable); | 启用/禁用蓝牙模块
+boolean isBTModuleEnabled();
+检测蓝牙模块是否可用
+boolean isBTModuleEnabled(); | 检测蓝牙模块是否可用
+boolean enableAutoTime(boolean enable);
+设置自动获取时间
+boolean enableAutoTime(boolean enable); | 设置自动获取时间
+boolean enableAutoTimeZone(boolean enable);
+设置自动获取时区
+boolean enableAutoTimeZone(boolean enable); | 设置自动获取时区
+void enableLocation(boolean enable);
+打开/关闭位置信息
+void enableLocation(boolean enable); | 打开/关闭位置信息
+void set24Hour(boolean is24Hour);
+打开/关闭24小时制
+void set24Hour(boolean is24Hour); | 打开/关闭24小时制
+boolean setAirplaneMode(boolean open);
+打开/关闭飞行模式
+boolean setAirplaneMode(boolean open); | 打开/关闭飞行模式
+int setPhysicKeyEnabled(int type,boolean enable);
+设置物理按键(FN,*)是否可用
+int setPhysicKeyEnabled(int type,boolean enable); | 设置物理按键(FN,*)是否可用
+int getPhysicKeyEnabled(int type);
+获取物理按键(FN,*)是否可用
+int getPhysicKeyEnabled(int type); | 获取物理按键(FN,*)是否可用
+boolean enableGPS(boolean isEnable);
+打开/关闭GPS
+boolean enableGPS(boolean isEnable); | 打开/关闭GPS
+boolean enableNFC(boolean enable);
+打开/关闭NFC
+boolean enableNFC(boolean enable); | 打开/关闭NFC
+boolean enableWIFI(boolean isEnable);
+打开/关闭WIFI
+boolean enableWIFI(boolean isEnable); | 打开/关闭WIFI
+int getInsertSdcardDisabled();
+获取插入SD卡时是否禁用
+int getInsertSdcardDisabled(); | 获取插入SD卡时是否禁用
+int disableInsertSdcard(boolean disable);
+设置插入SD卡时是否禁用
+int disableInsertSdcard(boolean disable); | 设置插入SD卡时是否禁用
+int setCableType(int type);
+设置USB线缆类型
+int setCableType(int type); | 设置USB线缆类型
+int getCableType();
+获取当前使用的USB线缆类型
+int getCableType(); | 获取当前使用的USB线缆类型
+int resetBatteryCycleCount(int count);
+重置电池循环充电次数
+int resetBatteryCycleCount(int count); | 重置电池循环充电次数
+int getBatteryCycleCount();
+获取电池循环充电次数
+int getBatteryCycleCount(); | 获取电池循环充电次数
+int enableShowVirtualKeyboard(boolean enable);
+设置是否显示虚拟键盘
+int enableShowVirtualKeyboard(boolean enable); | 设置是否显示虚拟键盘
+int isShowVirtualKeyboardEnabled()
+获取是否显示了虚拟键盘
+int isShowVirtualKeyboardEnabled() | 获取是否显示了虚拟键盘
+int getBatteryChargeVoltage()
+获取电池充电电压
+int getBatteryChargeVoltage() | 获取电池充电电压
+int setDefaultUsbMode(long type)
+设置USB默认模式
+int setDefaultUsbMode(long type) | 设置USB默认模式
+long getDefaultUsbMode()
+获取USB默认模式
+long getDefaultUsbMode() | 获取USB默认模式
+int getDeviceDockStatus();
+获取底座连接状态
+int getDeviceDockStatus(); | 获取底座连接状态
+int isSupportRgbLed();
+判断设备是否支持LED指示灯
+int isSupportRgbLed(); | 判断设备是否支持LED指示灯
+int openRgbLed(int rbg, int onMs, int offMs, int lightMode, long timeoutMs);
+打开LED指示灯
+int openRgbLed(int rbg, int onMs, int offMs, int lightMode, long timeoutMs); | 打开LED指示灯
+int closeRgbLed();
+关闭LED指示灯
+int closeRgbLed(); | 关闭LED指示灯
+int setNfcReaderCardemulationStatus(int status);
+设置当前读卡和卡模拟的开关状态
+int setNfcReaderCardemulationStatus(int status); | 设置当前读卡和卡模拟的开关状态
+int getNfcReaderCardemulationStatus();
+获取当前读卡和卡模拟的开关状态
+int getNfcReaderCardemulationStatus(); | 获取当前读卡和卡模拟的开关状态
+int setUsbPortPowerState(int portType, int powerState);
+设置设备USB口上下电
+int setUsbPortPowerState(int portType, int powerState); | 设置设备USB口上下电
+int getUsbPortPowerState(int portType);
+获取设备USB口供电状态
+int getUsbPortPowerState(int portType); | 获取设备USB口供电状态
+3 API详情
+3.1 
+修改系统时间
+原型
+void setSystemTime(int second,int minute,int hour,int day,int month,int year);
+原型 | void setSystemTime(int second,int minute,int hour,int day,int month,int year);
+功能
+修改系统时间
+功能 | 修改系统时间
+参数
+int second
+秒，取值范围：0 ~ 59
+参数 | int second | 秒，取值范围：0 ~ 59
+ 
+int minute
+分钟，取值范围：0 ~ 59
+  | int minute | 分钟，取值范围：0 ~ 59
+ 
+int hour
+小时，取值范围：0 ~ 23
+  | int hour | 小时，取值范围：0 ~ 23
+ 
+int day
+日，取值范围：1 ~ 31
+  | int day | 日，取值范围：1 ~ 31
+ 
+int month
+月，取值范围：1 ~ 12
+  | int month | 月，取值范围：1 ~ 12
+ 
+int year
+年
+  | int year | 年
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    sTmsApi.getDeviceManager().setSystemTime(1, 5, 7, 3, 2, 2026);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getDeviceManager().setSystemTime(1, 5, 7, 3, 2, 2026); } catch (Exception e) {     e.printStackTrace(); }
+3.2 
+重启设备
+原型
+void powerReboot();
+原型 | void powerReboot();
+功能
+重启设备
+功能 | 重启设备
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    sTmsApi.getDeviceManager().
+powerReboot
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getDeviceManager(). powerReboot (); } catch (Exception e) {     e.printStackTrace(); }
+3.3 
+关机
+原型
+void shutdown();
+原型 | void shutdown();
+功能
+关机
+功能 | 关机
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+     sTmsApi.getDeviceManager().
+shutdown
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {      sTmsApi.getDeviceManager(). shutdown (); } catch (Exception e) {     e.printStackTrace(); }
+3.4 
+设置时区
+原型
+void setTimeZone(String timeZone);
+原型 | void setTimeZone(String timeZone);
+功能
+设置时区
+功能 | 设置时区
+参数
+String timeZone
+时区，
+取值范围：TimeZone.getAvailableIDs()，
+例：Asia/Shanghai、Africa/Algiers
+参数 | String timeZone | 时区， 取值范围：TimeZone.getAvailableIDs()， 例：Asia/Shanghai、Africa/Algiers
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getDeviceManager().
+setTimeZone
+(
+"Asia/Shanghai"
+);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getDeviceManager(). setTimeZone ( "Asia/Shanghai" ); } catch (Exception e) {     e.printStackTrace(); }
+3.5 
+恢复出厂设置
+原型
+void factoryReset();
+原型 | void factoryReset();
+功能
+恢复出厂设置
+功能 | 恢复出厂设置
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    sTmsApi.getDeviceManager().
+factoryReset
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getDeviceManager(). factoryReset (); } catch (Exception e) {     e.printStackTrace(); }
+3.6 
+设备休眠
+原型
+void toSleep();
+原型 | void toSleep();
+功能
+设备休眠
+功能 | 设备休眠
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    sTmsApi.getDeviceManager().
+toSleep
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getDeviceManager(). toSleep (); } catch (Exception e) {     e.printStackTrace(); }
+3.7 
+唤醒设备
+原型
+void toWakeUp();
+原型 | void toWakeUp();
+功能
+唤醒设备
+功能 | 唤醒设备
+参数
+无
+ 
+参数 | 无 |  
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    sTmsApi.getDeviceManager().
+toWakeUp
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getDeviceManager(). toWakeUp (); } catch (Exception e) {     e.printStackTrace(); }
+3.8 
+设置开机动画
+原型
+void setBootAnimation(String filePath);
+原型 | void setBootAnimation(String filePath);
+功能
+设置开机动画
+功能 | 设置开机动画
+参数
+String filePath
+开机动画文件地址，仅支持设备本地文件夹地址。
+例：/sdcard/bootanimation.zip
+参数 | String filePath | 开机动画文件地址，仅支持设备本地文件夹地址。 例：/sdcard/bootanimation.zip
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+动画ZIP内含文件：
+图片文件夹
+desc.txt
+图片文件夹规范：
+图片格式：PNG
+图片大小：单张不超过20K
+图片尺寸：720*1440
+图片命名：001，002……
+图片张数：不超过60
+desc.txt内容模板：
+540 960 24
+p 0 10 folder1
+540：图片宽度
+960：图片高度
+24：每秒帧数，<=60
+p：标志符
+0：无限循环 (不用设置)
+10：停顿时间(秒) ，<=10s
+folder1：文件夹名，需与图片文件夹命名一致
+（注意：两行之间有换行；V1分辨率为540 960，M1分辨率为450 854，T1分辨率为1920 1080）
+如何在ZIP包里制作二段式动画：
+文件夹：二个图片文件夹，规则参照上述“图片文件夹规范”，文件夹数量最多为2
+desc.txt：追加两行配置信息，分别指向不同文件夹，规则参照上述“desc.txt配置规范”
+备注 | 动画ZIP内含文件： 图片文件夹 desc.txt 图片文件夹规范： 图片格式：PNG 图片大小：单张不超过20K 图片尺寸：720*1440 图片命名：001，002…… 图片张数：不超过60 desc.txt内容模板： 540 960 24 p 0 10 folder1 540：图片宽度 960：图片高度 24：每秒帧数，<=60 p：标志符 0：无限循环 (不用设置) 10：停顿时间(秒) ，<=10s folder1：文件夹名，需与图片文件夹命名一致 （注意：两行之间有换行；V1分辨率为540 960，M1分辨率为450 854，T1分辨率为1920 1080） 如何在ZIP包里制作二段式动画： 文件夹：二个图片文件夹，规则参照上述“图片文件夹规范”，文件夹数量最多为2 desc.txt：追加两行配置信息，分别指向不同文件夹，规则参照上述“desc.txt配置规范”
+示例代码
+try {
+sTmsApi.getDeviceManager().
+setBootAnimation
+("
+/sdcard/Download/bootanimation.zip
+");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { sTmsApi.getDeviceManager(). setBootAnimation (" /sdcard/Download/bootanimation.zip "); } catch (Exception e) {     e.printStackTrace(); }
+3.9 
+打开/关闭蓝牙
+原型
+void enableBluetooth(boolean enable);
+原型 | void enableBluetooth(boolean enable);
+功能
+打开/关闭蓝牙
+功能 | 打开/关闭蓝牙
+参数
+boolean enable
+打开/关闭
+true：打开
+false：关闭
+参数 | boolean enable | 打开/关闭 true：打开 false：关闭
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    sTmsApi.getDeviceManager().
+enableBluetooth
+(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getDeviceManager(). enableBluetooth (true); } catch (Exception e) {     e.printStackTrace(); }
+3.10 
+自定义按键功能
+原型
+void setCustomKeyFunction(String key, String type, String value)
+原型 | void setCustomKeyFunction(String key, String type, String value)
+功能
+自定义按键功能
+功能 | 自定义按键功能
+参数
+String key
+按键Key值，详见
+ 
+自定义按键参数 中KeyConstants.class的Key值
+参数 | String key | 按键Key值，详见   自定义按键参数 中KeyConstants.class的Key值
+ 
+String type
+功能类型，详见
+ 
+自定义按键参数 中KeyConstants.class中的Type值
+  | String type | 功能类型，详见   自定义按键参数 中KeyConstants.class中的Type值
+ 
+String value
+功能参数，详见
+ 
+自定义按键参数 中KeyConstants.class中的Value值
+  | String value | 功能参数，详见   自定义按键参数 中KeyConstants.class中的Value值
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+sTmsApi.getDeviceManager().
+setCustomKeyFunctionsetCustomKeyFunction("volume_1", "none", "volume_up")
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { sTmsApi.getDeviceManager(). setCustomKeyFunctionsetCustomKeyFunction("volume_1", "none", "volume_up") } catch (Exception e) {     e.printStackTrace(); }
+3.11 
+启用/禁用亮屏状态下电源键短按功能
+原型
+boolean setPowerButtonEnabled(boolean enabled);
+原型 | boolean setPowerButtonEnabled(boolean enabled);
+功能
+启用/禁用亮屏状态下电源键短按功能
+功能 | 启用/禁用亮屏状态下电源键短按功能
+参数
+boolean enabled
+启用/禁用
+true：启用
+false：禁用
+参数 | boolean enabled | 启用/禁用 true：启用 false：禁用
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result=sTmsApi.getDeviceManager().
+setPowerButtonEnabled(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result=sTmsApi.getDeviceManager(). setPowerButtonEnabled(true); } catch (Exception e) {     e.printStackTrace(); }
+3.12 
+检查亮屏状态下的电源键短按是否可用
+原型
+boolean isPowerButtonEnabled()
+原型 | boolean isPowerButtonEnabled()
+功能
+检查亮屏状态下的电源键短按是否可用
+功能 | 检查亮屏状态下的电源键短按是否可用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+可用/不可用
+true：可用
+false：不可用
+返回值 | 可用/不可用 true：可用 false：不可用
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result=sTmsApi.getDeviceManager().
+isPowerButtonEnabled();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result=sTmsApi.getDeviceManager(). isPowerButtonEnabled(); } catch (Exception e) {     e.printStackTrace(); }
+3.13 
+设置壁纸
+原型
+void setWallpaper(String filePath)
+原型 | void setWallpaper(String filePath)
+功能
+设置壁纸
+功能 | 设置壁纸
+参数
+String filePath
+壁纸文件地址：例：/sdcard/wallpaper.png
+参数 | String filePath | 壁纸文件地址：例：/sdcard/wallpaper.png
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、壁纸尺寸大小建议根据机型分辨率处理，避免显示图片拉伸变形。
+备注 | 1、壁纸尺寸大小建议根据机型分辨率处理，避免显示图片拉伸变形。
+示例代码
+try {
+    sTmsApi.getDeviceManager().
+setWallpaper("
+/sdcard/wallpaper.png
+");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getDeviceManager(). setWallpaper(" /sdcard/wallpaper.png "); } catch (Exception e) {     e.printStackTrace(); }
+3.14 
+设置屏幕亮度
+原型
+boolean setScreenBrightness(int value)
+原型 | boolean setScreenBrightness(int value)
+功能
+设置屏幕亮度
+功能 | 设置屏幕亮度
+参数
+int value
+屏幕亮度，取值范围根据调用
+ 
+getMinimumScreenBrightnessSetting()
+获取
+最小屏幕亮度及调用getMaximumScreenBrightnessSetting()
+获取
+最大屏幕亮度确定。
+参数 | int value | 屏幕亮度，取值范围根据调用   getMinimumScreenBrightnessSetting() 获取 最小屏幕亮度及调用getMaximumScreenBrightnessSetting() 获取 最大屏幕亮度确定。
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result=sTmsApi.getDeviceManager().
+setScreenBrightness(50);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result=sTmsApi.getDeviceManager(). setScreenBrightness(50); } catch (Exception e) {     e.printStackTrace(); }
+3.15 
+获取
+屏幕亮度值
+原型
+int getScreenBrightness()
+原型 | int getScreenBrightness()
+功能
+获取屏幕亮度值
+功能 | 获取屏幕亮度值
+参数
+无
+ 
+参数 | 无 |  
+返回值
+>=0 亮度值
+-1: 接口调用失败
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+返回值 | >=0 亮度值 -1: 接口调用失败 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   int result=sTmsApi.getDeviceManager().getScreenBrightness
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    int result=sTmsApi.getDeviceManager().getScreenBrightness (); } catch (Exception e) {     e.printStackTrace(); }
+3.16 
+设置屏幕超时时间
+原型
+boolean setScreenTimeout(int timeout)
+原型 | boolean setScreenTimeout(int timeout)
+功能
+设置屏幕超时时间
+功能 | 设置屏幕超时时间
+参数
+int timeout
+屏幕超时时间
+15000：15秒
+30000：30秒
+60000：1分钟
+120000：2分钟
+300000：5分钟
+600000：10分钟
+1800000：30分钟
+604800000：一周
+2147483647：永不
+参数 | int timeout | 屏幕超时时间 15000：15秒 30000：30秒 60000：1分钟 120000：2分钟 300000：5分钟 600000：10分钟 1800000：30分钟 604800000：一周 2147483647：永不
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、支持一周设置的机型如：P3_MIX, SP03, SP06 等。
+2、不支持一周设置的机型如：P2-A11, p2litese, P3, P3K, P3H, P3KH, P3HD, P3H-A14, P3-A14, P3KH-A14等。
+3、是否支持一周设置，可查看系统设置>显示>界面是否有该项，有显示则支持，没显示则不支持。
+备注 | 1、支持一周设置的机型如：P3_MIX, SP03, SP06 等。 2、不支持一周设置的机型如：P2-A11, p2litese, P3, P3K, P3H, P3KH, P3HD, P3H-A14, P3-A14, P3KH-A14等。 3、是否支持一周设置，可查看系统设置>显示>界面是否有该项，有显示则支持，没显示则不支持。
+示例代码
+try {
+   
+boolean
+ result=sTmsApi.getDeviceManager().
+setScreenTimeout(30000);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean  result=sTmsApi.getDeviceManager(). setScreenTimeout(30000); } catch (Exception e) {     e.printStackTrace(); }
+3.17 
+设置自动调节屏幕亮度模式
+原型
+void setBrightnessMode(int mode);
+原型 | void setBrightnessMode(int mode);
+功能
+设置自动调节屏幕亮度模式
+功能 | 设置自动调节屏幕亮度模式
+参数
+int mode
+自动调节屏幕亮度模式
+0：关闭自动调节屏幕亮度
+1：自动调节屏幕亮度
+参数 | int mode | 自动调节屏幕亮度模式 0：关闭自动调节屏幕亮度 1：自动调节屏幕亮度
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getDeviceManager().
+setBrightnessMode(0);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getDeviceManager(). setBrightnessMode(0); } catch (Exception e) {     e.printStackTrace(); }
+3.18 
+获取可设置的最小屏幕亮度
+原型
+int getMinimumScreenBrightnessSetting();
+原型 | int getMinimumScreenBrightnessSetting();
+功能
+获取可设置的最小屏幕亮度
+功能 | 获取可设置的最小屏幕亮度
+参数
+无
+ 
+参数 | 无 |  
+返回值
+可设置的最小屏幕亮度
+返回值 | 可设置的最小屏幕亮度
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   int result=sTmsApi.getDeviceManager().
+getMinimumScreenBrightnessSetting();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    int result=sTmsApi.getDeviceManager(). getMinimumScreenBrightnessSetting(); } catch (Exception e) {     e.printStackTrace(); }
+3.19 
+获取可设置的最大屏幕亮度
+原型
+int getMaximumScreenBrightnessSetting();
+原型 | int getMaximumScreenBrightnessSetting();
+功能
+获取可设置的最大屏幕亮度
+功能 | 获取可设置的最大屏幕亮度
+参数
+无
+ 
+参数 | 无 |  
+返回值
+可设置的最大屏幕亮度
+返回值 | 可设置的最大屏幕亮度
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   int result=sTmsApi.getDeviceManager().
+getMaximumScreenBrightnessSetting();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    int result=sTmsApi.getDeviceManager(). getMaximumScreenBrightnessSetting(); } catch (Exception e) {     e.printStackTrace(); }
+3.20 
+设置设备拥有者
+原型
+boolean setDeviceOwner(String packageName, String classFullPathName)
+原型 | boolean setDeviceOwner(String packageName, String classFullPathName)
+功能
+设置设备拥有者
+功能 | 设置设备拥有者
+参数
+String packageName
+设备拥有者包名
+参数 | String packageName | 设备拥有者包名
+ 
+String classFullPathName
+设备拥有者类名（必须继承DeviceAdminReceiver）
+  | String classFullPathName | 设备拥有者类名（必须继承DeviceAdminReceiver）
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、
+classFullPathName 设备拥有者类实现方式如下：
+1、创建 OwnerReceiver 类,必须继承DeviceAdminReceiver类：
+public class OwnerReceiver extends DeviceAdminReceiver {       
+    @Override
+    public void onEnabled(Context context, Intent intent) {
+      
+    }
+    @Override
+    public void onDisabled(Context context, Intent intent) {
+      
+    }
+    @Override
+    public void onPasswordChanged(Context context, Intent intent) {     
+    }
+}
+2、在AndroidManifest.xml注册OwnerReceiver：
+<receiver 
+        android:name=".OwnerReceiver"
+        android:label="用户可看的权限标题"
+android:permission="android.permission.BIND_DEVICE_ADMIN"> 
+        //必须拥有的权限,确保只有系统可以与DeviceAdminReceiver子类交互
+    <meta-data
+            android:name="android.app.device_admin"
+            android:resource="@xml/device_owner" />
+    <intent-filter>
+        <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+        //当用户启用设备管理员APP时,将DeviceAdminReceiver子类设置为接收器
+    </intent-filter>        
+</receiver>
+3、创建res/xml/device_owner.xml，在xml中声明APP需要的设备管理策略如：密码、锁屏、擦除数据、加密等等。
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-policies>
+    <limit-password />
+    <watch-login />
+    <reset-password />
+    <force-lock />
+    <wipe-data />
+    <expire-password />
+    <encrypted-storage />
+    <disable-camera />
+  </uses-policies>
+</device-admin>
+2、如果接口设置成功返回true，可在设置>安全>设备管理应用>会显示当前创建的拥有者，或者通过adb 命令获取当前设备拥有者：adb shell dumpsys device_policy
+3、设备已有DeviceOwner的情况下，无法再次设置DeviceOwner,需要先调用clearDeviceOwner清除后才能再次设置。
+备注 | 1、 classFullPathName 设备拥有者类实现方式如下： 1、创建 OwnerReceiver 类,必须继承DeviceAdminReceiver类： public class OwnerReceiver extends DeviceAdminReceiver {            @Override     public void onEnabled(Context context, Intent intent) {            }     @Override     public void onDisabled(Context context, Intent intent) {            }     @Override     public void onPasswordChanged(Context context, Intent intent) {          } } 2、在AndroidManifest.xml注册OwnerReceiver： <receiver          android:name=".OwnerReceiver"         android:label="用户可看的权限标题" android:permission="android.permission.BIND_DEVICE_ADMIN">          //必须拥有的权限,确保只有系统可以与DeviceAdminReceiver子类交互     <meta-data             android:name="android.app.device_admin"             android:resource="@xml/device_owner" />     <intent-filter>         <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />         //当用户启用设备管理员APP时,将DeviceAdminReceiver子类设置为接收器     </intent-filter>         </receiver> 3、创建res/xml/device_owner.xml，在xml中声明APP需要的设备管理策略如：密码、锁屏、擦除数据、加密等等。 <device-admin xmlns:android="http://schemas.android.com/apk/res/android">   <uses-policies>     <limit-password />     <watch-login />     <reset-password />     <force-lock />     <wipe-data />     <expire-password />     <encrypted-storage />     <disable-camera />   </uses-policies> </device-admin> 2、如果接口设置成功返回true，可在设置>安全>设备管理应用>会显示当前创建的拥有者，或者通过adb 命令获取当前设备拥有者：adb shell dumpsys device_policy 3、设备已有DeviceOwner的情况下，无法再次设置DeviceOwner,需要先调用clearDeviceOwner清除后才能再次设置。
+示例代码
+try {
+   
+boolean
+ result=sTmsApi.getDeviceManager().
+setDeviceOwner("com.xxx.xxx","com.xxx.xxx.receiver.DeviceOwer");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean  result=sTmsApi.getDeviceManager(). setDeviceOwner("com.xxx.xxx","com.xxx.xxx.receiver.DeviceOwer"); } catch (Exception e) {     e.printStackTrace(); }
+3.21 
+清除设备拥有者
+原型
+boolean clearDeviceOwner();
+原型 | boolean clearDeviceOwner();
+功能
+清除设备拥有者
+功能 | 清除设备拥有者
+参数
+无
+ 
+参数 | 无 |  
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   
+boolean
+ result=sTmsApi.getDeviceManager().clearDeviceOwner
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean  result=sTmsApi.getDeviceManager().clearDeviceOwner (); } catch (Exception e) {     e.printStackTrace(); }
+3.22 
+启用/禁用蓝牙模块
+原型
+boolean switchBTModuleEnable(boolean enable);
+原型 | boolean switchBTModuleEnable(boolean enable);
+功能
+启用/禁用蓝牙模块
+功能 | 启用/禁用蓝牙模块
+参数
+boolean enable
+启用/禁用
+true：
+启用（设置里蓝牙开关入口将显示）
+false：
+禁用（设置里蓝牙开关入口将隐藏）
+参数 | boolean enable | 启用/禁用 true： 启用（设置里蓝牙开关入口将显示） false： 禁用（设置里蓝牙开关入口将隐藏）
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   
+boolean
+ result=sTmsApi.getDeviceManager().switchBTModuleEnable
+(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean  result=sTmsApi.getDeviceManager().switchBTModuleEnable (true); } catch (Exception e) {     e.printStackTrace(); }
+3.23 
+检测蓝牙模块是否可用
+原型
+boolean isBTModuleEnabled();
+原型 | boolean isBTModuleEnabled();
+功能
+检测蓝牙模块是否可用
+功能 | 检测蓝牙模块是否可用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+启用/禁用
+true：
+启用
+false：
+禁用
+返回值 | 启用/禁用 true： 启用 false： 禁用
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   
+boolean
+ result=sTmsApi.getDeviceManager().isBTModuleEnabled
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean  result=sTmsApi.getDeviceManager().isBTModuleEnabled (); } catch (Exception e) {     e.printStackTrace(); }
+3.24 
+设置自动获取时间
+原型
+boolean enableAutoTime(boolean enable);
+原型 | boolean enableAutoTime(boolean enable);
+功能
+设置自动获取时间
+功能 | 设置自动获取时间
+参数
+boolean enable
+打开/关闭
+true：
+打开
+false：
+关闭
+参数 | boolean enable | 打开/关闭 true： 打开 false： 关闭
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+关闭自动获取时间后，系统设置里无法手工设置设备时间，通过接口是允许设置时间的，这是金融机特性，非金融机没有。
+备注 | 关闭自动获取时间后，系统设置里无法手工设置设备时间，通过接口是允许设置时间的，这是金融机特性，非金融机没有。
+示例代码
+try {
+   
+boolean
+ result=sTmsApi.getDeviceManager().enableAutoTime
+(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean  result=sTmsApi.getDeviceManager().enableAutoTime (true); } catch (Exception e) {     e.printStackTrace(); }
+3.25 
+设置自动获取时区
+原型
+boolean enableAutoTimeZone(boolean enable);
+原型 | boolean enableAutoTimeZone(boolean enable);
+功能
+设置自动获取时区
+功能 | 设置自动获取时区
+参数
+boolean enable
+打开/关闭
+true：
+打开
+false：
+关闭
+参数 | boolean enable | 打开/关闭 true： 打开 false： 关闭
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   
+boolean
+ result=sTmsApi.getDeviceManager().enableAutoTimeZone
+(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean  result=sTmsApi.getDeviceManager().enableAutoTimeZone (true); } catch (Exception e) {     e.printStackTrace(); }
+3.26 
+打开/关闭位置信息
+原型
+void enableLocation(boolean enable);
+原型 | void enableLocation(boolean enable);
+功能
+打开/关闭位置信息
+功能 | 打开/关闭位置信息
+参数
+boolean enable
+打开/关闭
+true：
+打开
+false：
+关闭
+参数 | boolean enable | 打开/关闭 true： 打开 false： 关闭
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+此功能接口与
+状态栏/设置里位置信息开关效果是一致
+备注 | 此功能接口与 状态栏/设置里位置信息开关效果是一致
+示例代码
+try {
+   sTmsApi.getDeviceManager().enableLocation
+(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getDeviceManager().enableLocation (true); } catch (Exception e) {     e.printStackTrace(); }
+3.27 
+打开/关闭24小时制
+原型
+void set24Hour(boolean is24Hour);
+原型 | void set24Hour(boolean is24Hour);
+功能
+打开/关闭24小时制
+功能 | 打开/关闭24小时制
+参数
+boolean is24Hour
+打开/关闭
+true：
+打开
+false：
+关闭
+参数 | boolean is24Hour | 打开/关闭 true： 打开 false： 关闭
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getDeviceManager().set24Hour
+(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getDeviceManager().set24Hour (true); } catch (Exception e) {     e.printStackTrace(); }
+3.28 
+打开/关闭飞行模式
+原型
+boolean setAirplaneMode(boolean open);
+原型 | boolean setAirplaneMode(boolean open);
+功能
+打开/关闭飞行模式
+功能 | 打开/关闭飞行模式
+参数
+boolean enable
+打开/关闭
+true：打开
+false：关闭
+参数 | boolean enable | 打开/关闭 true：打开 false：关闭
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   boolean result=sTmsApi.getDeviceManager().setAirplaneMode
+(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    boolean result=sTmsApi.getDeviceManager().setAirplaneMode (true); } catch (Exception e) {     e.printStackTrace(); }
+3.29 
+设置物理按键是否可用
+原型
+int setPhysicKeyEnabled(int type,boolean enable);
+原型 | int setPhysicKeyEnabled(int type,boolean enable);
+功能
+设置物理按键是否可用(仅适用于带物理键盘设备，例如：P3K带有物理键盘的设备)
+功能 | 设置物理按键是否可用(仅适用于带物理键盘设备，例如：P3K带有物理键盘的设备)
+参数
+type
+0:"Fn"键
+1:"*"键
+参数 | type | 0:"Fn"键 1:"*"键
+ 
+enable
+true:可用 false:不可用
+  | enable | true:可用 false:不可用
+返回值
+0: success
+-1: 接口调用失败
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0: success -1: 接口调用失败 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+仅支持P3K/P3KH 等带有物理键盘的设备
+备注 | 仅支持P3K/P3KH 等带有物理键盘的设备
+示例代码
+try {
+   int result=sTmsApi.getDeviceManager().setPhysicKeyEnabled
+(0,true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    int result=sTmsApi.getDeviceManager().setPhysicKeyEnabled (0,true); } catch (Exception e) {     e.printStackTrace(); }
+3.30 
+获取物理按键是否可用
+原型
+int getPhysicKeyEnabled(int type);
+原型 | int getPhysicKeyEnabled(int type);
+功能
+获取物理按键是否可用(仅适用于带物理键盘设备)
+功能 | 获取物理按键是否可用(仅适用于带物理键盘设备)
+参数
+type
+0:"Fn"键
+1:"*"键
+参数 | type | 0:"Fn"键 1:"*"键
+返回值
+0: 可用
+1:不可用(不存在物理按键或已经被禁用)
+-1: 接口调用失败(参数错误等)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0: 可用 1:不可用(不存在物理按键或已经被禁用) -1: 接口调用失败(参数错误等) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+仅支持P3K/P3KH 等带有物理键盘的设备
+备注 | 仅支持P3K/P3KH 等带有物理键盘的设备
+示例代码
+try {
+   int result=sTmsApi.getDeviceManager().getPhysicKeyEnabled
+(0);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    int result=sTmsApi.getDeviceManager().getPhysicKeyEnabled (0); } catch (Exception e) {     e.printStackTrace(); }
+3.31 
+打开/关闭GPS
+原型
+boolean enableGPS(boolean isEnable)
+原型 | boolean enableGPS(boolean isEnable)
+功能
+打开/关闭GPS
+功能 | 打开/关闭GPS
+参数
+isEnable
+true：
+打开
+false：
+关闭
+参数 | isEnable | true： 打开 false： 关闭
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    boolean result = sTmsApi.getDeviceManager().enableGPS(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     boolean result = sTmsApi.getDeviceManager().enableGPS(true); } catch (Exception e) {     e.printStackTrace(); }
+3.32 打开/关闭NFC
+原型
+boolean enableNFC(boolean enable)
+原型 | boolean enableNFC(boolean enable)
+功能
+打开/关闭NFC
+功能 | 打开/关闭NFC
+参数
+enable
+true：打开
+false：关闭
+参数 | enable | true：打开 false：关闭
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try { 
+    boolean result = sTmsApi.getDeviceManager().enableNFC(true); 
+} catch (Exception e) { 
+    e.printStackTrace(); 
+}
+示例代码 | try {      boolean result = sTmsApi.getDeviceManager().enableNFC(true);  } catch (Exception e) {      e.printStackTrace();  }
+3.33 打开/关闭NFC
+原型
+boolean enableNFC(boolean enable)
+原型 | boolean enableNFC(boolean enable)
+功能
+打开/关闭NFC
+功能 | 打开/关闭NFC
+参数
+enable
+true：
+打开
+false：
+关闭
+参数 | enable | true： 打开 false： 关闭
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getDeviceManager().enableNFC(true);
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getDeviceManager().enableNFC(true); } catch (Exception e) { e.printStackTrace(); }
+3.34 获取插入SD卡时是否禁用
+原型
+int getInsertSdcardDisabled();
+原型 | int getInsertSdcardDisabled();
+功能
+获取插入SD卡时是否禁用
+功能 | 获取插入SD卡时是否禁用
+参数
+参数 |  | 
+返回值
+0: 禁用
+-1: 未禁用
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0: 禁用 -1: 未禁用 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P2-SE
+适用范围 | P2-SE
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().getInsertSdcardDisabled(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().getInsertSdcardDisabled(0); } catch (Exception e) { e.printStackTrace(); }
+3.35 设置插入SD卡时是否禁用
+原型
+int disableInsertSdcard(boolean disable);
+原型 | int disableInsertSdcard(boolean disable);
+功能
+设置插入SD卡时是否禁用
+功能 | 设置插入SD卡时是否禁用
+参数
+disable
+true:禁用 false:未禁用
+参数 | disable | true:禁用 false:未禁用
+返回值
+0: success
+-1: 接口调用失败
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0: success -1: 接口调用失败 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P2-SE
+适用范围 | P2-SE
+备注
+禁用的SD卡，设置启用后需要重启设备
+备注 | 禁用的SD卡，设置启用后需要重启设备
+示例代码
+try { int result = sTmsApi.getDeviceManager().disableInsertSdcard(true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().disableInsertSdcard(true); } catch (Exception e) { e.printStackTrace(); }
+3.36 设置USB线缆类型
+原型
+int setCableType(int type);
+原型 | int setCableType(int type);
+功能
+设置USB线缆类型
+功能 | 设置USB线缆类型
+参数
+type
+1:通用的usb线
+2:定制Y型线(Y型线包含通信+充电功能)
+参数 | type | 1:通用的usb线 2:定制Y型线(Y型线包含通信+充电功能)
+返回值
+0: 成功
+-1: 接口调用失败(参数错误等)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0: 成功 -1: 接口调用失败(参数错误等) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3KH
+适用范围 | P3KH
+备注
+仅适用于P3KH(设备无PD芯片)切换类型后，需要重新拔插USB线才能生效
+备注 | 仅适用于P3KH(设备无PD芯片)切换类型后，需要重新拔插USB线才能生效
+示例代码
+try { int result = sTmsApi.getDeviceManager().setCableType(1); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().setCableType(1); } catch (Exception e) { e.printStackTrace(); }
+3.37 获取USB线缆类型
+原型
+int getCableType();
+原型 | int getCableType();
+功能
+获取当前使用USB线缆类型
+功能 | 获取当前使用USB线缆类型
+参数
+无
+参数 | 无 | 
+返回值
+1:通用的usb线
+2:定制Y型线(Y型线包含通信+充电功能)
+-1: 接口调用失败(参数错误等)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 1:通用的usb线 2:定制Y型线(Y型线包含通信+充电功能) -1: 接口调用失败(参数错误等) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3KH
+适用范围 | P3KH
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().getCableType(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().getCableType(0); } catch (Exception e) { e.printStackTrace(); }
+3.38 重置电池循环充电次数
+原型
+int resetBatteryCycleCount(int count);
+原型 | int resetBatteryCycleCount(int count);
+功能
+重置电池循环充电次数
+功能 | 重置电池循环充电次数
+参数
+count
+循环充电次数
+参数 | count | 循环充电次数
+返回值
+0: success
+-1: 接口调用失败(功能不支持)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0: success -1: 接口调用失败(功能不支持) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+该功能接口默认不支持，会返回-42，需要联系设备供应商打开该功能
+备注 | 该功能接口默认不支持，会返回-42，需要联系设备供应商打开该功能
+示例代码
+try { int result = sTmsApi.getDeviceManager().resetBatteryCycleCount(10); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().resetBatteryCycleCount(10); } catch (Exception e) { e.printStackTrace(); }
+3.39 获取电池循环充电次数
+原型
+int getBatteryCycleCount();
+原型 | int getBatteryCycleCount();
+功能
+获取电池循环充电次数
+功能 | 获取电池循环充电次数
+参数
+无
+参数 | 无 | 
+返回值
+>=0:表示获取到的循环充电次数
+-1: 接口调用失败
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+-42:不许调用该函数，请联系设备供应商
+-44:设备硬件不支持(例如设备无电池)
+返回值 | >=0:表示获取到的循环充电次数 -1: 接口调用失败 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商 -42:不许调用该函数，请联系设备供应商 -44:设备硬件不支持(例如设备无电池)
+适用范围
+P3
+适用范围 | P3
+备注
+该功能接口默认不支持，会返回-42，需要联系设备供应商打开该功能
+备注 | 该功能接口默认不支持，会返回-42，需要联系设备供应商打开该功能
+示例代码
+try { int result = sTmsApi.getDeviceManager().getBatteryCycleCount(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().getBatteryCycleCount(); } catch (Exception e) { e.printStackTrace(); }
+3.40 设置是否显示虚拟键盘
+原型
+int enableShowVirtualKeyboard(boolean enable);
+原型 | int enableShowVirtualKeyboard(boolean enable);
+功能
+在有物理键盘的前提下，是否显示虚拟键盘。对应系统/语言和输入法/实体键盘/使用屏幕键盘开关
+功能 | 在有物理键盘的前提下，是否显示虚拟键盘。对应系统/语言和输入法/实体键盘/使用屏幕键盘开关
+参数
+enable
+true:显示
+false:隐藏
+参数 | enable | true:显示 false:隐藏
+返回值
+0: success
+-1: 接口调用失败
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0: success -1: 接口调用失败 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P2 SmartPad
+适用范围 | P2 SmartPad
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().enableShowVirtualKeyboard(true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().enableShowVirtualKeyboard(true); } catch (Exception e) { e.printStackTrace(); }
+3.41 获取是否显示虚拟键盘
+原型
+int isShowVirtualKeyboardEnabled()
+原型 | int isShowVirtualKeyboardEnabled()
+功能
+获取是否显示了虚拟键盘，对应设置系统/语言和输入法/实体键盘/使用屏幕键盘开关
+功能 | 获取是否显示了虚拟键盘，对应设置系统/语言和输入法/实体键盘/使用屏幕键盘开关
+参数
+无
+参数 | 无 | 
+返回值
+0: 显示
+1: 隐藏
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+返回值 | 0: 显示 1: 隐藏 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商
+适用范围
+P2 SmartPad
+适用范围 | P2 SmartPad
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().isShowVirtualKeyboardEnabled(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().isShowVirtualKeyboardEnabled(); } catch (Exception e) { e.printStackTrace(); }
+3.42 获取电池充电电压
+原型
+int getBatteryChargeVoltage()
+原型 | int getBatteryChargeVoltage()
+功能
+获取电池充电电压
+功能 | 获取电池充电电压
+参数
+无
+参数 | 无 | 
+返回值
+>=0:表示获取到的充电电压(单位:毫伏)
+-1: 接口调用失败
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+-44:设备硬件不支持(例如设备无电池)
+-46:设备未处于充电中
+返回值 | >=0:表示获取到的充电电压(单位:毫伏) -1: 接口调用失败 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商 -44:设备硬件不支持(例如设备无电池) -46:设备未处于充电中
+适用范围
+V3e
+适用范围 | V3e
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().getBatteryChargeVoltage(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().getBatteryChargeVoltage(); } catch (Exception e) { e.printStackTrace(); }
+3.43 设置USB默认模式
+原型
+int setDefaultUsbMode(long type)
+原型 | int setDefaultUsbMode(long type)
+功能
+设置USB默认模式
+功能 | 设置USB默认模式
+参数
+type
+0：无数据传输（充电模式）
+1：文件传输 (MTP)
+2：图片传输 (PTP)
+3：MIDI4：USB 网络共享 (Tethering)
+参数 | type | 0：无数据传输（充电模式） 1：文件传输 (MTP) 2：图片传输 (PTP) 3：MIDI4：USB 网络共享 (Tethering)
+返回值
+0: 成功
+-1: 接口调用失败(参数错误等)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0: 成功 -1: 接口调用失败(参数错误等) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+L2sPro
+适用范围 | L2sPro
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().setDefaultUsbMode(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().setDefaultUsbMode(0); } catch (Exception e) { e.printStackTrace(); }
+3.44 获取USB默认模式
+原型
+long getDefaultUsbMode()
+原型 | long getDefaultUsbMode()
+功能
+获取当前USB模式
+功能 | 获取当前USB模式
+参数
+无
+参数 | 无 | 
+返回值
+0：无数据传输（充电模式）
+1：文件传输 (MTP)
+2：图片传输 (PTP)
+3：MIDI
+4：USB 网络共享 (Tethering)
+-40：接口在当前设备或ROM不支持
+-41：未找到系统服务，请联系设备供应商
+返回值 | 0：无数据传输（充电模式） 1：文件传输 (MTP) 2：图片传输 (PTP) 3：MIDI 4：USB 网络共享 (Tethering) -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商
+适用范围
+L2sPro
+适用范围 | L2sPro
+备注
+无
+备注 | 无
+示例代码
+try { long result = sTmsApi.getDeviceManager().getDefaultUsbMode(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { long result = sTmsApi.getDeviceManager().getDefaultUsbMode(); } catch (Exception e) { e.printStackTrace(); }
+3.45 获取底座连接状态
+原型
+int getDeviceDockStatus();
+原型 | int getDeviceDockStatus();
+功能
+获取底座连接状态
+功能 | 获取底座连接状态
+参数
+无
+参数 | 无 | 
+返回值
+0：没有连接
+1：已连接底座
+-1：失败
+-40：接口在当前设备或ROM不支持
+-41：未找到系统服务，请联系设备供应商
+返回值 | 0：没有连接 1：已连接底座 -1：失败 -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商
+适用范围
+P3_MIX
+适用范围 | P3_MIX
+备注
+支持P3_MIX 设备底座不插入电源时，也能获取底座与设备的连接状态
+备注 | 支持P3_MIX 设备底座不插入电源时，也能获取底座与设备的连接状态
+示例代码
+try { int result = sTmsApi.getDeviceManager().getDeviceDockStatus(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().getDeviceDockStatus(); } catch (Exception e) { e.printStackTrace(); }
+3.46 判断设备是否支持LED指示灯
+原型
+int isSupportRgbLed();
+原型 | int isSupportRgbLed();
+功能
+判断设备是否支持LED指示灯
+功能 | 判断设备是否支持LED指示灯
+参数
+无
+参数 | 无 | 
+返回值
+0：支持
+-1：不支持
+-40：接口在当前设备或ROM不支持
+-41：未找到系统服务，请联系设备供应商
+返回值 | 0：支持 -1：不支持 -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商
+适用范围
+CPad
+适用范围 | CPad
+备注
+仅适用于非金融设备控制系统内置的Rgb LED 指示灯，目前已支持CPad Android14。
+备注 | 仅适用于非金融设备控制系统内置的Rgb LED 指示灯，目前已支持CPad Android14。
+示例代码
+try { int result = sTmsApi.getDeviceManager().isSupportRgbLed(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().isSupportRgbLed(); } catch (Exception e) { e.printStackTrace(); }
+3.47 打开LED指示灯
+原型
+int openRgbLed(int rbg, int onMs, int offMs, int lightMode, long timeoutMs);
+原型 | int openRgbLed(int rbg, int onMs, int offMs, int lightMode, long timeoutMs);
+功能
+打开LED指示灯
+功能 | 打开LED指示灯
+参数
+rbg
+预设颜色索引，仅允许 1-7：1 红(R)、2 绿(G)、3 蓝(B)、4 黄(R+G)、5 青(G+B)、6 品红(R+B)、7 白(R+G+B)
+参数 | rbg | 预设颜色索引，仅允许 1-7：1 红(R)、2 绿(G)、3 蓝(B)、4 黄(R+G)、5 青(G+B)、6 品红(R+B)、7 白(R+G+B)
+onMs
+亮灯时间（毫秒）；仅lightMode == 1 时生效；常亮时可传任意值
+onMs | 亮灯时间（毫秒）；仅lightMode == 1 时生效；常亮时可传任意值
+offMs
+灭灯时间（毫秒）；仅lightMode ==1时生效；常亮时可传任意值
+offMs | 灭灯时间（毫秒）；仅lightMode ==1时生效；常亮时可传任意值
+lightMode
+0：常亮；1：闪烁
+lightMode | 0：常亮；1：闪烁
+timeoutMs
+任务超时后自动释放灯控（毫秒）；仅> 0 时生效；0 表示不自动超时
+timeoutMs | 任务超时后自动释放灯控（毫秒）；仅> 0 时生效；0 表示不自动超时
+返回值
+0：成功
+-1：接口调用失败(参数错误等)、非法 rbg（非 1-7）或非法 lightMode
+-40：接口在当前设备或ROM不支持
+-41：未找到系统服务，请联系设备供应商
+返回值 | 0：成功 -1：接口调用失败(参数错误等)、非法 rbg（非 1-7）或非法 lightMode -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商
+适用范围
+CPad
+适用范围 | CPad
+备注
+仅适用于非金融设备控制系统内置的Rgb LED 指示灯，目前已支持CPad Android14。lightMode为0 常亮模式下输入的onMs、offMs不会生效，只有闪烁模式下才生效。
+备注 | 仅适用于非金融设备控制系统内置的Rgb LED 指示灯，目前已支持CPad Android14。lightMode为0 常亮模式下输入的onMs、offMs不会生效，只有闪烁模式下才生效。
+示例代码
+try { int result = sTmsApi.getDeviceManager().openRgbLed(2,3000,2000,1,10000); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().openRgbLed(2,3000,2000,1,10000); } catch (Exception e) { e.printStackTrace(); }
+3.48 关闭LED指示灯
+原型
+int closeRgbLed();
+原型 | int closeRgbLed();
+功能
+关闭LED指示灯
+功能 | 关闭LED指示灯
+参数
+无
+参数 | 无 | 
+返回值
+0：成功
+-1：失败
+-40：接口在当前设备或ROM不支持
+-41：未找到系统服务，请联系设备供应商
+返回值 | 0：成功 -1：失败 -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商
+适用范围
+CPad
+适用范围 | CPad
+备注
+仅适用于非金融设备控制系统内置的Rgb LED 指示灯，目前已支持CPad Android14。
+备注 | 仅适用于非金融设备控制系统内置的Rgb LED 指示灯，目前已支持CPad Android14。
+示例代码
+try { int result = sTmsApi.getDeviceManager().closeRgbLed(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().closeRgbLed(); } catch (Exception e) { e.printStackTrace(); }
+3.49 设置当前读卡和卡模拟的开关状态
+原型
+int setNfcReaderCardemulationStatus(int status);
+原型 | int setNfcReaderCardemulationStatus(int status);
+功能
+设置当前读卡和卡模拟的开关状态
+功能 | 设置当前读卡和卡模拟的开关状态
+参数
+status
+0：全关
+1：仅开读卡
+2：仅开卡模拟
+3：全开
+参数 | status | 0：全关 1：仅开读卡 2：仅开卡模拟 3：全开
+返回值
+0：成功
+-1：失败
+-40：接口在当前设备或ROM不支持
+-41：未找到系统服务，请联系设备供应商
+-47：设备不支持NFC
+返回值 | 0：成功 -1：失败 -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商 -47：设备不支持NFC
+适用范围
+L3-A14
+适用范围 | L3-A14
+备注
+设置status 状态为0 时，如果NFC 开关是打开，调用此接口NFC不会自动关闭。
+设置status状态为1、2、3 时，需要打开NFC 开关才会生效，调用此接口不会自动打开NFC 开关。
+备注 | 设置status 状态为0 时，如果NFC 开关是打开，调用此接口NFC不会自动关闭。 设置status状态为1、2、3 时，需要打开NFC 开关才会生效，调用此接口不会自动打开NFC 开关。
+示例代码
+try { int result = sTmsApi.getDeviceManager().setNfcReaderCardemulationStatus(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().setNfcReaderCardemulationStatus(0); } catch (Exception e) { e.printStackTrace(); }
+3.50 获取当前读卡和卡模拟的开关状态
+原型
+int getNfcReaderCardemulationStatus();
+原型 | int getNfcReaderCardemulationStatus();
+功能
+获取当前读卡和卡模拟的开关状态
+功能 | 获取当前读卡和卡模拟的开关状态
+参数
+无
+参数 | 无 | 
+返回值
+0：全关
+1：仅开读卡
+2：仅开卡模拟
+3：全开-1：失败
+-40：接口在当前设备或ROM不支持
+-41：未找到系统服务，请联系设备供应商
+-47：设备不支持NFC
+返回值 | 0：全关 1：仅开读卡 2：仅开卡模拟 3：全开-1：失败 -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商 -47：设备不支持NFC
+适用范围
+L3-A14
+适用范围 | L3-A14
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().getNfcReaderCardemulationStatus(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().getNfcReaderCardemulationStatus(); } catch (Exception e) { e.printStackTrace(); }
+3.51 预置TTS语音包
+原型
+installTTSVoicePackage(int type, String path, IResultCallback callBack);
+原型 | installTTSVoicePackage(int type, String path, IResultCallback callBack);
+功能
+预置tts语音包
+功能 | 预置tts语音包
+参数
+type
+1：追加合并（保留其他文件）将 zip 解压到中转目录；若 zip 内的顶层目录/文件在中转目录已存在，则先删除中转目录中同名项再解压覆盖；中转目录中未同名的其他项保持不变。
+2：全量覆盖（清空后重建）先清空中转目录，再将 zip 解压进去；中转目录最终仅包含该 zip 的内容。
+参数 | type | 1：追加合并（保留其他文件）将 zip 解压到中转目录；若 zip 内的顶层目录/文件在中转目录已存在，则先删除中转目录中同名项再解压覆盖；中转目录中未同名的其他项保持不变。 2：全量覆盖（清空后重建）先清空中转目录，再将 zip 解压进去；中转目录最终仅包含该 zip 的内容。
+path
+语音压缩包zip路径,存在此路径下的符合当前设备tts版本的语音压缩包。
+从 Android 7.0（API 24）开始， A 应用无法再直接访问 B 应用的 /data/data/ 私有目录，建议path路径是公共目录路径，如：
+/storage/emulated/0/Download/
+testVoice.zip
+ 
+等。
+path | 语音压缩包zip路径,存在此路径下的符合当前设备tts版本的语音压缩包。 从 Android 7.0（API 24）开始， A 应用无法再直接访问 B 应用的 /data/data/ 私有目录，建议path路径是公共目录路径，如： /storage/emulated/0/Download/ testVoice.zip   等。
+IResultCallback callBack
+回调接口执行结果
+,
+取值示例：
+int result = bundle.getInt("resultCode"); //执行结果
+0 : 成功 -1 : type类型不正确
+-2 : path路径为空或null
+-3 : path 指向的文件不存在或无权限访问
+-4 : 传入path不是合法压缩包
+-5 : type = 2 时，清空中转目录失败
+-6 : type = 1 时，删除中转目录下同名顶层目录/文件失败
+-7 : type = 1 时，解压失败
+-8 : 空间不足（中转目录所在分区的可用大小大于解压后大小的105%）
+-9 : 其他异常
+-40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商
+IResultCallback callBack | 回调接口执行结果 , 取值示例： int result = bundle.getInt("resultCode"); //执行结果 0 : 成功 -1 : type类型不正确 -2 : path路径为空或null -3 : path 指向的文件不存在或无权限访问 -4 : 传入path不是合法压缩包 -5 : type = 2 时，清空中转目录失败 -6 : type = 1 时，删除中转目录下同名顶层目录/文件失败 -7 : type = 1 时，解压失败 -8 : 空间不足（中转目录所在分区的可用大小大于解压后大小的105%） -9 : 其他异常 -40：接口在当前设备或ROM不支持 -41：未找到系统服务，请联系设备供应商
+返回值
+无
+返回值 | 无
+适用范围
+P3
+适用范围 | P3
+备注
+1、金融机使能tts的条件：64位设备满足3+32及以上，32位设备满足2+16。否则tts默认是禁用状态，可通过资源包配置打开。
+2、金融机导入方案：目前android11机型（p2litese,P3,P3H,P3KH,P2-A11）使用的tts版本为23.12.333383720，我们称之为旧版本，此版本支持的语音类型有限，如果客户认为语音文件覆盖度不够广，可通过资源包升级到新版本tts（20260331.04_p0.892709386），但需告知客户，旧版本通过网络下载好的语音资源升级后不能用，需要通过接口预置或者网络下载的方式达到再次支持。
+3、资源包升级方案：把新版本tts(目前在测版本是有4个apk打包放在cache/customer/crp/priv-app/GoogleTTS/目录下)，
+并且配置ro.res.enable.google
+.tts为1，使能tts（因为根据机器不同配置，当前tts有可能是禁用状态）。
+备注 | 1、金融机使能tts的条件：64位设备满足3+32及以上，32位设备满足2+16。否则tts默认是禁用状态，可通过资源包配置打开。 2、金融机导入方案：目前android11机型（p2litese,P3,P3H,P3KH,P2-A11）使用的tts版本为23.12.333383720，我们称之为旧版本，此版本支持的语音类型有限，如果客户认为语音文件覆盖度不够广，可通过资源包升级到新版本tts（20260331.04_p0.892709386），但需告知客户，旧版本通过网络下载好的语音资源升级后不能用，需要通过接口预置或者网络下载的方式达到再次支持。 3、资源包升级方案：把新版本tts(目前在测版本是有4个apk打包放在cache/customer/crp/priv-app/GoogleTTS/目录下)， 并且配置ro.res.enable.google .tts为1，使能tts（因为根据机器不同配置，当前tts有可能是禁用状态）。
+示例代码
+try {
+sTmsApi.getDeviceManager().installTTSVoicePackage(0,"/sdcard/Download/
+voice.zip
+",
+new IResultCallback.Stub() {
+@Override
+public void onCall(Bundle bundle) throws RemoteException {
+if (bundle != null) {
+int result = bundle.getInt("resultCode");
+}
+}
+});
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { sTmsApi.getDeviceManager().installTTSVoicePackage(0,"/sdcard/Download/ voice.zip ", new IResultCallback.Stub() { @Override public void onCall(Bundle bundle) throws RemoteException { if (bundle != null) { int result = bundle.getInt("resultCode"); } } }); } catch (Exception e) { e.printStackTrace(); }
+3.52 删除TTS预置的中转目录语音包
+原型
+int deleteTTSVoicePackageCache(List<String> locales);
+原型 | int deleteTTSVoicePackageCache(List<String> locales);
+功能
+删除TTS预置的中转目录语音包(此接口仅为节省存储空间，并没有删除GoogleTTS私有目录下的语音包，已经装好的语音包还可继续使用。)
+功能 | 删除TTS预置的中转目录语音包(此接口仅为节省存储空间，并没有删除GoogleTTS私有目录下的语音包，已经装好的语音包还可继续使用。)
+参数
+List<String> locales
+locales 传入null 表示删所有。locales 可传入安装的语音包种的顶层目录的名称，如：cmn-cn、cmn-tw、cs-cz、de-de、el-gr、es-es、et-ee、fr-fr、hu-hu、it-it、nl-nl、pl-pl、ro-ro、sk-sk等，不同tts支持的语言范围不同。
+参数 | List<String> locales | locales 传入null 表示删所有。locales 可传入安装的语音包种的顶层目录的名称，如：cmn-cn、cmn-tw、cs-cz、de-de、el-gr、es-es、et-ee、fr-fr、hu-hu、it-it、nl-nl、pl-pl、ro-ro、sk-sk等，不同tts支持的语言范围不同。
+返回值
+0:成功
+-1:失败
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().deleteTTSVoicePackageCache(new ArrayList<>(Arrays.asList("cs-cz","fr-fr"))); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().deleteTTSVoicePackageCache(new ArrayList<>(Arrays.asList("cs-cz","fr-fr"))); } catch (Exception e) { e.printStackTrace(); }
+3.53 设置设备USB口上下电
+原型
+int setUsbPortPowerState(int portType, int powerState);
+原型 | int setUsbPortPowerState(int portType, int powerState);
+功能
+设置设备USB口上下电
+功能 | 设置设备USB口上下电
+参数
+portType
+0:短边端口
+1:长边端口
+参数 | portType | 0:短边端口 1:长边端口
+powerState
+0:上电
+1:下电
+powerState | 0:上电 1:下电
+返回值
+0:成功
+-1:失败
+-2:参数不合法
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:成功 -1:失败 -2:参数不合法 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+CPad-A14
+适用范围 | CPad-A14
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceManager().setUsbPortPowerState(0,0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().setUsbPortPowerState(0,0); } catch (Exception e) { e.printStackTrace(); }
+3.54 获取设备USB口供电状态
+原型
+int getUsbPortPowerState(int portType);
+原型 | int getUsbPortPowerState(int portType);
+功能
+获取设备USB口供电状态
+功能 | 获取设备USB口供电状态
+参数
+portType
+0:短边端口
+1:长边端口
+参数 | portType | 0:短边端口 1:长边端口
+返回值
+0:上电状态
+1:下电状态
+-1:失败
+-2:参数不合法
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:上电状态 1:下电状态 -1:失败 -2:参数不合法 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+CPad-A14
+适用范围 | CPad-A14
+备注
+setUsbPortPowerState设置状态后不会持久化保存，设备重启后状态会恢复默认状态，该接口仅在开机状态下获取使用。
+备注 | setUsbPortPowerState设置状态后不会持久化保存，设备重启后状态会恢复默认状态，该接口仅在开机状态下获取使用。
+示例代码
+try { int result = sTmsApi.getDeviceManager().getUsbPortPowerState(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceManager().getUsbPortPowerState(0); } catch (Exception e) { e.printStackTrace(); }

@@ -1,0 +1,356 @@
+﻿================================================================================
+SunmiCustomer API - 07 Device Runtime Information Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xdddeghjk524
+Update Time: 2026-04-29 18:25:31
+Content Length: 7752 chars
+================================================================================
+1 概述
+设备运行时信息模块，包含获取GPS位置信息、设备电量、运行时内存大小等功能。
+2 API列表
+接口
+说明
+接口 | 说明
+Map getGPSLocation();
+获取GPS位置信息（最近一次定位信息）
+Map getGPSLocation(); | 获取GPS位置信息（最近一次定位信息）
+String getBatteryCapacity();
+获取当前电池电量百分比
+String getBatteryCapacity(); | 获取当前电池电量百分比
+void getGPSLocationWithTimeout(GPSLocationListener listener, long timeout)
+实时获取GPS位置信息
+void getGPSLocationWithTimeout(GPSLocationListener listener, long timeout) | 实时获取GPS位置信息
+long getRamTotalSize();
+获取运行时内存总大小
+long getRamTotalSize(); | 获取运行时内存总大小
+long getRamUsedSize();
+获取已使用运行时内存大小
+long getRamUsedSize(); | 获取已使用运行时内存大小
+long getRomTotalSize();
+获取设备存储空间大小
+long getRomTotalSize(); | 获取设备存储空间大小
+long getRomUsedSize();
+获取设备已使用存储空间大小
+long getRomUsedSize(); | 获取设备已使用存储空间大小
+float getCpuUsage()
+获取CPU使用率
+float getCpuUsage() | 获取CPU使用率
+long getTurnOnMills()
+获取设备开机时间
+long getTurnOnMills() | 获取设备开机时间
+3 API详情
+3.1 
+获取GPS位置信息（最近一次定位信息）
+原型
+Map getGPSLocation();
+原型 | Map getGPSLocation();
+功能
+获取GPS位置信息（最近一次GPS缓存定位信息）
+功能 | 获取GPS位置信息（最近一次GPS缓存定位信息）
+参数
+无
+ 
+参数 | 无 |  
+返回值
+最近一次GPS缓存的定位信息
+返回值 | 最近一次GPS缓存的定位信息
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+如果返回null 请检查以下情况：
+1、请检查使用位置信息开关是否有打开。
+2、请到信号室外开阔地信号较好的位置尝试。
+3、如果之前没有成功使用过gps 定位，则取到的缓存位置信息也是null。
+4、需要获取Map 对应字段详见
+ 
+LocationInfoConstant
+备注 | 如果返回null 请检查以下情况： 1、请检查使用位置信息开关是否有打开。 2、请到信号室外开阔地信号较好的位置尝试。 3、如果之前没有成功使用过gps 定位，则取到的缓存位置信息也是null。 4、需要获取Map 对应字段详见   LocationInfoConstant
+示例代码
+try {
+   Map<String, String> gpsLocationMap = sTmsApi.getDeviceRunningInfo().
+getGPSLocation
+();
+  if (gpsLocationMap
+ != null && 
+gpsLocationMap
+.size() > 0 && !
+gpsLocationMap
+.equals("null")
+) {
+    //经度
+    String longitude = gpsLocationMap.get("longitude");
+   //纬度
+    String latitude = gpsLocationMap.get("latitude");
+   //海拔
+    String altitude = gpsLocationMap.get("altitude");
+   //速度
+    String speed = gpsLocationMap.get("speed");
+   //方位角
+    String bearing = gpsLocationMap.get("bearing");
+   }
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    Map<String, String> gpsLocationMap = sTmsApi.getDeviceRunningInfo(). getGPSLocation ();   if (gpsLocationMap  != null &&  gpsLocationMap .size() > 0 && ! gpsLocationMap .equals("null") ) {     //经度     String longitude = gpsLocationMap.get("longitude");    //纬度     String latitude = gpsLocationMap.get("latitude");    //海拔     String altitude = gpsLocationMap.get("altitude");    //速度     String speed = gpsLocationMap.get("speed");    //方位角     String bearing = gpsLocationMap.get("bearing");    } } catch (Exception e) {     e.printStackTrace(); }
+3.2 
+获取当前电池电量百分比
+原型
+String getBatteryCapacity();
+原型 | String getBatteryCapacity();
+功能
+获取当前电池电量百分比
+功能 | 获取当前电池电量百分比
+参数
+无
+ 
+参数 | 无 |  
+返回值
+当前电池电量百分比
+返回值 | 当前电池电量百分比
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   String result = sTmsApi.getDeviceRunningInfo().
+getBatteryCapacity
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    String result = sTmsApi.getDeviceRunningInfo(). getBatteryCapacity (); } catch (Exception e) {     e.printStackTrace(); }
+3.3 
+实时获取GPS位置信息
+原型
+void getGPSLocationWithTimeout(GPSLocationListener listener, long timeout)
+原型 | void getGPSLocationWithTimeout(GPSLocationListener listener, long timeout)
+功能
+实时获取GPS位置信息
+功能 | 实时获取GPS位置信息
+参数
+GPSLocationListener listener
+位置信息结果回调map 里对应的key 详见
+LocationInfoConstant
+参数 | GPSLocationListener listener | 位置信息结果回调map 里对应的key 详见 LocationInfoConstant
+ 
+long timeout
+定位超时时间，单位：毫秒
+  | long timeout | 定位超时时间，单位：毫秒
+返回值
+无
+返回值 | 无
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+如果返回null 请检查以下情况：
+1、请检查使用位置信息开关是否有打开。
+2、请到信号室外开阔地信号较好的位置尝试。
+3、超时时间设置较短也可能返回null，可设置大一点后尝试。
+备注 | 如果返回null 请检查以下情况： 1、请检查使用位置信息开关是否有打开。 2、请到信号室外开阔地信号较好的位置尝试。 3、超时时间设置较短也可能返回null，可设置大一点后尝试。
+示例代码
+try {
+     sTmsApi
+.getDeviceRunningInfo().getGPSLocationWithTimeout(new    GPSLocationListener.Stub() {
+            @Override
+            public void onGPSLocationChanged(Map 
+gpsLocationMap
+) throws RemoteException {
+     
+if (gpsLocationMap
+ != null && 
+gpsLocationMap
+.size() > 0 && !
+gpsLocationMap
+.equals("null")
+) {
+      //经度
+    String longitude = gpsLocationMap.get("longitude");
+   //纬度
+    String latitude = gpsLocationMap.get("latitude");
+   //海拔
+    String altitude = gpsLocationMap.get("altitude");
+   //速度
+    String speed = gpsLocationMap.get("speed");
+   //方位角
+    String bearing = gpsLocationMap.get("bearing");
+   }
+            }
+        }, 10000);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {      sTmsApi .getDeviceRunningInfo().getGPSLocationWithTimeout(new    GPSLocationListener.Stub() {             @Override             public void onGPSLocationChanged(Map  gpsLocationMap ) throws RemoteException {       if (gpsLocationMap  != null &&  gpsLocationMap .size() > 0 && ! gpsLocationMap .equals("null") ) {       //经度     String longitude = gpsLocationMap.get("longitude");    //纬度     String latitude = gpsLocationMap.get("latitude");    //海拔     String altitude = gpsLocationMap.get("altitude");    //速度     String speed = gpsLocationMap.get("speed");    //方位角     String bearing = gpsLocationMap.get("bearing");    }             }         }, 10000); } catch (Exception e) {     e.printStackTrace(); }
+3.4 
+获取运行时内存总大小
+原型
+long getRamTotalSize();
+原型 | long getRamTotalSize();
+功能
+获取运行时内存总大小
+功能 | 获取运行时内存总大小
+参数
+无
+ 
+参数 | 无 |  
+返回值
+运行时内存总大小，单位字节
+返回值 | 运行时内存总大小，单位字节
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   long result = sTmsApi.getDeviceRunningInfo().getRamTotalSize();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    long result = sTmsApi.getDeviceRunningInfo().getRamTotalSize(); } catch (Exception e) {     e.printStackTrace(); }
+3.5 
+获取已使用运行时内存大小
+原型
+long getRamUsedSize();
+原型 | long getRamUsedSize();
+功能
+获取已使用运行时内存大小
+功能 | 获取已使用运行时内存大小
+参数
+无
+ 
+参数 | 无 |  
+返回值
+已使用运行时内存大小，单位字节
+返回值 | 已使用运行时内存大小，单位字节
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   long result = sTmsApi.getDeviceRunningInfo().getRamUsedSize();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    long result = sTmsApi.getDeviceRunningInfo().getRamUsedSize(); } catch (Exception e) {     e.printStackTrace(); }
+3.6 
+获取设备存储空间总大小
+原型
+long getRomTotalSize();
+原型 | long getRomTotalSize();
+功能
+获取设备存储空间大小
+功能 | 获取设备存储空间大小
+参数
+无
+ 
+参数 | 无 |  
+返回值
+设备存储空间大小，单位字节
+返回值 | 设备存储空间大小，单位字节
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   long result = sTmsApi.getDeviceRunningInfo().
+getRomTotalSize
+();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    long result = sTmsApi.getDeviceRunningInfo(). getRomTotalSize (); } catch (Exception e) {     e.printStackTrace(); }
+3.7 
+获取设备已使用存储空间大小
+原型
+long getRomUsedSize();
+原型 | long getRomUsedSize();
+功能
+获取设备已使用存储空间大小
+功能 | 获取设备已使用存储空间大小
+参数
+无
+ 
+参数 | 无 |  
+返回值
+设备存储空间大小，单位字节
+返回值 | 设备存储空间大小，单位字节
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+  long result = sTmsApi.getDeviceRunningInfo().getRomUsedSize();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {   long result = sTmsApi.getDeviceRunningInfo().getRomUsedSize(); } catch (Exception e) {     e.printStackTrace(); }
+3.8 
+获取CPU使用率
+原型
+float getCpuUsage()
+原型 | float getCpuUsage()
+功能
+获取CPU使用率
+功能 | 获取CPU使用率
+参数
+无
+ 
+参数 | 无 |  
+返回值
+CPU使用率，例如："10.0",表示CPU使用率为百分之10
+返回值 | CPU使用率，例如："10.0",表示CPU使用率为百分之10
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+  float result = sTmsApi.getDeviceRunningInfo().getCpuUsage();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {   float result = sTmsApi.getDeviceRunningInfo().getCpuUsage(); } catch (Exception e) {     e.printStackTrace(); }
+3.9 
+获取设备开机时间
+原型
+long getTurnOnMills()
+原型 | long getTurnOnMills()
+功能
+获取设备开机时间
+功能 | 获取设备开机时间
+参数
+无
+ 
+参数 | 无 |  
+返回值
+设备开机时间，单位毫秒
+返回值 | 设备开机时间，单位毫秒
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+  long result = sTmsApi.getDeviceRunningInfo().getTurnOnMills();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {   long result = sTmsApi.getDeviceRunningInfo().getTurnOnMills(); } catch (Exception e) {     e.printStackTrace(); }

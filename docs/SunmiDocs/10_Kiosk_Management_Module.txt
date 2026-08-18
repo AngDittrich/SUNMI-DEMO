@@ -1,0 +1,531 @@
+﻿================================================================================
+SunmiCustomer API - 10 Kiosk Management Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xmrqeghjk513
+Update Time: 2026-04-29 18:25:31
+Content Length: 13478 chars
+================================================================================
+1 概述
+霸屏管理模块，包含是否支持霸屏、添加应用到霸屏列表、设置退出霸屏时的密码、获取霸屏模式下导航栏显示模式等相关接口功能。
+2 API列表
+接口
+说明
+接口 | 说明
+boolean enableKioskFunction(boolean enable);
+不支持/支持整个霸屏功能的开关
+boolean enableKioskFunction(boolean enable); | 不支持/支持整个霸屏功能的开关
+boolean isKioskFunctionEnabled();
+获取整个霸屏功能的是否支持
+boolean isKioskFunctionEnabled(); | 获取整个霸屏功能的是否支持
+boolean getKioskModeStatus();
+获取霸屏模式运行状态
+boolean getKioskModeStatus(); | 获取霸屏模式运行状态
+boolean addAppToKioskList(in List<String> packageNames);
+添加应用到霸屏列表
+boolean addAppToKioskList(in List<String> packageNames); | 添加应用到霸屏列表
+boolean removeAppFromKioskList(in List<String> packageNames);
+从霸屏列表中删除霸屏应用
+boolean removeAppFromKioskList(in List<String> packageNames); | 从霸屏列表中删除霸屏应用
+List<String> getKioskAppList();
+获取霸屏应用的列表，即所有的霸屏应用
+List<String> getKioskAppList(); | 获取霸屏应用的列表，即所有的霸屏应用
+boolean isKioskApp(String packageName);
+查询应用是否为霸屏应用
+boolean isKioskApp(String packageName); | 查询应用是否为霸屏应用
+boolean setKioskPwdByType(int type, String psw);
+设置退出霸屏时的密码
+boolean setKioskPwdByType(int type, String psw); | 设置退出霸屏时的密码
+boolean setNavigationBarStatusForKiosk(int status);
+设置霸屏模式下导航栏显示模式
+boolean setNavigationBarStatusForKiosk(int status); | 设置霸屏模式下导航栏显示模式
+int getNavigationBarStatusForKiosk()
+获取霸屏模式下导航栏显示模式
+int getNavigationBarStatusForKiosk() | 获取霸屏模式下导航栏显示模式
+boolean hideStatusBarForKiosk(boolean hide)
+设置霸屏模式下是否隐藏状态栏
+boolean hideStatusBarForKiosk(boolean hide) | 设置霸屏模式下是否隐藏状态栏
+boolean isStatusBarHiddenForKiosk()
+霸屏模式下获取状态栏是否隐藏
+boolean isStatusBarHiddenForKiosk() | 霸屏模式下获取状态栏是否隐藏
+boolean switchKioskPwdByType(int type)
+设置霸屏模式退出需要输入的密码类型
+boolean switchKioskPwdByType(int type) | 设置霸屏模式退出需要输入的密码类型
+int getSwitchKioskPwdByType()
+获取当前霸屏模式退出需要输入的密码类型
+int getSwitchKioskPwdByType() | 获取当前霸屏模式退出需要输入的密码类型
+boolean exitKioskMode(String password);
+退出霸屏模式
+boolean exitKioskMode(String password); | 退出霸屏模式
+3 API详情
+3.1 
+不支持/支持整个霸屏功能的开关
+原型
+boolean enableKioskFunction(boolean enable);
+原型 | boolean enableKioskFunction(boolean enable);
+功能
+打开或关闭霸屏功能的开关
+功能 | 打开或关闭霸屏功能的开关
+参数
+boolean enable
+true：打开
+false：关闭
+参数 | boolean enable | true：打开 false：关闭
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+         boolean result =sTmsApi.getKioskManager().enableKioskFunction(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {          boolean result =sTmsApi.getKioskManager().enableKioskFunction(true);         } catch (Exception e) {             e.printStackTrace();        }
+3.2 
+获取整个霸屏功能的是否支持
+原型
+boolean isKioskFunctionEnabled();
+原型 | boolean isKioskFunctionEnabled();
+功能
+获取整个霸屏功能的是否支持
+功能 | 获取整个霸屏功能的是否支持
+参数
+无
+ 
+参数 | 无 |  
+返回值
+执行结果
+true：打开
+false：关闭
+返回值 | 执行结果 true：打开 false：关闭
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+         boolean result =sTmsApi.getKioskManager().isKioskFunctionEnabled();
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {          boolean result =sTmsApi.getKioskManager().isKioskFunctionEnabled();         } catch (Exception e) {             e.printStackTrace();        }
+3.3 
+获取霸屏模式运行状态
+原型
+boolean getKioskModeStatus();
+原型 | boolean getKioskModeStatus();
+功能
+获取当前设备是否处于霸屏运行状态
+功能 | 获取当前设备是否处于霸屏运行状态
+参数
+无
+ 
+参数 | 无 |  
+返回值
+执行结果
+true：打开
+false：关闭
+返回值 | 执行结果 true：打开 false：关闭
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+         boolean result =sTmsApi.getKioskManager().getKioskModeStatus();
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {          boolean result =sTmsApi.getKioskManager().getKioskModeStatus();         } catch (Exception e) {             e.printStackTrace();        }
+3.4 
+添加应用到霸屏列表
+原型
+boolean addAppToKioskList(List<String> packageNames);
+原型 | boolean addAppToKioskList(List<String> packageNames);
+功能
+添加应用到霸屏列表
+功能 | 添加应用到霸屏列表
+参数
+List<String> packageNames
+应用包名列表
+参数 | List<String> packageNames | 应用包名列表
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+若应用被卸载，则会把此应用自动从霸屏列表中移除,使用了systemuid的应用除外。
+备注 | 若应用被卸载，则会把此应用自动从霸屏列表中移除,使用了systemuid的应用除外。
+示例代码
+ try {
+         List<String> packageNames = new ArrayList<>();
+         packageNames.add("com.xxx.xxx");
+         boolean result =sTmsApi.getKioskManager().addAppToKioskList(packageNames);
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {          List<String> packageNames = new ArrayList<>();          packageNames.add("com.xxx.xxx");          boolean result =sTmsApi.getKioskManager().addAppToKioskList(packageNames);         } catch (Exception e) {             e.printStackTrace();        }
+3.5 
+从霸屏列表中删除霸屏应用
+原型
+boolean removeAppFromKioskList(List<String> packageNames);
+原型 | boolean removeAppFromKioskList(List<String> packageNames);
+功能
+从霸屏列表中删除霸屏应用
+功能 | 从霸屏列表中删除霸屏应用
+参数
+List<String> packageNames
+应用包名列表
+参数 | List<String> packageNames | 应用包名列表
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+         List<String> packageNames = new ArrayList<>();
+         packageNames.add("com.xxx.xxx");
+  boolean result =sTmsApi.getKioskManager().removeAppFromKioskList(packageNames);
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 | try {          List<String> packageNames = new ArrayList<>();          packageNames.add("com.xxx.xxx");   boolean result =sTmsApi.getKioskManager().removeAppFromKioskList(packageNames);         } catch (Exception e) {             e.printStackTrace();        }
+3.6 
+获取霸屏应用的列表，即所有的霸屏应用
+原型
+List<String> getKioskAppList();
+原型 | List<String> getKioskAppList();
+功能
+获取霸屏应用的列表，即所有的霸屏应用
+功能 | 获取霸屏应用的列表，即所有的霸屏应用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+应用包名列表
+返回值 | 应用包名列表
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+若执行压力测试，建议调用addAppToKioskList后，延时300ms，再调用getKioskAppList接口
+备注 | 若执行压力测试，建议调用addAppToKioskList后，延时300ms，再调用getKioskAppList接口
+示例代码
+ try {
+         List<String> packageNames =sTmsApi.getKioskManager().getKioskAppList(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+       }
+示例代码 |  try {          List<String> packageNames =sTmsApi.getKioskManager().getKioskAppList(true);         } catch (Exception e) {             e.printStackTrace();        }
+3.7 
+查询应用是否为霸屏应用
+原型
+boolean isKioskApp(String packageName);
+原型 | boolean isKioskApp(String packageName);
+功能
+查询应用是否为霸屏应用
+功能 | 查询应用是否为霸屏应用
+参数
+String packageName
+应用包名
+参数 | String packageName | 应用包名
+返回值
+true: 是霸屏应用
+false: 不是霸屏应用
+返回值 | true: 是霸屏应用 false: 不是霸屏应用
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+ try {
+         boolean result=sTmsApi.getKioskManager().isKioskApp("com.xxx.xxx");
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 |  try {          boolean result=sTmsApi.getKioskManager().isKioskApp("com.xxx.xxx");         } catch (Exception e) {             e.printStackTrace();       }
+3.8 
+设置退出霸屏时的密码
+原型
+boolean setKioskPwdByType(int type, String psw);
+原型 | boolean setKioskPwdByType(int type, String psw);
+功能
+设置退出霸屏时的密码，密码只能为数字
+功能 | 设置退出霸屏时的密码，密码只能为数字
+参数
+int type
+0：设置退出霸屏时云端四位长度的密码
+1：设置退出霸屏时云端八位长度的密码
+2：设置退出霸屏时本地密码，长度为4
+参数 | int type | 0：设置退出霸屏时云端四位长度的密码 1：设置退出霸屏时云端八位长度的密码 2：设置退出霸屏时本地密码，长度为4
+ 
+String psw
+密码只能为数字，长度（4或8位）
+  | String psw | 密码只能为数字，长度（4或8位）
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、若同时存在云端密码和本地密码，则解锁界面允许使用两种密码退出霸屏，若同时存在云端4位和8位密码，则8位密码优先级更高。
+2、卸载应用后，没有清除密码存储。
+3、若同时设置了云端4位和8位密码，因8位优先级更高，若想返回使用4位密码，则可使用switchKioskPwdByType切换使用哪种密码。
+4、
+当 type 为 0 或 1 时，通过本接口设置的云端退出霸屏密码与商米云端霸屏退出密码存在冲突。两种方式只能二选一，不可同时使用。
+备注 | 1、若同时存在云端密码和本地密码，则解锁界面允许使用两种密码退出霸屏，若同时存在云端4位和8位密码，则8位密码优先级更高。 2、卸载应用后，没有清除密码存储。 3、若同时设置了云端4位和8位密码，因8位优先级更高，若想返回使用4位密码，则可使用switchKioskPwdByType切换使用哪种密码。 4、 当 type 为 0 或 1 时，通过本接口设置的云端退出霸屏密码与商米云端霸屏退出密码存在冲突。两种方式只能二选一，不可同时使用。
+示例代码
+try {
+         boolean result=sTmsApi.getKioskManager().setKioskPwdByType(2，"1234");
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          boolean result=sTmsApi.getKioskManager().setKioskPwdByType(2，"1234");         } catch (Exception e) {             e.printStackTrace();       }
+3.9 
+设置霸屏模式下导航栏显示模式
+原型
+boolean setNavigationBarStatusForKiosk(int status);
+原型 | boolean setNavigationBarStatusForKiosk(int status);
+功能
+设置霸屏模式时导航栏的状态（默认状态是上滑显示导航栏）
+功能 | 设置霸屏模式时导航栏的状态（默认状态是上滑显示导航栏）
+参数
+int status
+1：常驻显示导航栏（常驻显示是仅显示Back键）
+2：上滑显示导航栏（默认状态）
+参数 | int status | 1：常驻显示导航栏（常驻显示是仅显示Back键） 2：上滑显示导航栏（默认状态）
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+在进入霸屏应用之前设置好导航栏效果
+备注 | 在进入霸屏应用之前设置好导航栏效果
+示例代码
+try {
+         boolean result=sTmsApi.getKioskManager().setNavigationBarStatusForKiosk(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          boolean result=sTmsApi.getKioskManager().setNavigationBarStatusForKiosk(1);         } catch (Exception e) {             e.printStackTrace();       }
+3.10 
+获取霸屏模式下导航栏显示模式
+原型
+int getNavigationBarStatusForKiosk()
+原型 | int getNavigationBarStatusForKiosk()
+功能
+获取霸屏模式时导航栏的状态（默认状态是上滑显示导航栏）
+功能 | 获取霸屏模式时导航栏的状态（默认状态是上滑显示导航栏）
+参数
+无
+ 
+参数 | 无 |  
+返回值
+1：常驻显示导航栏（常驻显示是仅显示Back键）
+2：上滑显示导航栏（默认状态）
+返回值 | 1：常驻显示导航栏（常驻显示是仅显示Back键） 2：上滑显示导航栏（默认状态）
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+         int result=sTmsApi.getKioskManager().getNavigationBarStatusForKiosk();
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          int result=sTmsApi.getKioskManager().getNavigationBarStatusForKiosk();         } catch (Exception e) {             e.printStackTrace();       }
+3.11 
+设置霸屏模式下是否隐藏状态栏
+原型
+boolean hideStatusBarForKiosk(boolean hide)
+原型 | boolean hideStatusBarForKiosk(boolean hide)
+功能
+设置霸屏模式下是否隐藏状态栏
+功能 | 设置霸屏模式下是否隐藏状态栏
+参数
+boolean hide
+ true：默认隐藏，下滑显示状态栏（默认状态）
+ false：常显状态栏
+参数 | boolean hide |  true：默认隐藏，下滑显示状态栏（默认状态）  false：常显状态栏
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、在进入霸屏应用之前设置好状态栏效果。
+2、霸屏模式不能下拉出下拉面板。
+备注 | 1、在进入霸屏应用之前设置好状态栏效果。 2、霸屏模式不能下拉出下拉面板。
+示例代码
+try {
+         boolean result=sTmsApi.getKioskManager().hideStatusBarForKiosk(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          boolean result=sTmsApi.getKioskManager().hideStatusBarForKiosk(true);         } catch (Exception e) {             e.printStackTrace();       }
+3.12 
+霸屏模式下获取状态栏是否隐藏
+原型
+boolean isStatusBarHiddenForKiosk()
+原型 | boolean isStatusBarHiddenForKiosk()
+功能
+获取霸屏模式下是否自动隐藏状态栏
+功能 | 获取霸屏模式下是否自动隐藏状态栏
+参数
+无
+ 
+参数 | 无 |  
+返回值
+true：默认隐藏，下滑显示状态栏（默认状态）
+false：常显状态栏
+返回值 | true：默认隐藏，下滑显示状态栏（默认状态） false：常显状态栏
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+         boolean result=sTmsApi.getKioskManager().isStatusBarHiddenForKiosk();
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          boolean result=sTmsApi.getKioskManager().isStatusBarHiddenForKiosk();         } catch (Exception e) {             e.printStackTrace();       }
+3.13 
+设置霸屏模式退出需要输入的密码类型
+原型
+boolean switchKioskPwdByType(int type)
+原型 | boolean switchKioskPwdByType(int type)
+功能
+切换退出霸屏应用密码的类型
+功能 | 切换退出霸屏应用密码的类型
+参数
+int type
+-1 ：回到商米原逻辑
+0 ：退出霸屏时切换为使用四位长度的密码
+1 ：退出霸屏时切换为使用八位长度的密码
+2 ：退出霸屏时切换为使用本地密码
+参数 | int type | -1 ：回到商米原逻辑 0 ：退出霸屏时切换为使用四位长度的密码 1 ：退出霸屏时切换为使用八位长度的密码 2 ：退出霸屏时切换为使用本地密码
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、默认是商米原逻辑，如果同时存在本地密码和云端密码，则允许同时使用本地密码和云端密码退出霸屏，默认会选择在本地密码界面，可手动切换到云端密码界面。
+2、切换操作，则切换到哪种模式，就使用哪种密码退出霸屏模式，切换操作不会清除原有设置的密码。
+3、切换到哪种类型，要预先调用setKioskPwdByType(int type, String psw)接口后，才能正常切换到目标类型。
+备注 | 1、默认是商米原逻辑，如果同时存在本地密码和云端密码，则允许同时使用本地密码和云端密码退出霸屏，默认会选择在本地密码界面，可手动切换到云端密码界面。 2、切换操作，则切换到哪种模式，就使用哪种密码退出霸屏模式，切换操作不会清除原有设置的密码。 3、切换到哪种类型，要预先调用setKioskPwdByType(int type, String psw)接口后，才能正常切换到目标类型。
+示例代码
+try {
+         int type=0;
+        //预先调用setKioskPwdByType
+         boolean result=sTmsApi.getKioskManager().setKioskPwdByType(type,"1234");
+        //再切换类型
+         boolean result=sTmsApi.getKioskManager().switchKioskPwdByType(type);
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          int type=0;         //预先调用setKioskPwdByType          boolean result=sTmsApi.getKioskManager().setKioskPwdByType(type,"1234");         //再切换类型          boolean result=sTmsApi.getKioskManager().switchKioskPwdByType(type);         } catch (Exception e) {             e.printStackTrace();       }
+3.14 
+获取当前霸屏模式退出需要输入的密码类型
+原型
+int getSwitchKioskPwdByType()
+原型 | int getSwitchKioskPwdByType()
+功能
+获取退出当前霸屏应用选择的密码类型，如果没有通过switchKioskPwdByType切换类型，则默认使用的是-1，商米原逻辑。
+功能 | 获取退出当前霸屏应用选择的密码类型，如果没有通过switchKioskPwdByType切换类型，则默认使用的是-1，商米原逻辑。
+参数
+无
+ 
+参数 | 无 |  
+返回值
+-1 ：回到商米原逻辑（默认是商米原逻辑）
+0 ：退出霸屏时切换为使用四位长度的密码
+1 ：退出霸屏时切换为使用八位长度的密码
+2 ：退出霸屏时切换为使用本地密码
+返回值 | -1 ：回到商米原逻辑（默认是商米原逻辑） 0 ：退出霸屏时切换为使用四位长度的密码 1 ：退出霸屏时切换为使用八位长度的密码 2 ：退出霸屏时切换为使用本地密码
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+执行结果
+true：成功
+false：失败
+备注 | 执行结果 true：成功 false：失败
+示例代码
+try {
+         int result=sTmsApi.getKioskManager().getSwitchKioskPwdByType();
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          int result=sTmsApi.getKioskManager().getSwitchKioskPwdByType();         } catch (Exception e) {             e.printStackTrace();       }
+3.15 
+退出霸屏模式
+原型
+boolean exitKioskMode(String password);
+原型 | boolean exitKioskMode(String password);
+功能
+校验密码正确后退出霸屏
+功能 | 校验密码正确后退出霸屏
+参数
+password
+退出霸屏的密码
+参数 | password | 退出霸屏的密码
+返回值
+true：成功，false：失败
+返回值 | true：成功，false：失败
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+         boolean result=sTmsApi.getKioskManager().exitKioskMode("1234");
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          boolean result=sTmsApi.getKioskManager().exitKioskMode("1234");         } catch (Exception e) {             e.printStackTrace();       }

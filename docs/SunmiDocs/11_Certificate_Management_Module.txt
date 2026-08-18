@@ -1,0 +1,138 @@
+﻿================================================================================
+SunmiCustomer API - 11 Certificate Management Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xmrdeghjk524
+Update Time: 2026-04-29 18:25:31
+Content Length: 2968 chars
+================================================================================
+1 概述
+证书管理模块，包含设备证书管理相关接口功能。
+2 API列表
+接口
+说明
+接口 | 说明
+int updateCertificate(String certPath);
+更新应用验签证书
+int updateCertificate(String certPath); | 更新应用验签证书
+String getCertificateInfo();
+获取当前应用验签证书信息
+String getCertificateInfo(); | 获取当前应用验签证书信息
+String getTrustedFileCertChain();
+获取应用验签可信证书链信息
+String getTrustedFileCertChain(); | 获取应用验签可信证书链信息
+3 API详情
+3.1 
+获取系统所有应用信息
+原型
+int updateCertificate(String certPath);
+原型 | int updateCertificate(String certPath);
+功能
+更新应用验签证书
+功能 | 更新应用验签证书
+参数
+String certPath
+证书文件地址
+参数 | String certPath | 证书文件地址
+返回值
+执行结果
+0：成功
+其他：失败，详见
+ 
+应用验签证书相关错误码
+返回值 | 执行结果 0：成功 其他：失败，详见   应用验签证书相关错误码
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、放应用私有目录如：/data/data/com.sunmi.tmsservice.demo/test_UpdateCertificate.crt 会报4无权限，sdcard 目录下可以。
+备注 | 1、放应用私有目录如：/data/data/com.sunmi.tmsservice.demo/test_UpdateCertificate.crt 会报4无权限，sdcard 目录下可以。
+示例代码
+try {
+         int result=sTmsApi.getCertificateManager().
+updateCertificate
+("
+/sdcard/Download/test_UpdateCertificate.crt
+");
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          int result=sTmsApi.getCertificateManager(). updateCertificate (" /sdcard/Download/test_UpdateCertificate.crt ");         } catch (Exception e) {             e.printStackTrace();       }
+3.2 
+获取当前应用验签证书信息
+原型
+String getCertificateInfo();
+原型 | String getCertificateInfo();
+功能
+获取当前应用验签证书信息
+功能 | 获取当前应用验签证书信息
+参数
+无
+ 
+参数 | 无 |  
+返回值
+0：成功
+其他：失败，详见
+ 
+应用验签证书相关错误码
+返回值 | 0：成功 其他：失败，详见   应用验签证书相关错误码
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+返回数据示例：
+{
+    "CertState": 3,//1:厂商模式 2:中间模式 3:单证书模式 4:多证书模式
+    "C1Cert": "xxxxx",
+    "C2Cert": "xxxx",
+    "subject": "xxxxx",
+    "fingerprint": "xxxx",
+    "level": 2,
+    "issuer": "xxxx",
+    "Code": 0
+}
+备注 | 返回数据示例： {     "CertState": 3,//1:厂商模式 2:中间模式 3:单证书模式 4:多证书模式     "C1Cert": "xxxxx",     "C2Cert": "xxxx",     "subject": "xxxxx",     "fingerprint": "xxxx",     "level": 2,     "issuer": "xxxx",     "Code": 0 }
+示例代码
+try {
+         String result=sTmsApi.getCertificateManager().
+getCertificateInfo
+();
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          String result=sTmsApi.getCertificateManager(). getCertificateInfo ();         } catch (Exception e) {             e.printStackTrace();       }
+3.3 
+获取应用验签可信证书链信息
+原型
+String getTrustedFileCertChain();
+原型 | String getTrustedFileCertChain();
+功能
+获取应用验签可信证书链信息
+功能 | 获取应用验签可信证书链信息
+参数
+无
+ 
+参数 | 无 |  
+返回值
+0：成功
+其他：失败，详见
+ 
+应用验签证书相关错误码
+返回值 | 0：成功 其他：失败，详见   应用验签证书相关错误码
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+{
+"CertState":3,//1:厂商模式 2:中间模式 3:单证书模式 4:多证书模式
+"C2CertChain":"xxxxx",
+"Code":0
+}
+备注 | { "CertState":3,//1:厂商模式 2:中间模式 3:单证书模式 4:多证书模式 "C2CertChain":"xxxxx", "Code":0 }
+示例代码
+try {
+         String result=sTmsApi.getCertificateManager().
+getTrustedFileCertChain
+();
+        } catch (Exception e) {
+            e.printStackTrace();
+      }
+示例代码 | try {          String result=sTmsApi.getCertificateManager(). getTrustedFileCertChain ();         } catch (Exception e) {             e.printStackTrace();       }

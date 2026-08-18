@@ -1,0 +1,320 @@
+﻿================================================================================
+SunmiCustomer API - 12 Log Management Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xziceghjk502
+Update Time: 2026-04-29 18:25:31
+Content Length: 9836 chars
+================================================================================
+1 概述
+日志管理模块，包含日志功能开关、获取日志开关状态、添加或删除应用需要输出应用日志、打包应用日志等功能。
+2 API列表
+接口
+说明
+接口 | 说明
+int enableAppLogFunction(boolean enable);
+是否打开AppLog日志功能的开关
+int enableAppLogFunction(boolean enable); | 是否打开AppLog日志功能的开关
+int isAppLogFunctionEnabled();
+获取AppLog日志开关的状态
+int isAppLogFunctionEnabled(); | 获取AppLog日志开关的状态
+int addPackageNameToAppLog(String packageName);
+把某普通应用包名添加到需要输出应用日志列表中
+int addPackageNameToAppLog(String packageName); | 把某普通应用包名添加到需要输出应用日志列表中
+int deletePackageNameFromAppLog(String packageName);
+把某应用包名从应用日志列表中删除
+int deletePackageNameFromAppLog(String packageName); | 把某应用包名从应用日志列表中删除
+List<String> getPackageNameFromAppLog();
+获取会输出应用日志的包名列表
+List<String> getPackageNameFromAppLog(); | 获取会输出应用日志的包名列表
+void packAppLog(IResultCallback callBack);
+打包应用日志
+void packAppLog(IResultCallback callBack); | 打包应用日志
+void packLogsByType(in List<String> types,String outputPath,IResultCallback callback);
+按类型打包日志为 zip 文件
+void packLogsByType(in List<String> types,String outputPath,IResultCallback callback); | 按类型打包日志为 zip 文件
+void getSysLogByDate(String startDate,String endDate,String outputPath,IResultCallback callback);
+按日期范围导出系统日志
+void getSysLogByDate(String startDate,String endDate,String outputPath,IResultCallback callback); | 按日期范围导出系统日志
+3 API详情
+3.1 把某普通应用包名添加到需要输出应用日志列表中
+原型
+int addPackageNameToAppLog(String packageName);
+原型 | int addPackageNameToAppLog(String packageName);
+功能
+把某普通应用包名添加到需要输出应用日志列表中
+功能 | 把某普通应用包名添加到需要输出应用日志列表中
+参数
+String packageName
+应用包名
+参数 | String packageName | 应用包名
+返回值
+0: success
+-1: 接口调用失败
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+-45: 当前应用无权限调用该接口
+返回值 | 0: success -1: 接口调用失败 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商 -45: 当前应用无权限调用该接口
+适用范围
+P3H
+适用范围 | P3H
+备注
+支持接口鉴权逻辑。不能获取系统应用日志，有限制只有uid > 10000的应用才能取到日志。
+备注 | 支持接口鉴权逻辑。不能获取系统应用日志，有限制只有uid > 10000的应用才能取到日志。
+示例代码
+try { int result = sTmsApi.getLogcatManager().addPackageNameToAppLog("
+com.example.app
+"); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getLogcatManager().addPackageNameToAppLog(" com.example.app "); } catch (Exception e) { e.printStackTrace(); }
+3.2 把某应用包名从应用日志列表中删除
+原型
+int deletePackageNameFromAppLog(String packageName);
+原型 | int deletePackageNameFromAppLog(String packageName);
+功能
+把某应用包名从应用日志列表中删除
+功能 | 把某应用包名从应用日志列表中删除
+参数
+String packageName
+应用包名
+参数 | String packageName | 应用包名
+返回值
+0: success
+-1: 接口调用失败
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+-45: 当前应用无权限调用该接口
+返回值 | 0: success -1: 接口调用失败 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商 -45: 当前应用无权限调用该接口
+适用范围
+P3H
+适用范围 | P3H
+备注
+支持接口鉴权逻辑。
+备注 | 支持接口鉴权逻辑。
+示例代码
+try { int result = sTmsApi.getLogcatManager().deletePackageNameFromAppLog("
+com.example.app
+"); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getLogcatManager().deletePackageNameFromAppLog(" com.example.app "); } catch (Exception e) { e.printStackTrace(); }
+3.3 获取会输出应用日志的包名列表
+原型
+List<String> getPackageNameFromAppLog();
+原型 | List<String> getPackageNameFromAppLog();
+功能
+获取会输出应用日志的包名列表
+功能 | 获取会输出应用日志的包名列表
+参数
+无
+参数 | 无 | 
+返回值
+有权限时：如果有添加过应用包名返回：List<String>如果没有添加过应用包名，调用会返回null无权限时：会抛出异常：throw new SecurityException(packageName + " ，This application does not have the permission to call this interface.")
+返回值 | 有权限时：如果有添加过应用包名返回：List<String>如果没有添加过应用包名，调用会返回null无权限时：会抛出异常：throw new SecurityException(packageName + " ，This application does not have the permission to call this interface.")
+适用范围
+P3H
+适用范围 | P3H
+备注
+支持接口鉴权逻辑。
+备注 | 支持接口鉴权逻辑。
+示例代码
+try { List<String> result = sTmsApi.getLogcatManager().getPackageNameFromAppLog(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { List<String> result = sTmsApi.getLogcatManager().getPackageNameFromAppLog(0); } catch (Exception e) { e.printStackTrace(); }
+3.4 打包应用日志
+原型
+void packAppLog(IResultCallback callBack);
+原型 | void packAppLog(IResultCallback callBack);
+功能
+打包应用日志，会输出打包日志路径
+功能 | 打包应用日志，会输出打包日志路径
+参数
+IResultCallback callBack
+回调接口执行结果和打包日志路径;
+取值示例：String path = bundle.getString("path"); //日志路径int result = bundle.getInt("result"); //执行结果
+0: success
+-1: 接口调用失败
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+-45: 当前应用无权限调用该接口
+参数 | IResultCallback callBack | 回调接口执行结果和打包日志路径; 取值示例：String path = bundle.getString("path"); //日志路径int result = bundle.getInt("result"); //执行结果 0: success -1: 接口调用失败 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商 -45: 当前应用无权限调用该接口
+返回值
+无
+返回值 | 无
+适用范围
+P3H
+适用范围 | P3H
+备注
+支持接口鉴权逻辑。
+备注 | 支持接口鉴权逻辑。
+示例代码
+try {
+sTmsApi.getLogcatManager().packAppLog(new IResultCallback.Stub() {
+@Override
+public void onCall(Bundle bundle) throws RemoteException {
+if (bundle != null) {
+int result = bundle.getInt("result");
+String path = bundle.getString("path");
+}
+}
+});
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { sTmsApi.getLogcatManager().packAppLog(new IResultCallback.Stub() { @Override public void onCall(Bundle bundle) throws RemoteException { if (bundle != null) { int result = bundle.getInt("result"); String path = bundle.getString("path"); } } }); } catch (Exception e) { e.printStackTrace(); }
+3.5 是否打开AppLog日志功能的开关
+原型
+int enableAppLogFunction(boolean enable);
+原型 | int enableAppLogFunction(boolean enable);
+功能
+把某普通应用包名添加到需要输出应用日志列表中（列表中的应用日志才会保存到applog中）
+功能 | 把某普通应用包名添加到需要输出应用日志列表中（列表中的应用日志才会保存到applog中）
+参数
+boolean enable
+true ：开启
+false ：关闭
+参数 | boolean enable | true ：开启 false ：关闭
+返回值
+0: success
+-1: 接口调用失败
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+-45: 当前应用无权限调用该接口
+返回值 | 0: success -1: 接口调用失败 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商 -45: 当前应用无权限调用该接口
+适用范围
+P3H
+适用范围 | P3H
+备注
+支持接口鉴权逻辑。
+备注 | 支持接口鉴权逻辑。
+示例代码
+try { int result = sTmsApi.getLogcatManager().enableAppLogFunction(true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getLogcatManager().enableAppLogFunction(true); } catch (Exception e) { e.printStackTrace(); }
+3.6 获取AppLog日志开关的状态
+原型
+int isAppLogFunctionEnabled();
+原型 | int isAppLogFunctionEnabled();
+功能
+获取AppLog日志开关的状态
+功能 | 获取AppLog日志开关的状态
+参数
+无
+参数 | 无 | 
+返回值
+0: success
+-1: 接口调用失败
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+-45: 当前应用无权限调用该接口
+返回值 | 0: success -1: 接口调用失败 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商 -45: 当前应用无权限调用该接口
+适用范围
+P3H
+适用范围 | P3H
+备注
+支持接口鉴权逻辑。
+备注 | 支持接口鉴权逻辑。
+示例代码
+try { int result = sTmsApi.getLogcatManager().isAppLogFunctionEnabled(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getLogcatManager().isAppLogFunctionEnabled(); } catch (Exception e) { e.printStackTrace(); }
+3.7 按类型打包日志为 zip 文件
+原型
+void packLogsByType(List<String> types,String outputPath,IResultCallback callback);
+原型 | void packLogsByType(List<String> types,String outputPath,IResultCallback callback);
+功能
+按类型打包日志为 zip 文件
+功能 | 按类型打包日志为 zip 文件
+参数
+List<String> types
+1:devicelog（设备日志，是所有logcat日志,打包的是/data/sunmilog/devicelog下的日志）
+2:modemlog（modem日志，modem日志默认是不打开状态）
+3:netlog（网络日志，暂不支持）
+4:btlog（蓝牙日志，暂不支持）
+5:sphslog（L1日志）
+48:syslog（系统日志）
+49:klog（kernel日志）
+参数 | List<String> types | 1:devicelog（设备日志，是所有logcat日志,打包的是/data/sunmilog/devicelog下的日志） 2:modemlog（modem日志，modem日志默认是不打开状态） 3:netlog（网络日志，暂不支持） 4:btlog（蓝牙日志，暂不支持） 5:sphslog（L1日志） 48:syslog（系统日志） 49:klog（kernel日志）
+outputPath
+输出 zip 文件路径（必须落在 sdcard，调用方应用可读,如：/sdcard/Download/
+a.zip
+）
+outputPath | 输出 zip 文件路径（必须落在 sdcard，调用方应用可读,如：/sdcard/Download/ a.zip ）
+IResultCallback callBack
+回调接口执行结果和打包日志路径;
+取值示例：
+int result = bundle.getInt("result"); //执行结果
+0: success
+-1: 接口调用失败
+-2:空间不足，不打包日志
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+-45: 当前应用无权限调用该接口
+IResultCallback callBack | 回调接口执行结果和打包日志路径; 取值示例： int result = bundle.getInt("result"); //执行结果 0: success -1: 接口调用失败 -2:空间不足，不打包日志 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商 -45: 当前应用无权限调用该接口
+返回值
+无
+返回值 | 无
+适用范围
+P3H-A11
+适用范围 | P3H-A11
+备注
+无
+备注 | 无
+示例代码
+try {
+sTmsApi.getLogcatManager().packLogsByType(new ArrayList<>(Arrays.asList("1","48")), "
+/sdcard/Download/
+a.zip
+", new IResultCallback.Stub() {
+@Override
+public void onCall(Bundle bundle) throws RemoteException {
+if (bundle != null) {
+int result = bundle.getInt("result");
+}
+}
+});
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { sTmsApi.getLogcatManager().packLogsByType(new ArrayList<>(Arrays.asList("1","48")), " /sdcard/Download/ a.zip ", new IResultCallback.Stub() { @Override public void onCall(Bundle bundle) throws RemoteException { if (bundle != null) { int result = bundle.getInt("result"); } } }); } catch (Exception e) { e.printStackTrace(); }
+3.8 按日期范围导出系统日志
+原型
+void getSysLogByDate(String startDate,String endDate,String outputPath,IResultCallback callback);
+原型 | void getSysLogByDate(String startDate,String endDate,String outputPath,IResultCallback callback);
+功能
+按日期范围导出系统日志
+功能 | 按日期范围导出系统日志
+参数
+startDate
+开始日期 yyyy-MM-dd（含当天）
+参数 | startDate | 开始日期 yyyy-MM-dd（含当天）
+endDate
+结束日期 yyyy-MM-dd（含当天）
+endDate | 结束日期 yyyy-MM-dd（含当天）
+outputPath
+输出 txt 文件路径（必须落在 sdcard，调用方应用可读,如：/sdcard/Download/a.txt）
+outputPath | 输出 txt 文件路径（必须落在 sdcard，调用方应用可读,如：/sdcard/Download/a.txt）
+IResultCallback callBack
+回调接口执行结果和打包日志路径;
+取值示例：
+int result = bundle.getInt("result"); //执行结果
+0: success
+-1: 接口调用失败
+-2:空间不足，不打包日志
+-40: 接口在当前设备或ROM不支持
+-41: 未找到系统服务，请联系设备供应商
+-45: 当前应用无权限调用该接口
+IResultCallback callBack | 回调接口执行结果和打包日志路径; 取值示例： int result = bundle.getInt("result"); //执行结果 0: success -1: 接口调用失败 -2:空间不足，不打包日志 -40: 接口在当前设备或ROM不支持 -41: 未找到系统服务，请联系设备供应商 -45: 当前应用无权限调用该接口
+返回值
+无
+返回值 | 无
+适用范围
+P3H-A11
+适用范围 | P3H-A11
+备注
+无
+备注 | 无
+示例代码
+try { sTmsApi.getLogcatManager().getSysLogByDate("2026-01-01","2026-01-02","
+/sdcard/Download/a.txt
+", new IResultCallback.Stub() {
+@Override
+public void onCall(Bundle bundle) throws RemoteException {
+if (bundle != null) {
+int result = bundle.getInt("result");
+}
+}
+}); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { sTmsApi.getLogcatManager().getSysLogByDate("2026-01-01","2026-01-02"," /sdcard/Download/a.txt ", new IResultCallback.Stub() { @Override public void onCall(Bundle bundle) throws RemoteException { if (bundle != null) { int result = bundle.getInt("result"); } } }); } catch (Exception e) { e.printStackTrace(); }

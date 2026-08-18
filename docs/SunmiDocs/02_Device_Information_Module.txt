@@ -1,0 +1,1033 @@
+﻿================================================================================
+SunmiCustomer API - 02 Device Information Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xdqieghjk579
+Update Time: 2026-07-29 18:05:30
+Content Length: 21898 chars
+================================================================================
+1 概述
+提供设备序列号、设备型号、制造商、系统版本和固件版本等信息。
+2 API列表
+接口
+描述
+接口 | 描述
+String getSerialNo();
+获取设备SN
+String getSerialNo(); | 获取设备SN
+String getManufacture();
+获取设备供应商
+String getManufacture(); | 获取设备供应商
+String getModel();
+获取设备型号
+String getModel(); | 获取设备型号
+String getAndroidOSVersion();
+获取Android操作系统版本
+String getAndroidOSVersion(); | 获取Android操作系统版本
+String getAndroidKernelVersion();
+获取Android内核版本
+String getAndroidKernelVersion(); | 获取Android内核版本
+String getROMVersion();
+获取ROM版本
+String getROMVersion(); | 获取ROM版本
+String getFirmwareVersion();
+获取固件版本
+String getFirmwareVersion(); | 获取固件版本
+String getHardwareVersion();
+获取硬件版本
+String getHardwareVersion(); | 获取硬件版本
+String getSDKVersion();
+获取SDK版本
+String getSDKVersion(); | 获取SDK版本
+long getMemoryOccupation();
+获取系统内存占用情况
+long getMemoryOccupation(); | 获取系统内存占用情况
+String getMac();
+获取WIFI MAC地址
+String getMac(); | 获取WIFI MAC地址
+String getSystemProperty(String key);
+获取设备系统属性
+String getSystemProperty(String key); | 获取设备系统属性
+String getIMSIBySlotIndex(int slotIndex);
+获取对应卡槽的IMSI
+String getIMSIBySlotIndex(int slotIndex); | 获取对应卡槽的IMSI
+String getIMEIBySlotIndex(int slotIndex);
+获取对应卡槽的IMEI
+String getIMEIBySlotIndex(int slotIndex); | 获取对应卡槽的IMEI
+String getFullICCID(int slotIndex);
+获取对应卡槽的全ICCID
+String getFullICCID(int slotIndex); | 获取对应卡槽的全ICCID
+String getSunmiOsVersion();
+获取Sunmi OS版本
+String getSunmiOsVersion(); | 获取Sunmi OS版本
+String getIpAddresses();
+获取IP地址
+String getIpAddresses(); | 获取IP地址
+String getDeviceBluetoothMacAddress();
+获取设备蓝牙MAC地址
+String getDeviceBluetoothMacAddress(); | 获取设备蓝牙MAC地址
+boolean isFinancialDevice();
+检查设备是否是金融设备
+boolean isFinancialDevice(); | 检查设备是否是金融设备
+int verifyCrp(String filePath);
+验证资源包
+int verifyCrp(String filePath); | 验证资源包
+int installCrp(String filePath);
+安装资源包
+int installCrp(String filePath); | 安装资源包
+int getCrpType(String filePath);
+获取资源包类型
+int getCrpType(String filePath); | 获取资源包类型
+String getCrpVersion(int crpType);
+获取资源包版本
+String getCrpVersion(int crpType); | 获取资源包版本
+int getGmsFlag();
+检查设备是否是GMS设备
+int getGmsFlag(); | 检查设备是否是GMS设备
+boolean isInnerScannerSupported();
+检查设备是否支持内置扫码器
+boolean isInnerScannerSupported(); | 检查设备是否支持内置扫码器
+boolean isInnerPrinterSupported();
+检测设备是否支持内置打印机
+boolean isInnerPrinterSupported(); | 检测设备是否支持内置打印机
+String getSystemBuildDisplayId();
+获取Android系统的显示版本号DisplayId
+String getSystemBuildDisplayId(); | 获取Android系统的显示版本号DisplayId
+String getIMSI();
+获取设备IMSI
+String getIMSI(); | 获取设备IMSI
+String getIMEI();
+获取设备IMEI
+String getIMEI(); | 获取设备IMEI
+String getBrand();
+获取设备品牌
+String getBrand(); | 获取设备品牌
+String getPciHardwareVersion();
+获取终端当前的硬件版本号信息
+String getPciHardwareVersion(); | 获取终端当前的硬件版本号信息
+BatteryInfo getBatteryInfo();
+获取电池信息
+BatteryInfo getBatteryInfo(); | 获取电池信息
+3 API详情
+3.1 获取设备SN
+原型
+String getSerialNo();
+原型 | String getSerialNo();
+功能
+获取设备SN
+功能 | 获取设备SN
+参数
+无
+参数 | 无 | 
+返回值
+设备SN，例如："VB01234TT0011"
+返回值 | 设备SN，例如："VB01234TT0011"
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getSerialNo();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getSerialNo(); } catch (Exception e) { e.printStackTrace(); }
+3.2 获取设备供应商
+原型
+String getManufacture();
+原型 | String getManufacture();
+功能
+获取设备供应商
+功能 | 获取设备供应商
+参数
+无
+参数 | 无 | 
+返回值
+供应商名称，例如："SUNMI"
+返回值 | 供应商名称，例如："SUNMI"
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().
+getManufacture
+();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo(). getManufacture (); } catch (Exception e) { e.printStackTrace(); }
+3.3 获取设备型号
+原型
+String getModel();
+原型 | String getModel();
+功能
+获取设备型号
+功能 | 获取设备型号
+参数
+无
+参数 | 无 | 
+返回值
+设备型号，
+例如:"V3_PLUS"
+返回值 | 设备型号， 例如:"V3_PLUS"
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getModel();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getModel(); } catch (Exception e) { e.printStackTrace(); }
+3.4 获取Android操作系统版本
+原型
+String 
+getAndroidOSVersion
+();
+原型 | String  getAndroidOSVersion ();
+功能
+获取Android操作系统版本
+功能 | 获取Android操作系统版本
+参数
+无
+参数 | 无 | 
+返回值
+设备型号，
+例如:"11"
+返回值 | 设备型号， 例如:"11"
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getAndroidOSVersion();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getAndroidOSVersion(); } catch (Exception e) { e.printStackTrace(); }
+3.5 获取Android内核版本
+原型
+String getAndroidKernelVersion();
+原型 | String getAndroidKernelVersion();
+功能
+获取Android内核版本
+功能 | 获取Android内核版本
+参数
+无
+参数 | 无 | 
+返回值
+Android内核版本，例如："4.19.127"
+返回值 | Android内核版本，例如："4.19.127"
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getAndroidKernelVersion();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getAndroidKernelVersion(); } catch (Exception e) { e.printStackTrace(); }
+3.6 获取ROM版本
+原型
+String getROMVersion();
+原型 | String getROMVersion();
+功能
+获取ROM版本
+功能 | 获取ROM版本
+参数
+无
+参数 | 无 | 
+返回值
+ROM版本，例如："1.0.0"
+返回值 | ROM版本，例如："1.0.0"
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getROMVersion();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getROMVersion(); } catch (Exception e) { e.printStackTrace(); }
+3.7 获取固件版本
+原型
+String getFirmwareVersion();
+原型 | String getFirmwareVersion();
+功能
+获取固件版本
+功能 | 获取固件版本
+参数
+无
+参数 | 无 | 
+返回值
+固件版本，例如："357"
+返回值 | 固件版本，例如："357"
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getFirmwareVersion();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getFirmwareVersion(); } catch (Exception e) { e.printStackTrace(); }
+3.8 获取硬件版本
+原型
+String getHardwareVersion();
+原型 | String getHardwareVersion();
+功能
+获取硬件版本
+功能 | 获取硬件版本
+参数
+无
+参数 | 无 | 
+返回值
+硬件版本，例如："P3"
+返回值 | 硬件版本，例如："P3"
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getHardwareVersion();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getHardwareVersion(); } catch (Exception e) { e.printStackTrace(); }
+3.9 获取SDK版本
+原型
+String 
+getSDKVersion
+();
+原型 | String  getSDKVersion ();
+功能
+获取SDK版本
+功能 | 获取SDK版本
+参数
+无
+参数 | 无 | 
+返回值
+Android SDK版本
+，例如："30"
+返回值 | Android SDK版本 ，例如："30"
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getSDKVersion();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getSDKVersion(); } catch (Exception e) { e.printStackTrace(); }
+3.10 获取系统内存占用情况
+原型
+long getMemoryOccupation();
+原型 | long getMemoryOccupation();
+功能
+获取系统内存占用情况
+功能 | 获取系统内存占用情况
+参数
+无
+参数 | 无 | 
+返回值
+系统已使用内存大小（单位为字节)，例如："1781387264"
+返回值 | 系统已使用内存大小（单位为字节)，例如："1781387264"
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+long result = sTmsApi.getDeviceInfo().getMemoryOccupation();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { long result = sTmsApi.getDeviceInfo().getMemoryOccupation(); } catch (Exception e) { e.printStackTrace(); }
+3.11 获取WIFI MAC地址
+原型
+String getMac();
+原型 | String getMac();
+功能
+获取设备
+WIFI
+ MAC地址
+功能 | 获取设备 WIFI  MAC地址
+参数
+无
+参数 | 无 | 
+返回值
+设备
+WIFI
+的MAC地址，例如："1a:2b:3c:4d:5f:11"
+返回值 | 设备 WIFI 的MAC地址，例如："1a:2b:3c:4d:5f:11"
+适用范围
+通用
+适用范围 | 通用
+备注
+需要打开WIFI。
+备注 | 需要打开WIFI。
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().
+getMac
+();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo(). getMac (); } catch (Exception e) { e.printStackTrace(); }
+3.12 获取设备系统属性
+原型
+String getSystemProperty(String key);
+原型 | String getSystemProperty(String key);
+功能
+获取设备系统属性
+功能 | 获取设备系统属性
+参数
+key
+系统属性key值，如ro.product.model
+参数 | key | 系统属性key值，如ro.product.model
+返回值
+设备对应系统属性，参数key = "
+ro.product.model
+",返回值："V3_PLUS"
+特殊说明：特殊属性，persist.sys无法获取
+返回值 | 设备对应系统属性，参数key = " ro.product.model ",返回值："V3_PLUS" 特殊说明：特殊属性，persist.sys无法获取
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getSystemProperty("ro.product.model");
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getSystemProperty("ro.product.model"); } catch (Exception e) { e.printStackTrace(); }
+3.13 获取对应卡槽的IMSI
+原型
+String getIMSIBySlotIndex(int slotIndex);
+原型 | String getIMSIBySlotIndex(int slotIndex);
+功能
+获取对应卡槽的IMSI
+功能 | 获取对应卡槽的IMSI
+参数
+int slotIndex
+0 :卡槽1
+；
+1 :卡槽2
+参数 | int slotIndex | 0 :卡槽1 ； 1 :卡槽2
+返回值
+对应卡槽的IMSI
+返回值 | 对应卡槽的IMSI
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+如果返回null，请检查是否有插入SIM卡后重试。
+备注 | 如果返回null，请检查是否有插入SIM卡后重试。
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().
+getIMSIBySlotIndex
+(0);
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo(). getIMSIBySlotIndex (0); } catch (Exception e) { e.printStackTrace(); }
+3.14 获取对应卡槽的IMEI
+原型
+String getIMEIBySlotIndex(int slotIndex);
+原型 | String getIMEIBySlotIndex(int slotIndex);
+功能
+获取对应卡槽的IMEI
+功能 | 获取对应卡槽的IMEI
+参数
+int slotIndex
+0 :卡槽1
+；
+1 :卡槽2
+参数 | int slotIndex | 0 :卡槽1 ； 1 :卡槽2
+返回值
+对应卡槽的IMEI
+返回值 | 对应卡槽的IMEI
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getIMEIBySlotIndex(0);
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getIMEIBySlotIndex(0); } catch (Exception e) { e.printStackTrace(); }
+3.15 获取对应卡槽的全ICCID
+原型
+String getFullICCID(int slotIndex);
+原型 | String getFullICCID(int slotIndex);
+功能
+获取对应卡槽的全ICCID
+功能 | 获取对应卡槽的全ICCID
+参数
+int slotIndex
+0 :卡槽1
+；
+1 :卡槽2
+参数 | int slotIndex | 0 :卡槽1 ； 1 :卡槽2
+返回值
+对应卡槽的全ICCID
+返回值 | 对应卡槽的全ICCID
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、Google的获取ICCID方法，当ICCID中包含英文时，返回值会被截断；此接口返回包含英文的ICCID
+2、如果返回null，请检查是否有插入SIM卡后重试。
+备注 | 1、Google的获取ICCID方法，当ICCID中包含英文时，返回值会被截断；此接口返回包含英文的ICCID 2、如果返回null，请检查是否有插入SIM卡后重试。
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().
+getFullICCID
+(0);
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo(). getFullICCID (0); } catch (Exception e) { e.printStackTrace(); }
+3.16 获取获取Sunmi OS版本
+原型
+String getSunmiOsVersion();
+原型 | String getSunmiOsVersion();
+功能
+获取Sunmi OS版本
+功能 | 获取Sunmi OS版本
+参数
+无
+参数 | 无 | 
+返回值
+Sunmi OS版本，例如："2.0.0"
+返回值 | Sunmi OS版本，例如："2.0.0"
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+该接口已废弃，仅二代机才支持。
+备注 | 该接口已废弃，仅二代机才支持。
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().
+getSunmiOsVersion
+();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo(). getSunmiOsVersion (); } catch (Exception e) { e.printStackTrace(); }
+3.17 获取IP地址
+原型
+String getIpAddresses();
+原型 | String getIpAddresses();
+功能
+获取IP地址
+功能 | 获取IP地址
+参数
+无
+参数 | 无 | 
+返回值
+设备
+IP地址
+返回值 | 设备 IP地址
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、需要连接网络才能成功获取到IP地址。
+2、支持的网络类型：WiFi网络IP地址、以太网IP地址 、移动数据IP地址。
+备注 | 1、需要连接网络才能成功获取到IP地址。 2、支持的网络类型：WiFi网络IP地址、以太网IP地址 、移动数据IP地址。
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().
+getIpAddresses
+();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo(). getIpAddresses (); } catch (Exception e) { e.printStackTrace(); }
+3.18 获取设备蓝牙Mac地址
+原型
+String getDeviceBluetoothMacAddress();
+原型 | String getDeviceBluetoothMacAddress();
+功能
+获取设备蓝牙MAC地址
+功能 | 获取设备蓝牙MAC地址
+参数
+无
+参数 | 无 | 
+返回值
+设备蓝牙MAC地址，例如："1a:2b:3c:4d:5f:11"
+返回值 | 设备蓝牙MAC地址，例如："1a:2b:3c:4d:5f:11"
+适用范围
+通用
+适用范围 | 通用
+备注
+开启蓝牙并成功能连接到设备才能成功获取蓝牙MAC地址。
+备注 | 开启蓝牙并成功能连接到设备才能成功获取蓝牙MAC地址。
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getDeviceBluetoothMacAddress();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getDeviceBluetoothMacAddress(); } catch (Exception e) { e.printStackTrace(); }
+3.19 检查设备是否是金融设备
+原型
+boolean isFinancialDevice();
+原型 | boolean isFinancialDevice();
+功能
+检查设备是否是金融设备
+功能 | 检查设备是否是金融设备
+参数
+无
+参数 | 无 | 
+返回值
+true: 是
+false: 否
+返回值 | true: 是 false: 否
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getDeviceInfo().isFinancialDevice();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getDeviceInfo().isFinancialDevice(); } catch (Exception e) { e.printStackTrace(); }
+3.20 验证资源包
+原型
+int verifyCrp(String filePath);
+原型 | int verifyCrp(String filePath);
+功能
+验证资源包
+功能 | 验证资源包
+参数
+String filePath
+资源包文件路径
+参数 | String filePath | 资源包文件路径
+返回值
+0：成功
+其他：失败
+<0：异常值，详见
+4.1 Crp 资源包相关错误码
+返回值 | 0：成功 其他：失败 <0：异常值，详见 4.1 Crp 资源包相关错误码
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+此接口为耗时操作，不可在UI线程中执行
+。
+备注 | 此接口为耗时操作，不可在UI线程中执行 。
+示例代码
+try {
+int result = sTmsApi.getDeviceInfo().
+verifyCrp
+("
+/sdcard/Download/SunmiCrp_Eu_common.crp
+");
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { int result = sTmsApi.getDeviceInfo(). verifyCrp (" /sdcard/Download/SunmiCrp_Eu_common.crp "); } catch (Exception e) { e.printStackTrace(); }
+3.21 安装资源包
+原型
+int installCrp(String filePath);
+原型 | int installCrp(String filePath);
+功能
+安装资源包
+功能 | 安装资源包
+参数
+String filePath
+资源包文件路径
+参数 | String filePath | 资源包文件路径
+返回值
+0：成功
+其他：失败
+<0：异常值，详见
+4.1 Crp 资源包相关错误码
+返回值 | 0：成功 其他：失败 <0：异常值，详见 4.1 Crp 资源包相关错误码
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+此接口为耗时操作，不可在UI线程中执行
+。
+备注 | 此接口为耗时操作，不可在UI线程中执行 。
+示例代码
+try {
+int result = sTmsApi.getDeviceInfo().
+installCrp
+("
+/sdcard/Download/SunmiCrp_Eu_common.crp
+");
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { int result = sTmsApi.getDeviceInfo(). installCrp (" /sdcard/Download/SunmiCrp_Eu_common.crp "); } catch (Exception e) { e.printStackTrace(); }
+3.22 获取资源包类型
+原型
+int getCrpType(String filePath);
+原型 | int getCrpType(String filePath);
+功能
+获取资源包类型
+功能 | 获取资源包类型
+参数
+String filePath
+资源包文件路径
+参数 | String filePath | 资源包文件路径
+返回值
+资源包类型
+0：定制资源包
+1：通用资源包
+<0：异常值，详见
+4.1 Crp 资源包相关错误码
+返回值 | 资源包类型 0：定制资源包 1：通用资源包 <0：异常值，详见 4.1 Crp 资源包相关错误码
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+int result = sTmsApi.getDeviceInfo().
+getCrpType
+("
+/sdcard/Download/SunmiCrp_Eu_common.crp
+");
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { int result = sTmsApi.getDeviceInfo(). getCrpType (" /sdcard/Download/SunmiCrp_Eu_common.crp "); } catch (Exception e) { e.printStackTrace(); }
+3.23 获取资源包版本
+原型
+String getCrpVersion(int crpType);
+原型 | String getCrpVersion(int crpType);
+功能
+获取资源包版本
+功能 | 获取资源包版本
+参数
+int crpType
+资源包类型
+0：定制资源包
+1：通用资源包
+参数 | int crpType | 资源包类型 0：定制资源包 1：通用资源包
+返回值
+资源包版本，若此类型的资源包不存在，则返回null
+返回值 | 资源包版本，若此类型的资源包不存在，则返回null
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+int result = sTmsApi.getDeviceInfo().
+getCrpVersion
+(0);
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { int result = sTmsApi.getDeviceInfo(). getCrpVersion (0); } catch (Exception e) { e.printStackTrace(); }
+3.24 检查设备是否是GMS设备
+原型
+int getGmsFlag();
+原型 | int getGmsFlag();
+功能
+检查设备是否是GMS设备
+功能 | 检查设备是否是GMS设备
+参数
+无
+参数 | 无 | 
+返回值
+检查设备是否是GMS设备0：非GMS设备1：标准GMS设备2：Sunmi非标GMS设备
+返回值 | 检查设备是否是GMS设备0：非GMS设备1：标准GMS设备2：Sunmi非标GMS设备
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getDeviceInfo().getGmsFlag(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getDeviceInfo().getGmsFlag(0); } catch (Exception e) { e.printStackTrace(); }
+3.25 检查设备是否支持内置扫码器
+原型
+boolean isInnerScannerSupported();
+原型 | boolean isInnerScannerSupported();
+功能
+检查设备是否支持内置扫码器
+功能 | 检查设备是否支持内置扫码器
+参数
+无
+参数 | 无 | 
+返回值
+true：支持
+false：不支持
+返回值 | true：支持 false：不支持
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getDeviceInfo().isInnerScannerSupported();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getDeviceInfo().isInnerScannerSupported(); } catch (Exception e) { e.printStackTrace(); }
+3.26 检测设备是否支持内置打印机
+原型
+boolean isInnerPrinterSupported();
+原型 | boolean isInnerPrinterSupported();
+功能
+检测设备是否支持内置打印机
+功能 | 检测设备是否支持内置打印机
+参数
+无
+参数 | 无 | 
+返回值
+true：支持
+false：不支持
+返回值 | true：支持 false：不支持
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getDeviceInfo().isInnerPrinterSupported();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getDeviceInfo().isInnerPrinterSupported(); } catch (Exception e) { e.printStackTrace(); }
+3.27 获取Android系统的显示版本号DisplayId
+原型
+String getSystemBuildDisplayId();
+原型 | String getSystemBuildDisplayId();
+功能
+用于获取Android系统的显示版本号，该值存储在system/build.prop文件中
+功能 | 用于获取Android系统的显示版本号，该值存储在system/build.prop文件中
+参数
+无
+参数 | 无 | 
+返回值
+获取DisplayId，例如："P3_user_3.0.26_130_20250905"
+返回值 | 获取DisplayId，例如："P3_user_3.0.26_130_20250905"
+适用范围
+金融通用
+适用范围 | 金融通用
+备注
+1、原方法名为
+getDisplayId() ，改名为getSystemBuildDisplayId()
+2、方法实现SystemPropertiesUtils.get("
+ro.build.display.id
+")
+备注 | 1、原方法名为 getDisplayId() ，改名为getSystemBuildDisplayId() 2、方法实现SystemPropertiesUtils.get(" ro.build.display.id ")
+示例代码
+try {
+boolean result = sTmsApi.getDeviceInfo().
+getSystemBuildDisplayId
+();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getDeviceInfo(). getSystemBuildDisplayId (); } catch (Exception e) { e.printStackTrace(); }
+3.28 获取设备IMSI
+原型
+String getIMSI()
+原型 | String getIMSI()
+功能
+获取设备IMSI
+功能 | 获取设备IMSI
+参数
+无
+参数 | 无 | 
+返回值
+获取到的IMSI,例如："112233445566778"
+返回值 | 获取到的IMSI,例如："112233445566778"
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+需要插入SIM卡。否则返回null
+当双卡设备，插入1张SIM卡时，将返回插入SIM卡IMSI
+当双卡设备，插入2张SIM卡时，将返回通话偏好设置为首选的卡的IMSI
+备注 | 需要插入SIM卡。否则返回null 当双卡设备，插入1张SIM卡时，将返回插入SIM卡IMSI 当双卡设备，插入2张SIM卡时，将返回通话偏好设置为首选的卡的IMSI
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getIMSI();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getIMSI(); } catch (Exception e) { e.printStackTrace(); }
+3.29 获取设备IMEI
+原型
+String getIMEI()
+原型 | String getIMEI()
+功能
+获取设备IMEI
+功能 | 获取设备IMEI
+参数
+无
+参数 | 无 | 
+返回值
+设备IMEI，例如："86341600000001"
+返回值 | 设备IMEI，例如："86341600000001"
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+对于支持多卡(卡槽1，卡槽2)的设备，返回卡槽1的IMEI，如果设备无SIM卡模块，将返回Android id.
+备注 | 对于支持多卡(卡槽1，卡槽2)的设备，返回卡槽1的IMEI，如果设备无SIM卡模块，将返回Android id.
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getIMEI();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getIMEI(); } catch (Exception e) { e.printStackTrace(); }
+3.30 获取设备品牌
+原型
+String getBrand()
+原型 | String getBrand()
+功能
+获取设备品牌
+功能 | 获取设备品牌
+参数
+无
+参数 | 无 | 
+返回值
+设备品牌，例如："SUNMI"
+返回值 | 设备品牌，例如："SUNMI"
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+String result = sTmsApi.getDeviceInfo().getBrand();
+} catch (Exception e) {
+e.printStackTrace();
+}
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getBrand(); } catch (Exception e) { e.printStackTrace(); }
+3.31 获取终端当前的硬件版本号信息
+原型
+String getPciHardwareVersion();
+原型 | String getPciHardwareVersion();
+功能
+获取终端当前的硬件版本号信息
+功能 | 获取终端当前的硬件版本号信息
+参数
+无
+参数 | 无 | 
+返回值
+硬件版本号字符串：例如 "T6F10_000_0211"； null：表示当前 ROM 不支持该接口； 空字符串：表示查询失败或未知错误
+返回值 | 硬件版本号字符串：例如 "T6F10_000_0211"； null：表示当前 ROM 不支持该接口； 空字符串：表示查询失败或未知错误
+适用范围
+P3、P2SE
+适用范围 | P3、P2SE
+备注
+无
+备注 | 无
+示例代码
+try { String result = sTmsApi.getDeviceInfo().getPciHardwareVersion(0); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { String result = sTmsApi.getDeviceInfo().getPciHardwareVersion(0); } catch (Exception e) { e.printStackTrace(); }
+3.32 获取电池信息
+原型
+BatteryInfo getBatteryInfo();
+原型 | BatteryInfo getBatteryInfo();
+功能
+获取电池信息：包括电池百分比，充电状态，电压，电流，温度，电池型号名称，序列号，零件号，生产时间，首次使用时间，最大容量，当前电池容量的FCC，当前电池容量，健康度，循环充电次数
+功能 | 获取电池信息：包括电池百分比，充电状态，电压，电流，温度，电池型号名称，序列号，零件号，生产时间，首次使用时间，最大容量，当前电池容量的FCC，当前电池容量，健康度，循环充电次数
+参数
+无
+参数 | 无 | 
+返回值
+null：表示当前 ROM 不支持该接口；
+BatteryInfo 返回信息如下：
+int batteryLevel - 电池百分比
+int batteryStatus - 电池充电状态 0：未充电 1：充电中
+int batteryVoltage - 电池电压
+int batteryCurrent - 电池电流
+String batteryTemperature - 电池温度(单位：摄氏度)
+int batteryFullCharge - 是否充满 0:未充满 1：充满
+int isSupportBattery - 是否支持电池 1支持，0不支持
+String batteryModelName - 电池的型号名称
+String batterySn - 电池的序列号
+String batteryPartNumber - 电池的零件号
+String batteryProductionTime - 电池的生产时间
+String batteryFirstUseTime - 电池首次使用的时间
+long batteryMaxCapacity - 电池的最大容量(单位mAh)
+long batteryCurrentCapacityFCC - 当前电池容量的FCC
+long batteryCurrentCapacity - 当前电池电量
+int batteryHealth - 健康度
+int batteryChargeVoltage - 充电电压（mV）: 非金融新增项，金融暂不支持
+int batteryCycleCount - 充电循环次数金融机（android恢复出厂不清除，由上层应用或者cit清除）
+需要资源包配置ro.sm
+.cyclecount.enable=1打开此功能，不然返-1不支持。非金融机 ：不需要资源包配置ro属性。
+String batteryManufacturer - 电池厂商（电池厂商返回全称，语言适配中文，中文繁体（香港、澳门）返回中文，其他语言均返回英文）目前电池厂商返回以下几个，中英文全称：广东风华新能源股份有限公司/Guangdong Fenghua New Energy Co.,Ltd.广东省豪鹏新能源科技有限公司/Guandong Highpower New Energy Technology Co.,Ltd.中山天贸电池有限公司/Zhongshan Tianmao Battery Co.,Ltd.
+返回值 | null：表示当前 ROM 不支持该接口； BatteryInfo 返回信息如下： int batteryLevel - 电池百分比 int batteryStatus - 电池充电状态 0：未充电 1：充电中 int batteryVoltage - 电池电压 int batteryCurrent - 电池电流 String batteryTemperature - 电池温度(单位：摄氏度) int batteryFullCharge - 是否充满 0:未充满 1：充满 int isSupportBattery - 是否支持电池 1支持，0不支持 String batteryModelName - 电池的型号名称 String batterySn - 电池的序列号 String batteryPartNumber - 电池的零件号 String batteryProductionTime - 电池的生产时间 String batteryFirstUseTime - 电池首次使用的时间 long batteryMaxCapacity - 电池的最大容量(单位mAh) long batteryCurrentCapacityFCC - 当前电池容量的FCC long batteryCurrentCapacity - 当前电池电量 int batteryHealth - 健康度 int batteryChargeVoltage - 充电电压（mV）: 非金融新增项，金融暂不支持 int batteryCycleCount - 充电循环次数金融机（android恢复出厂不清除，由上层应用或者cit清除） 需要资源包配置ro.sm .cyclecount.enable=1打开此功能，不然返-1不支持。非金融机 ：不需要资源包配置ro属性。 String batteryManufacturer - 电池厂商（电池厂商返回全称，语言适配中文，中文繁体（香港、澳门）返回中文，其他语言均返回英文）目前电池厂商返回以下几个，中英文全称：广东风华新能源股份有限公司/Guangdong Fenghua New Energy Co.,Ltd.广东省豪鹏新能源科技有限公司/Guandong Highpower New Energy Technology Co.,Ltd.中山天贸电池有限公司/Zhongshan Tianmao Battery Co.,Ltd.
+适用范围
+CPad 、V3Plus
+适用范围 | CPad 、V3Plus
+备注
+支持CPad、V3PLUS（只返回电池必要10个字段信息，如：batteryModelName、batterySn、batteryPartNumber、batteryCycleCount、batteryHealth、batteryCurrentCapacity、batteryCurrentCapacityFCC、batteryMaxCapacity、batteryFirstUseTime、batteryProductionTime）根据不同机型需求，返回的BatteryInfo 只返回必要字段，其它非必要字段可能为空。支持P3H-A14-BKD
+备注 | 支持CPad、V3PLUS（只返回电池必要10个字段信息，如：batteryModelName、batterySn、batteryPartNumber、batteryCycleCount、batteryHealth、batteryCurrentCapacity、batteryCurrentCapacityFCC、batteryMaxCapacity、batteryFirstUseTime、batteryProductionTime）根据不同机型需求，返回的BatteryInfo 只返回必要字段，其它非必要字段可能为空。支持P3H-A14-BKD
+示例代码
+try { BatteryInfo result = sTmsApi.getDeviceInfo().getBatteryInfo(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { BatteryInfo result = sTmsApi.getDeviceInfo().getBatteryInfo(); } catch (Exception e) { e.printStackTrace(); }

@@ -1,0 +1,57 @@
+﻿================================================================================
+SunmiCustomer API - 09 Device Software Information Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xddmeghjk546
+Update Time: 2026-04-29 18:25:31
+Content Length: 1332 chars
+================================================================================
+1 概述
+设备软件信息模块，提供获取设备所有应用信息接口
+2 API列表
+接口
+说明
+接口 | 说明
+String getSystemAllPackageInfo();
+获取系统所有应用信息
+String getSystemAllPackageInfo(); | 获取系统所有应用信息
+3 API详情
+3.1 
+获取系统所有应用信息
+原型
+String getSystemAllPackageInfo();
+原型 | String getSystemAllPackageInfo();
+功能
+获取系统所有应用信息
+功能 | 获取系统所有应用信息
+参数
+无
+ 
+参数 | 无 |  
+返回值
+系统所有应用信息，返回数据为Json字符串，示例如下：
+[{
+    "cachesSize": 0,//缓存大小(字节)
+    "dataSize": 0,//数据大小(字节)
+    "packageName": "com.android.cts.priv.ctsshim",//包名
+    "codeSize": 0,//app大小(字节)
+    "appSize": 0//总大小(字节)
+}, {
+    "cachesSize": 0,
+    "dataSize": 0,
+    "packageName": "com.qualcomm.qti.qcolor",
+    "codeSize": 0,
+    "appSize": 0
+}]
+返回值 | 系统所有应用信息，返回数据为Json字符串，示例如下： [{     "cachesSize": 0,//缓存大小(字节)     "dataSize": 0,//数据大小(字节)     "packageName": "com.android.cts.priv.ctsshim",//包名     "codeSize": 0,//app大小(字节)     "appSize": 0//总大小(字节) }, {     "cachesSize": 0,     "dataSize": 0,     "packageName": "com.qualcomm.qti.qcolor",     "codeSize": 0,     "appSize": 0 }]
+适用范围
+通用
+适用范围 | 通用
+备注
+1、接口数据量比较大，耗时比较久，建议在子线程中调用，避免阻塞主线程。
+备注 | 1、接口数据量比较大，耗时比较久，建议在子线程中调用，避免阻塞主线程。
+示例代码
+try {
+    String result = sTmsApi.getPackageCTPA().getSystemAllPackageInfo();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     String result = sTmsApi.getPackageCTPA().getSystemAllPackageInfo(); } catch (Exception e) {     e.printStackTrace(); }

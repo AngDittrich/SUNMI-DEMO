@@ -1,0 +1,609 @@
+﻿================================================================================
+SunmiCustomer API - 06 System UI Management Module
+URL: https://docs.sunmi.com/en-US/cdixeghjk491/xddqeghjk513
+Update Time: 2026-04-29 18:25:31
+Content Length: 12527 chars
+================================================================================
+1 概述
+系统UI管理模块，包含：显示/隐藏导航栏、状态栏、图标、按钮等接口
+2 API列表
+接口
+说明
+接口 | 说明
+void showNavigationBarBackButton(boolean show);
+显示/隐藏导航栏返回键
+void showNavigationBarBackButton(boolean show); | 显示/隐藏导航栏返回键
+void showNavigationBarHomeButton(boolean show);
+显示/隐藏导航栏Home键
+void showNavigationBarHomeButton(boolean show); | 显示/隐藏导航栏Home键
+void showNavigationBarRecentsButton(boolean show);
+显示/隐藏导航栏Recent键
+void showNavigationBarRecentsButton(boolean show); | 显示/隐藏导航栏Recent键
+void showNatigationBar(boolean show)
+显示/隐藏导航栏
+void showNatigationBar(boolean show) | 显示/隐藏导航栏
+void showStatusBar(boolean show)
+显示/隐藏状态栏
+void showStatusBar(boolean show) | 显示/隐藏状态栏
+void enableNavigationBarBackButton(boolean enable);
+启用/禁用导航栏返回键
+void enableNavigationBarBackButton(boolean enable); | 启用/禁用导航栏返回键
+boolean isNavigationBarBackButtonEnabled();
+检查导航栏返回键是否可用
+boolean isNavigationBarBackButtonEnabled(); | 检查导航栏返回键是否可用
+void enableNavigationBarHomeButton(boolean enable);
+启用/禁用导航栏Home键
+void enableNavigationBarHomeButton(boolean enable); | 启用/禁用导航栏Home键
+boolean isNavigationBarHomeButtonEnabled();
+检查导航栏Home键是否可用
+boolean isNavigationBarHomeButtonEnabled(); | 检查导航栏Home键是否可用
+void enableNavigationBarRecentsButton(boolean enable);
+启用/禁用导航栏Recent键
+void enableNavigationBarRecentsButton(boolean enable); | 启用/禁用导航栏Recent键
+boolean isNavigationBarRecentsButtonEnabled();
+检查导航栏Recent键是否可用
+boolean isNavigationBarRecentsButtonEnabled(); | 检查导航栏Recent键是否可用
+void enableNotificationPanel(boolean enable);
+禁止/允许状态栏下拉
+void enableNotificationPanel(boolean enable); | 禁止/允许状态栏下拉
+boolean setAirplaneModeBarClickable(boolean clickable)
+设置快捷菜单飞行模式按钮是否可点击
+boolean setAirplaneModeBarClickable(boolean clickable) | 设置快捷菜单飞行模式按钮是否可点击
+int setSettingsUiWifiDetailShareVisible(boolean show);
+设置<设置-WiFi详情-分享按钮>是否可见
+int setSettingsUiWifiDetailShareVisible(boolean show); | 设置<设置-WiFi详情-分享按钮>是否可见
+int getSettingsUiWifiDetailShareVisible();
+获取<设置-WiFi详情-分享按钮>是否可见
+int getSettingsUiWifiDetailShareVisible(); | 获取<设置-WiFi详情-分享按钮>是否可见
+int setSettingsPPPCommunicationVisible(boolean show);
+显示/隐藏PPP通讯入口
+int setSettingsPPPCommunicationVisible(boolean show); | 显示/隐藏PPP通讯入口
+int getSettingsPPPCommunicationVisible();
+获取PPP通讯入口是否可见
+int getSettingsPPPCommunicationVisible(); | 获取PPP通讯入口是否可见
+boolean isNotificationPanelEnabled();
+获取状态栏是否允许下拉
+boolean isNotificationPanelEnabled(); | 获取状态栏是否允许下拉
+3 API详情
+3.1 
+显示/隐藏导航栏返回键
+原型
+void showNavigationBarBackButton(boolean show);
+原型 | void showNavigationBarBackButton(boolean show);
+功能
+显示/隐藏导航栏返回键
+功能 | 显示/隐藏导航栏返回键
+参数
+show
+true：
+显示
+false：
+隐藏
+参数 | show | true： 显示 false： 隐藏
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getSystemUIManager().showNavigationBarBackButton(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSystemUIManager().showNavigationBarBackButton(true); } catch (Exception e) {     e.printStackTrace(); }
+3.2 
+显示/隐藏导航栏Home键
+原型
+void showNavigationBarHomeButton(boolean show);
+原型 | void showNavigationBarHomeButton(boolean show);
+功能
+显示/隐藏导航栏Home键
+功能 | 显示/隐藏导航栏Home键
+参数
+show
+true：
+显示
+false：
+隐藏
+参数 | show | true： 显示 false： 隐藏
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+    sTmsApi.getSystemUIManager().showNavigationBarHomeButton(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {     sTmsApi.getSystemUIManager().showNavigationBarHomeButton(true); } catch (Exception e) {     e.printStackTrace(); }
+3.3 
+显示/隐藏导航栏Recent键
+原型
+void showNavigationBarRecentsButton(boolean show);
+原型 | void showNavigationBarRecentsButton(boolean show);
+功能
+显示/隐藏导航栏Recent键
+功能 | 显示/隐藏导航栏Recent键
+参数
+show
+true：
+显示
+false：
+隐藏
+参数 | show | true： 显示 false： 隐藏
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getSystemUIManager().showNavigationBarRecentsButton(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSystemUIManager().showNavigationBarRecentsButton(true); } catch (Exception e) {     e.printStackTrace(); }
+3.4 
+显示/隐藏导航栏
+原型
+void showNatigationBar(boolean show)
+原型 | void showNatigationBar(boolean show)
+功能
+显示/隐藏导航栏
+功能 | 显示/隐藏导航栏
+参数
+show
+true：
+显示
+false：
+隐藏
+参数 | show | true： 显示 false： 隐藏
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+ 
+备注 |  
+示例代码
+try {
+   sTmsApi.getSystemUIManager().showNatigationBar(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSystemUIManager().showNatigationBar(true); } catch (Exception e) {     e.printStackTrace(); }
+3.5 
+显示/隐藏状态栏
+原型
+void showStatusBar(boolean show)
+原型 | void showStatusBar(boolean show)
+功能
+显示/隐藏状态栏
+功能 | 显示/隐藏状态栏
+参数
+show
+true：
+显示
+false：
+隐藏
+参数 | show | true： 显示 false： 隐藏
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getSystemUIManager().showStatusBar(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSystemUIManager().showStatusBar(true); } catch (Exception e) {     e.printStackTrace(); }
+3.6 
+启用/禁用导航栏返回键
+原型
+void enableNavigationBarBackButton(boolean enable);
+原型 | void enableNavigationBarBackButton(boolean enable);
+功能
+启用/禁用导航栏返回键
+功能 | 启用/禁用导航栏返回键
+参数
+enable
+true：
+启用
+false：
+禁用
+参数 | enable | true： 启用 false： 禁用
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getSystemUIManager().enableNavigationBarBackButton(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSystemUIManager().enableNavigationBarBackButton(true); } catch (Exception e) {     e.printStackTrace(); }
+3.7 
+检查导航栏返回键是否可用
+原型
+boolean isNavigationBarBackButtonEnabled();
+原型 | boolean isNavigationBarBackButtonEnabled();
+功能
+检查导航栏返回键是否可用
+功能 | 检查导航栏返回键是否可用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+启用/禁用
+true：
+启用
+false：
+禁用
+返回值 | 启用/禁用 true： 启用 false： 禁用
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getSystemUIManager().isNavigationBarBackButtonEnabled();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getSystemUIManager().isNavigationBarBackButtonEnabled(); } catch (Exception e) {     e.printStackTrace(); }
+3.8 
+启用/禁用导航栏Home键
+原型
+void enableNavigationBarHomeButton(boolean enable);
+原型 | void enableNavigationBarHomeButton(boolean enable);
+功能
+启用/禁用导航栏Home键
+功能 | 启用/禁用导航栏Home键
+参数
+enable
+true：
+启用
+false：
+禁用
+参数 | enable | true： 启用 false： 禁用
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getSystemUIManager().enableNavigationBarHomeButton(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSystemUIManager().enableNavigationBarHomeButton(true); } catch (Exception e) {     e.printStackTrace(); }
+3.9 
+检查导航栏Home键是否可用
+原型
+boolean isNavigationBarHomeButtonEnabled();
+原型 | boolean isNavigationBarHomeButtonEnabled();
+功能
+检查导航栏Home键是否可用
+功能 | 检查导航栏Home键是否可用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+启用/禁用
+true：
+启用
+false：
+禁用
+返回值 | 启用/禁用 true： 启用 false： 禁用
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getSystemUIManager().isNavigationBarHomeButtonEnabled();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getSystemUIManager().isNavigationBarHomeButtonEnabled(); } catch (Exception e) {     e.printStackTrace(); }
+3.10 
+启用/禁用导航栏Recent键
+原型
+void enableNavigationBarRecentsButton(boolean enable);
+原型 | void enableNavigationBarRecentsButton(boolean enable);
+功能
+启用/禁用导航栏Recent键
+功能 | 启用/禁用导航栏Recent键
+参数
+enable
+true：
+启用
+false：
+禁用
+参数 | enable | true： 启用 false： 禁用
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getSystemUIManager().enableNavigationBarRecentsButton(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSystemUIManager().enableNavigationBarRecentsButton(true); } catch (Exception e) {     e.printStackTrace(); }
+3.11 
+检查导航栏Recent键是否可用
+原型
+boolean isNavigationBarRecentsButtonEnabled();
+原型 | boolean isNavigationBarRecentsButtonEnabled();
+功能
+检查导航栏Recent键是否可用
+功能 | 检查导航栏Recent键是否可用
+参数
+无
+ 
+参数 | 无 |  
+返回值
+启用/禁用
+true：
+启用
+false：
+禁用
+返回值 | 启用/禁用 true： 启用 false： 禁用
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getSystemUIManager().isNavigationBarRecentsButtonEnabled();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getSystemUIManager().isNavigationBarRecentsButtonEnabled(); } catch (Exception e) {     e.printStackTrace(); }
+3.12 
+允许/禁止状态栏下拉
+原型
+void enableNotificationPanel(boolean enable);
+原型 | void enableNotificationPanel(boolean enable);
+功能
+禁止/允许状态栏下拉
+功能 | 禁止/允许状态栏下拉
+参数
+enable
+允许/禁止
+true：
+允许
+false：
+禁止
+参数 | enable | 允许/禁止 true： 允许 false： 禁止
+返回值
+无
+返回值 | 无
+适用范围
+通用
+适用范围 | 通用
+备注
+无
+备注 | 无
+示例代码
+try {
+   sTmsApi.getSystemUIManager().enableNotificationPanel(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try {    sTmsApi.getSystemUIManager().enableNotificationPanel(true); } catch (Exception e) {     e.printStackTrace(); }
+3.13 
+设置快捷菜单飞行模式按钮是否可点击
+原型
+boolean setAirplaneModeBarClickable(boolean clickable)
+原型 | boolean setAirplaneModeBarClickable(boolean clickable)
+功能
+设置快捷菜单飞行模式按钮是否可点击
+功能 | 设置快捷菜单飞行模式按钮是否可点击
+参数
+clickable
+可点击/不可点击
+true：
+可点击
+false：
+不可点击
+参数 | clickable | 可点击/不可点击 true： 可点击 false： 不可点击
+返回值
+执行结果
+true：成功
+false：失败
+返回值 | 执行结果 true：成功 false：失败
+适用范围
+非金融通用
+适用范围 | 非金融通用
+备注
+无
+备注 | 无
+示例代码
+try {
+boolean result = sTmsApi.getSystemUIManager().setAirplaneModeBarClickable(true);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+示例代码 | try { boolean result = sTmsApi.getSystemUIManager().setAirplaneModeBarClickable(true); } catch (Exception e) {     e.printStackTrace(); }
+3.14 设置WiFi详情-分享按钮是否可见
+原型
+int setSettingsUiWifiDetailShareVisible(boolean show);
+原型 | int setSettingsUiWifiDetailShareVisible(boolean show);
+功能
+设置<设置-WiFi详情-分享按钮>是否可见
+功能 | 设置<设置-WiFi详情-分享按钮>是否可见
+参数
+show
+true：显示false：隐藏
+参数 | show | true：显示false：隐藏
+返回值
+0:设置成功
+-1: 失败(调用失败)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:设置成功 -1: 失败(调用失败) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getSystemUIManager().setSettingsUiWifiDetailShareVisible(true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getSystemUIManager().setSettingsUiWifiDetailShareVisible(true); } catch (Exception e) { e.printStackTrace(); }
+3.15 获取WiFi详情-分享按钮是否可见
+原型
+int getSettingsUiWifiDetailShareVisible();
+原型 | int getSettingsUiWifiDetailShareVisible();
+功能
+获取<设置-WiFi详情-分享按钮>是否可见
+功能 | 获取<设置-WiFi详情-分享按钮>是否可见
+参数
+无
+参数 | 无 | 
+返回值
+2:被锁定(管理后台配置)
+1:隐藏
+0:显示
+-1: 失败
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 2:被锁定(管理后台配置) 1:隐藏 0:显示 -1: 失败 -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3
+适用范围 | P3
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getSystemUIManager().getSettingsUiWifiDetailShareVisible(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getSystemUIManager().getSettingsUiWifiDetailShareVisible(); } catch (Exception e) { e.printStackTrace(); }
+3.16 显示/隐藏PPP通讯入口
+原型
+int setSettingsPPPCommunicationVisible(boolean show);
+原型 | int setSettingsPPPCommunicationVisible(boolean show);
+功能
+设置<设置-网络和互联网-PPP通讯按钮>是否可见
+功能 | 设置<设置-网络和互联网-PPP通讯按钮>是否可见
+参数
+show
+true：显示
+false：隐藏
+参数 | show | true：显示 false：隐藏
+返回值
+0:设置成功
+-1: 失败(调用失败)
+-40:接口在当前设备或ROM不支持
+-41:未找到系统服务，请联系设备供应商
+返回值 | 0:设置成功 -1: 失败(调用失败) -40:接口在当前设备或ROM不支持 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3、P3H
+适用范围 | P3、P3H
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getSystemUIManager().setSettingsPPPCommunicationVisible(true); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getSystemUIManager().setSettingsPPPCommunicationVisible(true); } catch (Exception e) { e.printStackTrace(); }
+3.17 获取PPP通讯入口是否可见
+原型
+int getSettingsPPPCommunicationVisible();
+原型 | int getSettingsPPPCommunicationVisible();
+功能
+获取<设置-网络和互联网-PPP通讯>是否可见
+功能 | 获取<设置-网络和互联网-PPP通讯>是否可见
+参数
+show
+true：显示
+false：隐藏
+参数 | show | true：显示 false：隐藏
+返回值
+2:被锁定(资源包配置)
+1:隐藏
+0:显示
+-1: 失败
+-40:接口在当前设备ROM不支持或如果没有调接口设置状态值
+-41:未找到系统服务，请联系设备供应商
+返回值 | 2:被锁定(资源包配置) 1:隐藏 0:显示 -1: 失败 -40:接口在当前设备ROM不支持或如果没有调接口设置状态值 -41:未找到系统服务，请联系设备供应商
+适用范围
+P3、P3H
+适用范围 | P3、P3H
+备注
+无
+备注 | 无
+示例代码
+try { int result = sTmsApi.getSystemUIManager().getSettingsPPPCommunicationVisible(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { int result = sTmsApi.getSystemUIManager().getSettingsPPPCommunicationVisible(); } catch (Exception e) { e.printStackTrace(); }
+3.18 获取状态栏是否允许下拉
+原型
+boolean isNotificationPanelEnabled()
+原型 | boolean isNotificationPanelEnabled()
+功能
+获取状态栏是否允许下拉
+功能 | 获取状态栏是否允许下拉
+参数
+无
+参数 | 无 | 
+返回值
+true：允许
+false：不允许
+返回值 | true：允许 false：不允许
+适用范围
+P3H-A14
+适用范围 | P3H-A14
+备注
+无
+备注 | 无
+示例代码
+try { boolean result = sTmsApi.getSystemUIManager().isNotificationPanelEnabled(); } catch (Exception e) { e.printStackTrace(); }
+示例代码 | try { boolean result = sTmsApi.getSystemUIManager().isNotificationPanelEnabled(); } catch (Exception e) { e.printStackTrace(); }
