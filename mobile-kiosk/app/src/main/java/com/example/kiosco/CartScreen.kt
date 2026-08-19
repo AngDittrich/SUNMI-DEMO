@@ -650,39 +650,91 @@ private fun PaymentModal(
             .background(Color.Black.copy(alpha = 0.7f)),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.86f)
+                .padding(horizontal = 24.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = brandTheme.surface,
+            shadowElevation = 12.dp
         ) {
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = Color.White,
-                shadowElevation = 8.dp
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.padding(28.dp, 22.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(brandTheme.accent.copy(alpha = 0.14f)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Acerque su tarjeta o celular",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Black,
-                        color = brandTheme.textPrimary,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "para realizar el pago",
-                        fontSize = 16.sp,
-                        color = TextMuted,
-                        textAlign = TextAlign.Center
+                    Icon(
+                        imageVector = Icons.Default.Nfc,
+                        contentDescription = null,
+                        tint = brandTheme.accent,
+                        modifier = Modifier.size(40.dp)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Text(
+                    text = if (phase == PaymentPhase.Approved) {
+                        "Pago aprobado"
+                    } else {
+                        "Pago sin contacto"
+                    },
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    color = brandTheme.textPrimary,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = if (phase == PaymentPhase.Approved) {
+                        "Procesando tu pedido…"
+                    } else {
+                        "Acerca tu tarjeta o celular al lector y mantenlo ahí."
+                    },
+                    fontSize = 16.sp,
+                    color = TextMuted,
+                    textAlign = TextAlign.Center
+                )
+
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    NfcTapZone(
+                        approved = phase == PaymentPhase.Approved,
+                        modifier = Modifier.offset(y = maxHeight * 0.15f)
+                    )
+                }
+
+                Text(
+                    text = if (phase == PaymentPhase.Approved) {
+                        "Transacción completada"
+                    } else {
+                        "Esperando tarjeta…"
+                    },
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (phase == PaymentPhase.Approved) {
+                        brandTheme.accent
+                    } else {
+                        TextMuted
+                    },
+                    textAlign = TextAlign.Center
+                )
             }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            NfcTapZone()
         }
     }
 }
@@ -690,17 +742,20 @@ private fun PaymentModal(
 private enum class PaymentPhase { WaitingForNfc, Approved }
 
 @Composable
-private fun NfcTapZone() {
+private fun NfcTapZone(
+    approved: Boolean,
+    modifier: Modifier = Modifier
+) {
     val brandTheme = LocalBrandTheme.current
-    val dashColor = brandTheme.accent.copy(alpha = 0.6f)
-    val bgColor = brandTheme.accent.copy(alpha = 0.06f)
+    val dashColor = brandTheme.accent.copy(alpha = if (approved) 0.9f else 0.6f)
+    val bgColor = brandTheme.accent.copy(alpha = if (approved) 0.14f else 0.06f)
 
     val transition = rememberInfiniteTransition(label = "nfcPulse")
     val pulse by transition.animateFloat(
-        initialValue = 0.96f,
+        initialValue = 0.98f,
         targetValue = 1.02f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1200),
+            animation = tween(1800),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulseScale"
@@ -714,10 +769,10 @@ private fun NfcTapZone() {
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .width(220.dp)
             .height(280.dp)
-            .scale(pulse)
+            .scale(if (approved) 1f else pulse)
             .drawBehind {
                 drawRoundRect(
                     color = bgColor,
@@ -731,11 +786,28 @@ private fun NfcTapZone() {
             },
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.Nfc,
-            contentDescription = null,
-            tint = brandTheme.accent,
-            modifier = Modifier.size(72.dp)
-        )
+        if (approved) {
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .clip(CircleShape)
+                    .background(brandTheme.accent),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "✓",
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    fontSize = 56.sp,
+                    fontWeight = FontWeight.Black
+                )
+            }
+        } else {
+            Icon(
+                imageVector = Icons.Default.Nfc,
+                contentDescription = null,
+                tint = brandTheme.accent,
+                modifier = Modifier.size(72.dp)
+            )
+        }
     }
 }
