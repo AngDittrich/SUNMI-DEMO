@@ -52,6 +52,8 @@ fun SurveyThankYouScreen(
         if (!automaticPrintStarted) {
             automaticPrintStarted = true
             onPrint()
+        } else if (printState == TicketPrintState.Idle) {
+            onPrint()
         }
     }
 

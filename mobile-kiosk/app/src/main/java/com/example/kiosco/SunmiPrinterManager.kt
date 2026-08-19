@@ -15,6 +15,8 @@ import com.sunmi.printerx.style.BaseStyle
 import com.sunmi.printerx.style.QrStyle
 import com.sunmi.printerx.style.TextStyle
 import java.lang.ref.WeakReference
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -52,24 +54,51 @@ class SunmiPrinterManager(context: Context) {
         onResult: (Result<Unit>) -> Unit
     ) {
         enqueuePrint(onResult) {
+            printDividingLine(DividingLine.SOLID, 2)
+
+            printDividingLine(DividingLine.EMPTY, 1)
+
             initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
+            printText(
+                "KIOSCO DE SNACKS",
+                TextStyle.getStyle()
+                    .setTextSize(20)
+                    .enableBold(true)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.DOTTED, 1)
+            printDividingLine(DividingLine.EMPTY, 1)
+
             printText(
                 "TICKET DE COMPRA",
                 TextStyle.getStyle()
-                    .setTextSize(32)
+                    .setTextSize(28)
                     .enableBold(true)
             )
-            printDividingLine(DividingLine.DOTTED, 2)
+
+            printDividingLine(DividingLine.EMPTY, 1)
+
+            val dateStr = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Date())
+            printText(
+                dateStr,
+                TextStyle.getStyle()
+                    .setTextSize(16)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.SOLID, 2)
+            printDividingLine(DividingLine.EMPTY, 1)
 
             initLine(BaseStyle.getStyle().setAlign(Align.LEFT))
             items.forEach { item ->
                 printTexts(
                     arrayOf(
                         item.product.name,
-                        "${item.quantity} x ${money(item.product.price)}",
+                        "${item.quantity}x ${money(item.product.price)}",
                         money(item.subtotal)
                     ),
-                    intArrayOf(5, 4, 3),
+                    intArrayOf(6, 3, 3),
                     arrayOf(
                         TextStyle.getStyle()
                             .setAlign(Align.LEFT)
@@ -80,38 +109,92 @@ class SunmiPrinterManager(context: Context) {
                 )
             }
 
-            printDividingLine(DividingLine.DOTTED, 2)
+            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.SOLID, 2)
+            printDividingLine(DividingLine.EMPTY, 1)
+
             initLine(BaseStyle.getStyle().setAlign(Align.RIGHT))
             printText(
-                "TOTAL: ${money(items.sumOf { it.subtotal })}",
+                "TOTAL:",
+                TextStyle.getStyle()
+                    .setTextSize(26)
+                    .enableBold(true)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 1)
+
+            printText(
+                money(items.sumOf { it.subtotal }),
                 TextStyle.getStyle()
                     .setTextSize(28)
                     .enableBold(true)
             )
 
+            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.SOLID, 2)
+            printDividingLine(DividingLine.EMPTY, 1)
+
             initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
             printText(
                 "¡Gracias por su compra!",
                 TextStyle.getStyle()
+                    .setTextSize(18)
+                    .enableBold(true)
             )
+
+            printDividingLine(DividingLine.EMPTY, 1)
+
+            printText(
+                "Vuelva pronto",
+                TextStyle.getStyle()
+                    .setTextSize(14)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.SOLID, 2)
+
+            printDividingLine(DividingLine.EMPTY, 6)
         }
     }
 
     fun printSurveyCoupon(onResult: (Result<Unit>) -> Unit) {
         enqueuePrint(onResult) {
+            printDividingLine(DividingLine.SOLID, 2)
+
+            printDividingLine(DividingLine.EMPTY, 1)
+
             initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
+            printText(
+                "CUPÓN DE ENCUESTA",
+                TextStyle.getStyle()
+                    .setTextSize(22)
+                    .enableBold(true)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.DOTTED, 1)
+            printDividingLine(DividingLine.EMPTY, 1)
+
             printText(
                 SURVEY_COUPON,
                 TextStyle.getStyle()
                     .setTextSize(30)
                     .enableBold(true)
             )
+
+            printDividingLine(DividingLine.EMPTY, 1)
+
             printQrCode(
                 SURVEY_COUPON,
                 QrStyle.getStyle()
                     .setDot(8)
                     .setAlign(Align.CENTER)
             )
+
+            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.SOLID, 2)
+
+            printDividingLine(DividingLine.EMPTY, 6)
         }
     }
 

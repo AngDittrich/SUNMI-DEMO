@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,16 +40,18 @@ import kotlin.math.roundToInt
 @Composable
 fun OrderSummaryScreen(
     orderItems: List<CartItem>,
+    paymentConfirmed: Boolean,
     printState: TicketPrintState,
     onPrint: () -> Unit,
+    onSimulatePayment: () -> Unit,
     onDone: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
     val totalPrice = orderItems.sumOf { it.subtotal }
     val totalItems = orderItems.sumOf { it.quantity }
 
-    LaunchedEffect(Unit) {
-        onPrint()
+    LaunchedEffect(paymentConfirmed) {
+        if (paymentConfirmed) onPrint()
     }
 
     Column(
@@ -68,25 +71,56 @@ fun OrderSummaryScreen(
     ) {
         Spacer(modifier = Modifier.height(40.dp))
 
-        SuccessCheck()
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "¡Pago exitoso!",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Black,
-            color = brandTheme.textPrimary
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Gracias por tu compra",
-            fontSize = 18.sp,
-            color = TextMuted,
-            textAlign = TextAlign.Center
-        )
+        if (paymentConfirmed) {
+            SuccessCheck()
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "¡Pago exitoso!",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Black,
+                color = brandTheme.textPrimary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Gracias por tu compra",
+                fontSize = 18.sp,
+                color = TextMuted,
+                textAlign = TextAlign.Center
+            )
+        } else {
+            WaitingForPaymentAnimation()
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Acerca tu tarjeta para pagar",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Black,
+                color = brandTheme.textPrimary,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Toca el lector NFC con tu tarjeta",
+                fontSize = 16.sp,
+                color = TextMuted,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = onSimulatePayment,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = brandTheme.accent.copy(alpha = 0.15f),
+                    contentColor = brandTheme.accent
+                ),
+                shape = RoundedCornerShape(26.dp),
+                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 14.dp)
+            ) {
+                Text(
+                    text = "Simular pago (prueba)",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(28.dp))
 
@@ -96,38 +130,71 @@ fun OrderSummaryScreen(
             totalItems = totalItems
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        if (paymentConfirmed) {
+            Spacer(modifier = Modifier.height(20.dp))
 
-        TicketCard(printState = printState)
+            TicketCard(printState = printState)
 
-        Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-        when (printState) {
-            TicketPrintState.Printed -> {
-                PrintActionButton(
-                    text = "Listo",
-                    onClick = onDone
-                )
-            }
-
-            TicketPrintState.Idle,
-            TicketPrintState.Printing -> {
-                ContinueWithoutPrintingButton(onClick = onDone)
-            }
-
-            is TicketPrintState.Failed -> {
-                if (printState.retryable) {
+            when (printState) {
+                TicketPrintState.Printed -> {
                     PrintActionButton(
-                        text = "Imprimir de nuevo",
-                        onClick = onPrint
+                        text = "Listo",
+                        onClick = onDone
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
-                ContinueWithoutPrintingButton(onClick = onDone)
+
+                TicketPrintState.Idle,
+                TicketPrintState.Printing -> {
+                    ContinueWithoutPrintingButton(onClick = onDone)
+                }
+
+                is TicketPrintState.Failed -> {
+                    if (printState.retryable) {
+                        PrintActionButton(
+                            text = "Imprimir de nuevo",
+                            onClick = onPrint
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                    ContinueWithoutPrintingButton(onClick = onDone)
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun WaitingForPaymentAnimation() {
+    val brandTheme = LocalBrandTheme.current
+    val transition = rememberInfiniteTransition(label = "nfcPulse")
+    val pulse by transition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseScale"
+    )
+
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .scale(pulse)
+            .clip(CircleShape)
+            .background(brandTheme.base),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Nfc,
+            contentDescription = null,
+            tint = brandTheme.onBase,
+            modifier = Modifier.size(64.dp)
+        )
     }
 }
 

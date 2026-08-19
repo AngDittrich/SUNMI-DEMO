@@ -34,3 +34,11 @@ PASS — requested static verification completed. No Gradle, compile, lint, asse
 - Cleanup disables transaction mode only in the pre-content phase. It cannot replace an already recorded terminal result, and the atomic terminal result continues to protect confirmed success from timeout, cancellation, late callback, or cleanup races.
 - Exact POS and survey payloads, stale callback attempt tokens, single-thread serialization, Spanish error messages, `Continuar sin imprimir`, and local-only printing remain unchanged.
 - No build, test, Gradle, compile, lint, assemble, or install command was run for these final review fixes.
+
+## Important final-review finding 1
+
+- `SurveyThankYouScreen` still makes one automatic print attempt on first entry and saves the consumed guard in the current destination.
+- When Activity recreation restores the guard as consumed but `MainActivity` recreates `surveyPrintState` as `Idle`, the screen now makes one fresh automatic attempt instead of remaining stuck.
+- A restored consumed guard does not start another attempt when the current state is `Printing`, `Printed`, or `Failed`; retry remains manual and available only for retryable failures.
+- QR/coupon content, fallback action, Back handling, and theme behavior are unchanged.
+- No build, test, Gradle, compile, lint, assemble, or install command was run for this fix.

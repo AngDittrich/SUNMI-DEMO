@@ -135,7 +135,10 @@ fun WelcomeScreen(
 
             Spacer(modifier = Modifier.height(if (largeDisplay) 26.dp else 18.dp))
 
-            BenefitRow(largeDisplay = largeDisplay)
+            BenefitRow(
+                selectedService = selectedService,
+                largeDisplay = largeDisplay
+            )
 
             Spacer(modifier = Modifier.height(if (largeDisplay) 20.dp else 12.dp))
 
@@ -377,7 +380,7 @@ private fun SnackTile(
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = brandTheme.highlight,
+                tint = Color.White,
                 modifier = Modifier.size(if (largeDisplay) 52.dp else 32.dp)
             )
         }

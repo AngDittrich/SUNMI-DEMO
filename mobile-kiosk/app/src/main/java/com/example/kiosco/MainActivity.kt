@@ -189,6 +189,9 @@ class MainActivity : ComponentActivity() {
                 var productNotFoundVisible by remember { mutableStateOf(false) }
                 var productNotFoundToken by remember { mutableStateOf(0) }
                 var searchResetToken by remember { mutableStateOf(0) }
+                var paymentConfirmed by remember { mutableStateOf(false) }
+                var showCartPayment by remember { mutableStateOf(false) }
+                var cartPaymentNfcDetected by remember { mutableStateOf(false) }
                 val density = LocalDensity.current
                 val configuration = LocalConfiguration.current
                 val focusManager = LocalFocusManager.current
@@ -295,6 +298,16 @@ class MainActivity : ComponentActivity() {
                         currentRoute == NavRoutes.SURVEY ||
                         currentRoute == NavRoutes.SURVEY_THANK_YOU
                     ) {
+                        return@rememberUpdatedState
+                    }
+                    // At checkout, any NFC/card tap = payment confirmation
+                    if (currentRoute == NavRoutes.ORDER_SUMMARY && !paymentConfirmed) {
+                        paymentConfirmed = true
+                        return@rememberUpdatedState
+                    }
+                    // At cart payment modal, NFC tap = payment confirmation
+                    if (showCartPayment && !cartPaymentNfcDetected) {
+                        cartPaymentNfcDetected = true
                         return@rememberUpdatedState
                     }
                     // A tag/scanner hit while the catalog is still loading would
@@ -637,8 +650,14 @@ class MainActivity : ComponentActivity() {
                                         }
                                         OrderSummaryScreen(
                                             orderItems = lastOrder.value,
+                                            paymentConfirmed = paymentConfirmed,
                                             printState = posPrintState,
                                             onPrint = ::printPosReceipt,
+                                            onSimulatePayment = {
+                                                if (!paymentConfirmed) {
+                                                    paymentConfirmed = true
+                                                }
+                                            },
                                             onDone = {
                                                 posPrintAttempt += 1
                                                 navController.navigate(NavRoutes.WELCOME) {
@@ -790,13 +809,25 @@ class MainActivity : ComponentActivity() {
                                         lastOrder.value = cartItems.value
                                         posPrintAttempt += 1
                                         posPrintState = TicketPrintState.Idle
+                                        paymentConfirmed = false
+                                        cartPaymentNfcDetected = false
                                         cartItems.value = emptyList()
                                         cartSheetVisible = false
                                         detailProductId = null
                                         navController.navigate(NavRoutes.ORDER_SUMMARY)
                                     },
                                     cartSheetVisible = cartSheetVisible,
-                                    onDismiss = { cartSheetVisible = false }
+                                    onDismiss = { cartSheetVisible = false },
+                                    showPaymentModal = showCartPayment,
+                                    onShowPaymentModal = {
+                                        showCartPayment = true
+                                        cartPaymentNfcDetected = false
+                                    },
+                                    onDismissPaymentModal = {
+                                        showCartPayment = false
+                                        cartPaymentNfcDetected = false
+                                    },
+                                    nfcDetected = cartPaymentNfcDetected
                                 )
                             }
 

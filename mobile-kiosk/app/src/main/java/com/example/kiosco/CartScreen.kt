@@ -1,12 +1,10 @@
 package com.example.kiosco
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
@@ -15,7 +13,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -27,9 +24,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.outlined.ShoppingBag
@@ -38,14 +34,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,13 +64,16 @@ fun CartScreen(
     onClearCart: () -> Unit,
     onCheckout: () -> Unit,
     cartSheetVisible: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    showPaymentModal: Boolean,
+    onShowPaymentModal: () -> Unit,
+    onDismissPaymentModal: () -> Unit,
+    nfcDetected: Boolean
 ) {
     val brandTheme = LocalBrandTheme.current
     val totalPrice = cartItems.sumOf { it.subtotal }
     val totalItems = cartItems.sumOf { it.quantity }
     var showClearDialog by remember { mutableStateOf(false) }
-    var showPaymentModal by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val sheetOffset = remember { Animatable(0f) }
@@ -77,8 +81,6 @@ fun CartScreen(
     var lastDragDelta by remember { mutableFloatStateOf(0f) }
     val dragProgress = (sheetOffset.value / sheetHeightPx).coerceIn(0f, 1f)
 
-    // Reset on open only: when dismissed the sheet must keep travelling from
-    // where the finger left it instead of snapping back up mid-exit.
     LaunchedEffect(cartSheetVisible) {
         if (cartSheetVisible) sheetOffset.snapTo(0f)
     }
@@ -239,7 +241,7 @@ fun CartScreen(
                         totalItems = totalItems,
                         totalPrice = totalPrice,
                         enabled = cartItems.isNotEmpty(),
-                        onCheckout = { showPaymentModal = true }
+                        onCheckout = onShowPaymentModal
                     )
                 }
             }
@@ -258,8 +260,9 @@ fun CartScreen(
 
     if (showPaymentModal) {
         PaymentModal(
+            nfcDetected = nfcDetected,
             onPaymentComplete = {
-                showPaymentModal = false
+                onDismissPaymentModal()
                 onCheckout()
             }
         )
@@ -622,179 +625,118 @@ private fun ClearCartDialog(
 
 @Composable
 private fun PaymentModal(
+    nfcDetected: Boolean,
     onPaymentComplete: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
-    var phase by remember { mutableStateOf(PaymentPhase.Paying) }
-    var approved by remember { mutableStateOf(false) }
+    var phase by remember { mutableStateOf(PaymentPhase.WaitingForNfc) }
 
-    LaunchedEffect(phase) {
-        when (phase) {
-            PaymentPhase.Paying -> {
-                delay(2400)
-                phase = PaymentPhase.Paid
-            }
-            PaymentPhase.Paid -> {
-                delay(1400)
-                onPaymentComplete()
-            }
+    LaunchedEffect(nfcDetected) {
+        if (nfcDetected && phase == PaymentPhase.WaitingForNfc) {
+            phase = PaymentPhase.Approved
         }
     }
 
     LaunchedEffect(phase) {
-        if (phase == PaymentPhase.Paid) {
-            delay(120)
-            approved = true
+        if (phase == PaymentPhase.Approved) {
+            delay(1400)
+            onPaymentComplete()
         }
     }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF5F5F0)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White,
+                shadowElevation = 4.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(28.dp, 22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Acerque su tarjeta o celular",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Black,
+                        color = brandTheme.textPrimary,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "para realizar el pago",
+                        fontSize = 16.sp,
+                        color = TextMuted,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            NfcTapZone()
+        }
+    }
+}
+
+private enum class PaymentPhase { WaitingForNfc, Approved }
+
+@Composable
+private fun NfcTapZone() {
+    val brandTheme = LocalBrandTheme.current
+    val dashColor = brandTheme.accent.copy(alpha = 0.6f)
+    val bgColor = brandTheme.accent.copy(alpha = 0.06f)
+
+    val transition = rememberInfiniteTransition(label = "nfcPulse")
+    val pulse by transition.animateFloat(
+        initialValue = 0.96f,
+        targetValue = 1.02f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseScale"
+    )
+
+    val borderStroke = Stroke(
+        width = 3.dp.value,
+        pathEffect = PathEffect.dashPathEffect(
+            floatArrayOf(16f, 12f), 0f
+        )
+    )
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.55f)),
+            .width(220.dp)
+            .height(280.dp)
+            .scale(pulse)
+            .drawBehind {
+                drawRoundRect(
+                    color = bgColor,
+                    cornerRadius = CornerRadius(24.dp.toPx())
+                )
+                drawRoundRect(
+                    color = dashColor,
+                    cornerRadius = CornerRadius(24.dp.toPx()),
+                    style = borderStroke
+                )
+            },
         contentAlignment = Alignment.Center
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 28.dp),
-            shape = RoundedCornerShape(32.dp),
-            color = brandTheme.surface,
-            shadowElevation = 20.dp
-        ) {
-            AnimatedContent(
-                targetState = phase,
-                transitionSpec = {
-                    fadeIn() togetherWith fadeOut()
-                },
-                label = "paymentPhase"
-            ) { currentPhase ->
-                when (currentPhase) {
-                    PaymentPhase.Paying -> PayingContent()
-                    PaymentPhase.Paid -> PaidContent(approved = approved)
-                }
-            }
-        }
-    }
-}
-
-private enum class PaymentPhase { Paying, Paid }
-
-@Composable
-private fun PayingContent() {
-    val brandTheme = LocalBrandTheme.current
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 28.dp, vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val transition = rememberInfiniteTransition(label = "payingPulse")
-        val pulse by transition.animateFloat(
-            initialValue = 1f,
-            targetValue = 1.12f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 700),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "pulseScale"
-        )
-
-        Box(
-            modifier = Modifier
-                .size(128.dp)
-                .scale(pulse)
-                .clip(CircleShape)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            brandTheme.accent,
-                            brandTheme.accent.copy(alpha = 0.7f)
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.CreditCard,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSecondary,
-                modifier = Modifier.size(56.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        Text(
-            text = "Acerque su tarjeta al terminal",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = brandTheme.textPrimary,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Procesando pago...",
-            fontSize = 15.sp,
-            color = TextMuted,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-private fun PaidContent(approved: Boolean) {
-    val brandTheme = LocalBrandTheme.current
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 28.dp, vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val scale by animateFloatAsState(
-            targetValue = if (approved) 1f else 0.4f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMedium
-            ),
-            label = "checkScale"
-        )
-
-        Box(
-            modifier = Modifier
-                .size(128.dp)
-                .scale(scale)
-                .clip(CircleShape)
-                .background(brandTheme.base),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = null,
-                tint = brandTheme.onBase,
-                modifier = Modifier.size(72.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        Text(
-            text = "Pago aprobado",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Black,
-            color = brandTheme.textPrimary,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Preparando tu pedido...",
-            fontSize = 15.sp,
-            color = TextMuted,
-            textAlign = TextAlign.Center
+        Icon(
+            imageVector = Icons.Default.Nfc,
+            contentDescription = null,
+            tint = brandTheme.accent,
+            modifier = Modifier.size(72.dp)
         )
     }
 }
