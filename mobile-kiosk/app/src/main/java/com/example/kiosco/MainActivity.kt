@@ -1,5 +1,6 @@
 package com.example.kiosco
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.KeyCharacterMap
@@ -101,6 +102,8 @@ private data class ScanSuccessFeedback(
 )
 
 class MainActivity : ComponentActivity() {
+    private var nfcScanManager: NfcScanManager? = null
+
     /**
      * SUNMI scanners often inject keyboard-wedge events (digits + Enter) in
      * parallel with the broadcast. Enter would activate the focused button
@@ -129,6 +132,26 @@ class MainActivity : ComponentActivity() {
             return true
         }
         return super.dispatchKeyEvent(event)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        nfcScanManager?.onNewIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val manager = nfcScanManager
+        manager?.enableForegroundDispatch(this)
+        // Cold start via a tag tap delivers the NFC intent to onCreate, so the
+        // first onResume must process it too (the manager dedupes instances).
+        manager?.onNewIntent(intent)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        nfcScanManager?.disableForegroundDispatch(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -174,6 +197,62 @@ class MainActivity : ComponentActivity() {
                 val currentDestination = navController.currentBackStackEntryAsState()
                 val currentRoute = currentDestination.value?.destination?.route
                 val repository = remember(context) { ProductRepository(context) }
+                val printerManager = remember(context) { SunmiPrinterManager(context) }
+                var posPrintState by remember {
+                    mutableStateOf<TicketPrintState>(TicketPrintState.Idle)
+                }
+                var surveyPrintState by remember {
+                    mutableStateOf<TicketPrintState>(TicketPrintState.Idle)
+                }
+                var posPrintAttempt by remember { mutableStateOf(0L) }
+                var surveyPrintAttempt by remember { mutableStateOf(0L) }
+
+                fun printFailureState(error: Throwable): TicketPrintState.Failed {
+                    val printError = error as? TicketPrintException
+                    return TicketPrintState.Failed(
+                        message = error.message
+                            ?.takeIf { it.isNotBlank() }
+                            ?: "No se pudo completar la impresión SUNMI.",
+                        retryable = printError?.retryable ?: true
+                    )
+                }
+
+                fun printPosReceipt() {
+                    posPrintAttempt += 1
+                    val attempt = posPrintAttempt
+                    val orderItems = lastOrder.value
+                    if (orderItems.isEmpty()) {
+                        posPrintState = TicketPrintState.Failed(
+                            message =
+                                "El pedido ya no está disponible; continúe con el comprobante en pantalla.",
+                            retryable = false
+                        )
+                        return
+                    }
+                    posPrintState = TicketPrintState.Printing
+                    printerManager.printPosReceipt(orderItems) { result ->
+                        if (attempt == posPrintAttempt) {
+                            posPrintState = result.fold(
+                                onSuccess = { TicketPrintState.Printed },
+                                onFailure = ::printFailureState
+                            )
+                        }
+                    }
+                }
+
+                fun printSurveyCoupon() {
+                    surveyPrintAttempt += 1
+                    val attempt = surveyPrintAttempt
+                    surveyPrintState = TicketPrintState.Printing
+                    printerManager.printSurveyCoupon { result ->
+                        if (attempt == surveyPrintAttempt) {
+                            surveyPrintState = result.fold(
+                                onSuccess = { TicketPrintState.Printed },
+                                onFailure = ::printFailureState
+                            )
+                        }
+                    }
+                }
 
                 fun fallbackBagCenter(): Offset {
                     val widthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
@@ -218,12 +297,17 @@ class MainActivity : ComponentActivity() {
                     ) {
                         return@rememberUpdatedState
                     }
+                    // A tag/scanner hit while the catalog is still loading would
+                    // falsely report "producto no encontrado"; ignore until ready.
+                    if (isLoading) {
+                        return@rememberUpdatedState
+                    }
 
                     focusManager.clearFocus(force = true)
                     searchResetToken += 1
 
                     if (isEmployee) {
-                        val match = products.find { it.barcode == code }
+                        val match = products.find { it.barcode == code || it.nfcId == code }
                         if (match != null) {
                             navController.navigate(NavRoutes.adminForm(productId = match.id)) {
                                 launchSingleTop = true
@@ -234,7 +318,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     } else {
-                        val match = products.find { it.barcode == code }
+                        val match = products.find { it.barcode == code || it.nfcId == code }
                         if (match != null) {
                             val current = cartItems.value
                             val existing = current.find { it.product.id == match.id }
@@ -350,12 +434,26 @@ class MainActivity : ComponentActivity() {
                     productNotFoundVisible = false
                 }
 
+                DisposableEffect(printerManager) {
+                    onDispose { printerManager.release() }
+                }
+
                 DisposableEffect(Unit) {
                     val scanner = BarcodeScanManager(this@MainActivity) { code ->
                         onBarcodeScanned(code)
                     }
                     scanner.register()
                     onDispose { scanner.unregister() }
+
+                    val nfc = NfcScanManager(this@MainActivity) { tagId ->
+                        onBarcodeScanned(tagId)
+                    }
+                    nfcScanManager = nfc
+                    nfc.init()
+                    onDispose {
+                        nfc.destroy()
+                        nfcScanManager = null
+                    }
                 }
 
                 Surface(
@@ -500,6 +598,8 @@ class MainActivity : ComponentActivity() {
                                     composable(NavRoutes.SURVEY) {
                                         SurveyScreen(
                                             onSubmit = {
+                                                surveyPrintAttempt += 1
+                                                surveyPrintState = TicketPrintState.Idle
                                                 navController.navigate(
                                                     NavRoutes.SURVEY_THANK_YOU
                                                 ) {
@@ -512,7 +612,10 @@ class MainActivity : ComponentActivity() {
 
                                     composable(NavRoutes.SURVEY_THANK_YOU) {
                                         SurveyThankYouScreen(
+                                            printState = surveyPrintState,
+                                            onPrint = ::printSurveyCoupon,
                                             onReturnHome = {
+                                                surveyPrintAttempt += 1
                                                 navController.navigate(NavRoutes.WELCOME) {
                                                     popUpTo(NavRoutes.WELCOME) {
                                                         inclusive = false
@@ -520,14 +623,24 @@ class MainActivity : ComponentActivity() {
                                                     launchSingleTop = true
                                                 }
                                             },
-                                            onBack = { navController.popBackStack() }
+                                            onBack = {
+                                                surveyPrintAttempt += 1
+                                                navController.popBackStack()
+                                            }
                                         )
                                     }
 
                                     composable(NavRoutes.ORDER_SUMMARY) {
+                                        BackHandler {
+                                            posPrintAttempt += 1
+                                            navController.popBackStack()
+                                        }
                                         OrderSummaryScreen(
                                             orderItems = lastOrder.value,
+                                            printState = posPrintState,
+                                            onPrint = ::printPosReceipt,
                                             onDone = {
+                                                posPrintAttempt += 1
                                                 navController.navigate(NavRoutes.WELCOME) {
                                                     popUpTo(0) { inclusive = true }
                                                 }
@@ -675,6 +788,8 @@ class MainActivity : ComponentActivity() {
                                     onClearCart = { cartItems.value = emptyList() },
                                     onCheckout = {
                                         lastOrder.value = cartItems.value
+                                        posPrintAttempt += 1
+                                        posPrintState = TicketPrintState.Idle
                                         cartItems.value = emptyList()
                                         cartSheetVisible = false
                                         detailProductId = null

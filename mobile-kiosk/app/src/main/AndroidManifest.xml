@@ -5,6 +5,17 @@
     <!-- Coil declares INTERNET in its own manifest; strip it so the demo cannot reach the network. -->
     <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
 
+    <!-- NFC: FLEX 3 reads tags via the standard Android NFC stack. Not required
+         so the app still installs on non-NFC devices for development. -->
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+
+    <queries>
+        <package android:name="com.sunmi.extprinterservice" />
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -18,12 +29,26 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.Kiosco"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- NFC: let a tag tap deliver an intent while the kiosk is
+                 running (singleTop -> onNewIntent) or launch it cold. -->
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

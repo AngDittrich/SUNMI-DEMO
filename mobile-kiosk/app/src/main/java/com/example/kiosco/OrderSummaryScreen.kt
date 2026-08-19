@@ -39,11 +39,17 @@ import kotlin.math.roundToInt
 @Composable
 fun OrderSummaryScreen(
     orderItems: List<CartItem>,
+    printState: TicketPrintState,
+    onPrint: () -> Unit,
     onDone: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
     val totalPrice = orderItems.sumOf { it.subtotal }
     val totalItems = orderItems.sumOf { it.quantity }
+
+    LaunchedEffect(Unit) {
+        onPrint()
+    }
 
     Column(
         modifier = Modifier
@@ -92,27 +98,33 @@ fun OrderSummaryScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TicketCard()
+        TicketCard(printState = printState)
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        Button(
-            onClick = onDone,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = brandTheme.accent,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            ),
-            shape = RoundedCornerShape(26.dp),
-            contentPadding = PaddingValues(horizontal = 48.dp, vertical = 18.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
-        ) {
-            Text(
-                text = "Listo",
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 18.sp
-            )
+        when (printState) {
+            TicketPrintState.Printed -> {
+                PrintActionButton(
+                    text = "Listo",
+                    onClick = onDone
+                )
+            }
+
+            TicketPrintState.Idle,
+            TicketPrintState.Printing -> {
+                ContinueWithoutPrintingButton(onClick = onDone)
+            }
+
+            is TicketPrintState.Failed -> {
+                if (printState.retryable) {
+                    PrintActionButton(
+                        text = "Imprimir de nuevo",
+                        onClick = onPrint
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                ContinueWithoutPrintingButton(onClick = onDone)
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -259,8 +271,19 @@ private fun OrderDetailsCard(
 }
 
 @Composable
-private fun TicketCard() {
+private fun TicketCard(printState: TicketPrintState) {
     val brandTheme = LocalBrandTheme.current
+    val message = when (printState) {
+        TicketPrintState.Idle,
+        TicketPrintState.Printing -> "Imprimiendo…"
+
+        TicketPrintState.Printed ->
+            "Tu ticket se imprimió correctamente. Por favor recógelo."
+
+        is TicketPrintState.Failed ->
+            "No se pudo imprimir el ticket: ${printState.message}"
+    }
+
     Card(
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = brandTheme.base),
@@ -274,7 +297,7 @@ private fun TicketCard() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Por favor recoja su ticket recién impreso",
+                text = message,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = brandTheme.onBase,
@@ -282,29 +305,77 @@ private fun TicketCard() {
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            if (printState == TicketPrintState.Printed) {
+                Spacer(modifier = Modifier.height(12.dp))
 
-            val transition = rememberInfiniteTransition(label = "arrowBounce")
-            val bounce by transition.animateFloat(
-                initialValue = 0f,
-                targetValue = 12f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 800),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "bounceOffset"
-            )
+                val transition = rememberInfiniteTransition(label = "arrowBounce")
+                val bounce by transition.animateFloat(
+                    initialValue = 0f,
+                    targetValue = 12f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(durationMillis = 800),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "bounceOffset"
+                )
 
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowDown,
-                contentDescription = "Recoja su ticket",
-                tint = brandTheme.onBase,
-                modifier = Modifier
-                    .offset {
-                        IntOffset(0, bounce.roundToInt())
-                    }
-                    .size(44.dp)
-            )
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "Recoja su ticket",
+                    tint = brandTheme.onBase,
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(0, bounce.roundToInt())
+                        }
+                        .size(44.dp)
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun PrintActionButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    val brandTheme = LocalBrandTheme.current
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = brandTheme.accent,
+            contentColor = MaterialTheme.colorScheme.onSecondary
+        ),
+        shape = RoundedCornerShape(26.dp),
+        contentPadding = PaddingValues(horizontal = 48.dp, vertical = 18.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 18.sp
+        )
+    }
+}
+
+@Composable
+private fun ContinueWithoutPrintingButton(onClick: () -> Unit) {
+    val brandTheme = LocalBrandTheme.current
+    OutlinedButton(
+        onClick = onClick,
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = brandTheme.textPrimary),
+        shape = RoundedCornerShape(26.dp),
+        contentPadding = PaddingValues(horizontal = 32.dp, vertical = 18.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+    ) {
+        Text(
+            text = "Continuar sin imprimir",
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 18.sp
+        )
     }
 }

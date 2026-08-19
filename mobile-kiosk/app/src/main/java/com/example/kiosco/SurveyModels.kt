@@ -11,5 +11,4 @@ data class SurveyResponse(
     val comment: String
 )
 
-const val SURVEY_COUPON = "SYSCOM-SUNMI"
 const val SURVEY_QR_ASSET = "file:///android_asset/brand/syscom-sunmi-qr.png"

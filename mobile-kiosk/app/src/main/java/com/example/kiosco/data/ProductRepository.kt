@@ -23,7 +23,8 @@ class ProductRepository(context: Context) {
         category: String,
         barcode: String,
         imageUrl: String,
-        description: String
+        description: String,
+        nfcId: String = ""
     ): Product {
         val id = dao.insert(
             ProductEntity(
@@ -31,6 +32,7 @@ class ProductRepository(context: Context) {
                 price = price,
                 category = category,
                 barcode = barcode,
+                nfcId = nfcId,
                 imageUrl = imageUrl.ifBlank { ProductImages.PLACEHOLDER },
                 description = description
             )
@@ -41,6 +43,7 @@ class ProductRepository(context: Context) {
             price = price,
             category = category,
             barcode = barcode,
+            nfcId = nfcId,
             imageUrl = imageUrl.ifBlank { ProductImages.PLACEHOLDER },
             description = description
         )
@@ -60,6 +63,7 @@ class ProductRepository(context: Context) {
         price = price,
         category = category,
         barcode = barcode,
+        nfcId = nfcId,
         imageUrl = imageUrl,
         description = description
     )
@@ -70,6 +74,7 @@ class ProductRepository(context: Context) {
         price = price,
         category = category,
         barcode = barcode,
+        nfcId = nfcId,
         imageUrl = imageUrl.ifBlank { ProductImages.PLACEHOLDER },
         description = description.orEmpty()
     )

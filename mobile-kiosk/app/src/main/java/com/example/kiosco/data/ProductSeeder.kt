@@ -7,6 +7,7 @@ object ProductSeeder {
             price = 3.50,
             category = "snacks",
             barcode = "5901234123457",
+            nfcId = "NFC-001",
             image = "cookie.png",
             description = "Crujientes galletas de mantequilla repletas de chips de chocolate derretido. Horneadas doradas por fuera y suaves por dentro para ese clásico sabor de panadería."
         ),
@@ -15,6 +16,7 @@ object ProductSeeder {
             price = 6.00,
             category = "snacks",
             barcode = "5901234123464",
+            nfcId = "NFC-002",
             image = "ICEE.png",
             description = "Un granizado de cereza helado servido extra frío. Dulce, ácido y refrescante, es el compañero perfecto para un día cálido de cine."
         ),
@@ -23,6 +25,7 @@ object ProductSeeder {
             price = 4.75,
             category = "snacks",
             barcode = "5901234123471",
+            nfcId = "NFC-003",
             image = "nachos.webp",
             description = "Crujientes totopos de maíz bañados en queso derretido caliente y jalapeños suaves. Un favorito salado para compartir con un crujido satisfactorio."
         ),
@@ -194,12 +197,14 @@ object ProductSeeder {
         category: String,
         barcode: String,
         image: String,
-        description: String
+        description: String,
+        nfcId: String = ""
     ) = ProductEntity(
         name = name,
         price = price,
         category = category,
         barcode = barcode,
+        nfcId = nfcId,
         imageUrl = ProductImages.assetUri(image),
         description = description
     )

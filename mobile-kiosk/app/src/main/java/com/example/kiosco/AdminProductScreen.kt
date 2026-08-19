@@ -90,6 +90,7 @@ fun AdminProductListScreen(
         else products.filter {
             it.name.contains(q, ignoreCase = true) ||
                 it.barcode.contains(q, ignoreCase = true) ||
+                it.nfcId.contains(q, ignoreCase = true) ||
                 it.category.contains(q, ignoreCase = true)
         }
     }
@@ -341,6 +342,9 @@ fun AdminProductFormScreen(
     var barcode by remember(existing?.id, initialBarcode) {
         mutableStateOf(existing?.barcode?.takeIf { it.isNotBlank() } ?: initialBarcode)
     }
+    var nfcId by remember(existing?.id) {
+        mutableStateOf(existing?.nfcId.orEmpty())
+    }
     var imageUrl by remember(existing?.id) {
         mutableStateOf(
             existing?.imageUrl?.takeIf { it.isNotBlank() } ?: ProductImages.PLACEHOLDER
@@ -398,6 +402,7 @@ fun AdminProductFormScreen(
             ) { priceText = it }
             AdminField("Categoría", category) { category = it }
             AdminField("Código de barras", barcode) { barcode = it }
+            AdminField("ID NFC (tag)", nfcId) { nfcId = it }
             AdminField(
                 label = "Imagen (asset local)",
                 value = imageUrl,
@@ -433,6 +438,7 @@ fun AdminProductFormScreen(
                                     price = price,
                                     category = category.trim(),
                                     barcode = barcode.trim(),
+                                    nfcId = nfcId.trim(),
                                     imageUrl = resolvedImage,
                                     description = description.trim()
                                 )
@@ -443,6 +449,7 @@ fun AdminProductFormScreen(
                                 price = price,
                                 category = category.trim(),
                                 barcode = barcode.trim(),
+                                nfcId = nfcId.trim(),
                                 imageUrl = resolvedImage,
                                 description = description.trim()
                             )

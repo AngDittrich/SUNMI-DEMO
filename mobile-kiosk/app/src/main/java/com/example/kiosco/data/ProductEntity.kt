@@ -14,6 +14,7 @@ data class ProductEntity(
     val price: Double,
     val category: String,
     val barcode: String,
+    val nfcId: String = "",
     val imageUrl: String,
     val description: String = ""
 )
