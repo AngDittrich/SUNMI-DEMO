@@ -102,6 +102,7 @@ class NfcScanManager(
         if (!adapter.isEnabled) return
         val filters = arrayOf(
             IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED),
+            IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
             IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
         )
         try {

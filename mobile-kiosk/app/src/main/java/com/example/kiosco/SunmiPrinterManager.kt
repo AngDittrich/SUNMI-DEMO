@@ -54,30 +54,28 @@ class SunmiPrinterManager(context: Context) {
         onResult: (Result<Unit>) -> Unit
     ) {
         enqueuePrint(onResult) {
-            printDividingLine(DividingLine.SOLID, 2)
-
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 12)
 
             initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
             printText(
-                "KIOSCO DE SNACKS",
+                "SYSCOM - SUNMI",
                 TextStyle.getStyle()
-                    .setTextSize(20)
+                    .setTextSize(32)
                     .enableBold(true)
+                    .enableAntiColor(true)
+                    .setTextSpace(4)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
-            printDividingLine(DividingLine.DOTTED, 1)
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
+            printDividingLine(DividingLine.DOTTED, 2)
+            printDividingLine(DividingLine.EMPTY, 10)
 
             printText(
                 "TICKET DE COMPRA",
                 TextStyle.getStyle()
-                    .setTextSize(28)
+                    .setTextSize(26)
                     .enableBold(true)
             )
-
-            printDividingLine(DividingLine.EMPTY, 1)
 
             val dateStr = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Date())
             printText(
@@ -86,9 +84,31 @@ class SunmiPrinterManager(context: Context) {
                     .setTextSize(16)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.SOLID, 2)
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
+
+            initLine(BaseStyle.getStyle().setAlign(Align.LEFT))
+            printTexts(
+                arrayOf("PRODUCTO", "CANT.", "TOTAL"),
+                intArrayOf(6, 3, 3),
+                arrayOf(
+                    TextStyle.getStyle()
+                        .setAlign(Align.LEFT)
+                        .enableBold(true)
+                        .setTextSize(14),
+                    TextStyle.getStyle()
+                        .setAlign(Align.CENTER)
+                        .enableBold(true)
+                        .setTextSize(14),
+                    TextStyle.getStyle()
+                        .setAlign(Align.RIGHT)
+                        .enableBold(true)
+                        .setTextSize(14)
+                )
+            )
+
+            printDividingLine(DividingLine.EMPTY, 6)
 
             initLine(BaseStyle.getStyle().setAlign(Align.LEFT))
             items.forEach { item ->
@@ -109,30 +129,30 @@ class SunmiPrinterManager(context: Context) {
                 )
             }
 
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.SOLID, 2)
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
 
             initLine(BaseStyle.getStyle().setAlign(Align.RIGHT))
             printText(
                 "TOTAL:",
                 TextStyle.getStyle()
-                    .setTextSize(26)
+                    .setTextSize(24)
                     .enableBold(true)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 8)
 
             printText(
                 money(items.sumOf { it.subtotal }),
                 TextStyle.getStyle()
-                    .setTextSize(28)
+                    .setTextSize(30)
                     .enableBold(true)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.SOLID, 2)
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
 
             initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
             printText(
@@ -142,7 +162,7 @@ class SunmiPrinterManager(context: Context) {
                     .enableBold(true)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
 
             printText(
                 "Vuelva pronto",
@@ -150,20 +170,31 @@ class SunmiPrinterManager(context: Context) {
                     .setTextSize(14)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.SOLID, 2)
 
-            printDividingLine(DividingLine.EMPTY, 6)
+            printDividingLine(DividingLine.EMPTY, 60)
         }
     }
 
     fun printSurveyCoupon(onResult: (Result<Unit>) -> Unit) {
         enqueuePrint(onResult) {
-            printDividingLine(DividingLine.SOLID, 2)
-
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 12)
 
             initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
+            printText(
+                "SYSCOM - SUNMI",
+                TextStyle.getStyle()
+                    .setTextSize(32)
+                    .enableBold(true)
+                    .enableAntiColor(true)
+                    .setTextSpace(4)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 10)
+            printDividingLine(DividingLine.DOTTED, 2)
+            printDividingLine(DividingLine.EMPTY, 10)
+
             printText(
                 "CUPÓN DE ENCUESTA",
                 TextStyle.getStyle()
@@ -171,18 +202,15 @@ class SunmiPrinterManager(context: Context) {
                     .enableBold(true)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
-            printDividingLine(DividingLine.DOTTED, 1)
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
 
             printText(
-                SURVEY_COUPON,
+                "Escanea y califica tu experiencia",
                 TextStyle.getStyle()
-                    .setTextSize(30)
-                    .enableBold(true)
+                    .setTextSize(14)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 14)
 
             printQrCode(
                 SURVEY_COUPON,
@@ -191,10 +219,20 @@ class SunmiPrinterManager(context: Context) {
                     .setAlign(Align.CENTER)
             )
 
-            printDividingLine(DividingLine.EMPTY, 1)
+            printDividingLine(DividingLine.EMPTY, 10)
+
+            initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
+            printText(
+                SURVEY_COUPON,
+                TextStyle.getStyle()
+                    .setTextSize(18)
+                    .enableBold(true)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.SOLID, 2)
 
-            printDividingLine(DividingLine.EMPTY, 6)
+            printDividingLine(DividingLine.EMPTY, 60)
         }
     }
 
@@ -451,6 +489,7 @@ class SunmiPrinterManager(context: Context) {
         val terminalSignal = CountDownLatch(1)
         val transactionGate = Any()
         val transactionPhase = AtomicReference(TransactionPhase.PRE_SUBMISSION)
+        val failureReconciliation = AtomicReference<Runnable?>(null)
         val timeout = Runnable {
             synchronized(transactionGate) {
                 val outputMayHaveStarted =
@@ -461,7 +500,8 @@ class SunmiPrinterManager(context: Context) {
                     } else {
                         "La preparación de la impresión agotó el tiempo de espera."
                     },
-                    retryable = !outputMayHaveStarted
+                    retryable = !outputMayHaveStarted,
+                    submittedUnconfirmed = outputMayHaveStarted
                 )
                 if (
                     terminalResult.compareAndSet(
@@ -485,21 +525,56 @@ class SunmiPrinterManager(context: Context) {
         }
         val printCallback = object : PrintResult() {
             override fun onResult(resultCode: Int, message: String?) {
-                val result = if (resultCode == 0) {
-                    Result.success(Unit)
-                } else {
-                    Result.failure(
-                        TicketPrintException(
-                            message = message
-                                ?.takeIf { it.isNotBlank() }
-                                ?.let { "La impresora SUNMI reportó: $it" }
-                                ?: "La impresora SUNMI devolvió el error $resultCode.",
-                            retryable = true
+                if (resultCode == PRINT_RESULT_SUCCESS) {
+                    if (
+                        terminalResult.compareAndSet(
+                            null,
+                            Result.success(Unit)
                         )
-                    )
+                    ) {
+                        failureReconciliation.get()?.let(mainHandler::removeCallbacks)
+                        terminalSignal.countDown()
+                    }
+                    return
                 }
-                if (terminalResult.compareAndSet(null, result)) {
-                    terminalSignal.countDown()
+
+                val sdkFailure = TicketPrintException(
+                    message = message
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { "La impresora SUNMI reportó: $it" }
+                        ?: "La impresora SUNMI devolvió el error $resultCode.",
+                    retryable = true
+                )
+                val reconciliation = Runnable {
+                    if (terminalResult.get() != null) return@Runnable
+
+                    // PrinterX can report its documented failure after the
+                    // transaction has already produced paper. A current device
+                    // error remains definitive; READY/unknown cannot prove
+                    // whether output occurred, so it must not invite a duplicate.
+                    val currentStatusFailure = printerStatusFailure(currentPrinter)
+                    val reconciledFailure = currentStatusFailure?.let {
+                        userFacingFailure(it, retryable = false)
+                    } ?: submittedUnconfirmedFailure(sdkFailure)
+                    if (
+                        terminalResult.compareAndSet(
+                            null,
+                            Result.failure(reconciledFailure)
+                        )
+                    ) {
+                        terminalSignal.countDown()
+                    }
+                }
+                if (
+                    failureReconciliation.compareAndSet(
+                        null,
+                        reconciliation
+                    )
+                ) {
+                    mainHandler.postDelayed(
+                        reconciliation,
+                        FAILURE_RECONCILIATION_DELAY_MS
+                    )
                 }
             }
         }
@@ -544,11 +619,13 @@ class SunmiPrinterManager(context: Context) {
                 currentLineApi.printTrans(printCallback)
             }
         } catch (error: Throwable) {
-            val failure = userFacingFailure(
-                error,
-                retryable =
-                    transactionPhase.get() == TransactionPhase.PRE_SUBMISSION
-            )
+            val failure = if (
+                transactionPhase.get() == TransactionPhase.PRE_SUBMISSION
+            ) {
+                userFacingFailure(error, retryable = true)
+            } else {
+                submittedUnconfirmedFailure(error)
+            }
             if (
                 terminalResult.compareAndSet(
                     null,
@@ -581,6 +658,7 @@ class SunmiPrinterManager(context: Context) {
                     lineApi?.enableTransMode(false)
                 }.exceptionOrNull()
             }
+            failureReconciliation.get()?.let(mainHandler::removeCallbacks)
             mainHandler.removeCallbacks(timeout)
             synchronized(lock) {
                 activePrintTimeouts.remove(timeout)
@@ -599,7 +677,8 @@ class SunmiPrinterManager(context: Context) {
                     } else {
                         "La preparación de la impresión agotó el tiempo de espera."
                     },
-                    retryable = !outputMayHaveStarted
+                    retryable = !outputMayHaveStarted,
+                    submittedUnconfirmed = outputMayHaveStarted
                 )
             )
         if (cleanupFailure != null) {
@@ -674,7 +753,27 @@ class SunmiPrinterManager(context: Context) {
                 ?: "PrinterX no pudo completar la impresión."
             else -> detail ?: "No se pudo completar la impresión SUNMI."
         }
-        return TicketPrintException(message, canRetry, error)
+        return TicketPrintException(
+            message = message,
+            retryable = canRetry,
+            cause = error
+        )
+    }
+
+    private fun submittedUnconfirmedFailure(
+        error: Throwable
+    ): TicketPrintException {
+        val detail = error.message?.takeIf { it.isNotBlank() }
+        return TicketPrintException(
+            message = buildString {
+                append("El ticket fue enviado a la impresora, pero PrinterX no confirmó el resultado")
+                if (detail != null) append(": $detail")
+                append(". Evite imprimirlo de nuevo.")
+            },
+            retryable = false,
+            submittedUnconfirmed = true,
+            cause = error
+        )
     }
 
     private fun onceOnMain(
@@ -702,6 +801,8 @@ class SunmiPrinterManager(context: Context) {
         const val PRINTER_ACQUISITION_TIMEOUT_MS = 5_000L
         const val PRINT_RESULT_TIMEOUT_MS = 15_000L
         const val TIMEOUT_SIGNAL_GRACE_MS = 1_000L
+        const val FAILURE_RECONCILIATION_DELAY_MS = 1_000L
+        const val PRINT_RESULT_SUCCESS = 0
     }
 
     private enum class TransactionPhase {

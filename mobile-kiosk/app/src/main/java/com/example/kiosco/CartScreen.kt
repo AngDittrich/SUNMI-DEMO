@@ -41,6 +41,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -631,6 +632,7 @@ private fun PaymentModal(
     onPaymentComplete: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
+    val successGreen = Color(0xFF1B8F3A)
     var phase by remember { mutableStateOf(PaymentPhase.WaitingForNfc) }
 
     LaunchedEffect(nfcDetected) {
@@ -659,16 +661,34 @@ private fun PaymentModal(
                 .padding(horizontal = 24.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
-            val compactHeight = maxHeight < 640.dp
-            val modalHeightFraction = if (compactHeight) 0.94f else 0.86f
-            val cardGap = (maxHeight * 0.025f).coerceIn(12.dp, 24.dp)
+            val compactHeight = maxHeight < 700.dp
+            val modalHeightFraction = if (compactHeight) 0.94f else 0.90f
+            val cardGap = if (compactHeight) {
+                (maxHeight * 0.045f).coerceIn(24.dp, 28.dp)
+            } else {
+                (maxHeight * 0.045f).coerceIn(28.dp, 36.dp)
+            }
+            val maximumZoneHeight = if (compactHeight) 330.dp else 420.dp
+            val reservedVerticalSpace = if (compactHeight) 250.dp else 312.dp
+            val zoneHeight = minOf(
+                maximumZoneHeight,
+                (maxHeight * modalHeightFraction - reservedVerticalSpace)
+                    .coerceAtLeast(120.dp)
+            )
+            val lowerCardMaximumHeight = if (compactHeight) 400.dp else 500.dp
+            val stackDownshift = minOf(
+                8.dp,
+                maxHeight * ((1f - modalHeightFraction) / 2f)
+            )
 
             Column(
                 modifier = Modifier
                     .widthIn(max = 520.dp)
                     .fillMaxWidth()
-                    .fillMaxHeight(modalHeightFraction),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxHeight(modalHeightFraction)
+                    .offset(y = stackDownshift),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom
             ) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -732,20 +752,34 @@ private fun PaymentModal(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .heightIn(max = lowerCardMaximumHeight),
                     shape = RoundedCornerShape(28.dp),
                     color = brandTheme.surface,
                     shadowElevation = 10.dp
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
                             .padding(
                                 horizontal = if (compactHeight) 16.dp else 24.dp,
                                 vertical = if (compactHeight) 14.dp else 20.dp
                             ),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            NfcTapZone(
+                                approved = phase == PaymentPhase.Approved,
+                                modifier = Modifier
+                                    .height(zoneHeight)
+                                    .aspectRatio(240f / 320f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(if (compactHeight) 8.dp else 12.dp))
+
                         Text(
                             text = if (phase == PaymentPhase.Approved) {
                                 "Transacción completada"
@@ -755,31 +789,12 @@ private fun PaymentModal(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (phase == PaymentPhase.Approved) {
-                                brandTheme.accent
+                                successGreen
                             } else {
                                 TextMuted
                             },
                             textAlign = TextAlign.Center
                         )
-
-                        Spacer(modifier = Modifier.height(if (compactHeight) 8.dp else 12.dp))
-
-                        BoxWithConstraints(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            contentAlignment = Alignment.BottomCenter
-                        ) {
-                            val maximumZoneHeight = if (compactHeight) 210.dp else 260.dp
-                            val zoneHeight = minOf(maximumZoneHeight, maxHeight * 0.94f)
-
-                            NfcTapZone(
-                                approved = phase == PaymentPhase.Approved,
-                                modifier = Modifier
-                                    .height(zoneHeight)
-                                    .aspectRatio(220f / 280f)
-                            )
-                        }
                     }
                 }
             }
@@ -795,8 +810,36 @@ private fun NfcTapZone(
     modifier: Modifier = Modifier
 ) {
     val brandTheme = LocalBrandTheme.current
-    val dashColor = brandTheme.accent.copy(alpha = if (approved) 0.9f else 0.6f)
-    val bgColor = brandTheme.accent.copy(alpha = if (approved) 0.14f else 0.06f)
+    val successGreen = Color(0xFF1B8F3A)
+    val dashColor = if (approved) successGreen.copy(alpha = 0.9f) else {
+        brandTheme.accent.copy(alpha = 0.6f)
+    }
+    val bgColor = if (approved) successGreen.copy(alpha = 0.12f) else {
+        brandTheme.accent.copy(alpha = 0.06f)
+    }
+    val ringProgress = remember { Animatable(0f) }
+    val checkProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(approved) {
+        if (approved) {
+            ringProgress.snapTo(0f)
+            checkProgress.snapTo(0f)
+            launch {
+                ringProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 560)
+                )
+            }
+            delay(220)
+            checkProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 300)
+            )
+        } else {
+            ringProgress.snapTo(0f)
+            checkProgress.snapTo(0f)
+        }
+    }
 
     val transition = rememberInfiniteTransition(label = "nfcPulse")
     val pulse by transition.animateFloat(
@@ -837,16 +880,53 @@ private fun NfcTapZone(
                 modifier = Modifier
                     .fillMaxWidth(0.44f)
                     .aspectRatio(1f)
-                    .clip(CircleShape)
-                    .background(brandTheme.accent),
+                    .drawBehind {
+                        val ringWidth = 7.dp.toPx()
+                        val inset = ringWidth / 2f
+                        drawCircle(
+                            color = successGreen.copy(alpha = 0.18f),
+                            radius = size.minDimension / 2f - inset
+                        )
+                        drawArc(
+                            color = successGreen,
+                            startAngle = -90f,
+                            sweepAngle = 360f * ringProgress.value,
+                            useCenter = false,
+                            topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
+                            size = androidx.compose.ui.geometry.Size(
+                                width = size.width - ringWidth,
+                                height = size.height - ringWidth
+                            ),
+                            style = Stroke(width = ringWidth, cap = StrokeCap.Round)
+                        )
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Pago aprobado",
-                    tint = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.fillMaxSize(0.58f)
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(0.78f)
+                        .graphicsLayer {
+                            alpha = ringProgress.value
+                            scaleX = 0.9f + (0.1f * ringProgress.value)
+                            scaleY = 0.9f + (0.1f * ringProgress.value)
+                        }
+                        .clip(CircleShape)
+                        .background(successGreen),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Pago aprobado",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .fillMaxSize(0.58f)
+                            .graphicsLayer {
+                                alpha = checkProgress.value
+                                scaleX = 0.72f + (0.28f * checkProgress.value)
+                                scaleY = 0.72f + (0.28f * checkProgress.value)
+                            }
+                    )
+                }
             }
         } else {
             Icon(

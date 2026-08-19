@@ -61,92 +61,104 @@ fun OrderSummaryScreen(
                     colors = listOf(brandTheme.surface, brandTheme.background)
                 )
             )
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 24.dp),
+            .statusBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(40.dp))
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(40.dp))
 
-        if (paymentConfirmed) {
-            SuccessCheck()
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "¡Pago exitoso!",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Black,
-                color = brandTheme.textPrimary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Gracias por tu compra",
-                fontSize = 18.sp,
-                color = TextMuted,
-                textAlign = TextAlign.Center
-            )
-        } else {
-            WaitingForPaymentAnimation()
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Acerca tu tarjeta para pagar",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Black,
-                color = brandTheme.textPrimary,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Toca el lector NFC con tu tarjeta",
-                fontSize = 16.sp,
-                color = TextMuted,
-                textAlign = TextAlign.Center
-            )
-        }
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        OrderDetailsCard(
-            orderItems = orderItems,
-            totalPrice = totalPrice,
-            totalItems = totalItems
-        )
-
-        if (paymentConfirmed) {
-            Spacer(modifier = Modifier.height(20.dp))
-
-            TicketCard(printState = printState)
+            if (paymentConfirmed) {
+                SuccessCheck()
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "¡Pago exitoso!",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Black,
+                    color = brandTheme.textPrimary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Gracias por tu compra",
+                    fontSize = 18.sp,
+                    color = TextMuted,
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                WaitingForPaymentAnimation()
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Acerca tu tarjeta para pagar",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Black,
+                    color = brandTheme.textPrimary,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Toca el lector NFC con tu tarjeta",
+                    fontSize = 16.sp,
+                    color = TextMuted,
+                    textAlign = TextAlign.Center
+                )
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            when (printState) {
-                TicketPrintState.Printed -> {
-                    PrintActionButton(
-                        text = "Listo",
-                        onClick = onDone
-                    )
-                }
+            OrderDetailsCard(
+                orderItems = orderItems,
+                totalPrice = totalPrice,
+                totalItems = totalItems
+            )
 
-                TicketPrintState.Idle,
-                TicketPrintState.Printing -> {
-                    ContinueWithoutPrintingButton(onClick = onDone)
-                }
+            if (paymentConfirmed) {
+                Spacer(modifier = Modifier.height(20.dp))
 
-                is TicketPrintState.Failed -> {
-                    if (printState.retryable) {
+                TicketCard(printState = printState)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (paymentConfirmed) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 16.dp, bottom = 16.dp)
+            ) {
+                when (printState) {
+                    TicketPrintState.Printed -> {
                         PrintActionButton(
-                            text = "Imprimir de nuevo",
-                            onClick = onPrint
+                            text = "Listo",
+                            onClick = onDone
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    ContinueWithoutPrintingButton(onClick = onDone)
+
+                    TicketPrintState.Idle,
+                    TicketPrintState.Printing -> {
+                        ContinueWithoutPrintingButton(onClick = onDone)
+                    }
+
+                    is TicketPrintState.Failed -> {
+                        if (printState.retryable) {
+                            PrintActionButton(
+                                text = "Imprimir de nuevo",
+                                onClick = onPrint
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                        ContinueWithoutPrintingButton(onClick = onDone)
+                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -330,8 +342,11 @@ private fun TicketCard(printState: TicketPrintState) {
         TicketPrintState.Printed ->
             "Tu ticket se imprimió correctamente. Por favor recógelo."
 
-        is TicketPrintState.Failed ->
+        is TicketPrintState.Failed -> if (printState.submittedUnconfirmed) {
+            printState.message
+        } else {
             "No se pudo imprimir el ticket: ${printState.message}"
+        }
     }
 
     Card(

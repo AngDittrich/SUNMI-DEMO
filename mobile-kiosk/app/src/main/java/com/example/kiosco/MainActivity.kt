@@ -103,6 +103,7 @@ private data class ScanSuccessFeedback(
 
 class MainActivity : ComponentActivity() {
     private var nfcScanManager: NfcScanManager? = null
+    private var onNfcTagCallback: ((String) -> Unit)? = null
 
     /**
      * SUNMI scanners often inject keyboard-wedge events (digits + Enter) in
@@ -154,9 +155,20 @@ class MainActivity : ComponentActivity() {
         nfcScanManager?.disableForegroundDispatch(this)
     }
 
+    override fun onDestroy() {
+        nfcScanManager?.destroy()
+        nfcScanManager = null
+        super.onDestroy()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        nfcScanManager = NfcScanManager(this) { tagId ->
+            onNfcTagCallback?.invoke(tagId)
+        }
+        nfcScanManager?.init()
 
         setContent {
             var isSunmiTheme by remember { mutableStateOf(false) }
@@ -216,7 +228,9 @@ class MainActivity : ComponentActivity() {
                         message = error.message
                             ?.takeIf { it.isNotBlank() }
                             ?: "No se pudo completar la impresión SUNMI.",
-                        retryable = printError?.retryable ?: true
+                        retryable = printError?.retryable ?: true,
+                        submittedUnconfirmed =
+                            printError?.submittedUnconfirmed ?: false
                     )
                 }
 
@@ -373,6 +387,8 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                onNfcTagCallback = onBarcodeScanned
+
                 // Cart helpers
                 val addToCart = remember(cartItems.value) {
                     { product: Product ->
@@ -457,16 +473,6 @@ class MainActivity : ComponentActivity() {
                     }
                     scanner.register()
                     onDispose { scanner.unregister() }
-
-                    val nfc = NfcScanManager(this@MainActivity) { tagId ->
-                        onBarcodeScanned(tagId)
-                    }
-                    nfcScanManager = nfc
-                    nfc.init()
-                    onDispose {
-                        nfc.destroy()
-                        nfcScanManager = null
-                    }
                 }
 
                 Surface(
