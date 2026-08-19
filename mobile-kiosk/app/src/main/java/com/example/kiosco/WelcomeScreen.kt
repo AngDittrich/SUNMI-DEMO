@@ -468,26 +468,31 @@ private fun ServiceSegment(
 }
 
 @Composable
-private fun BenefitRow(largeDisplay: Boolean) {
+private fun BenefitRow(
+    selectedService: WelcomeService,
+    largeDisplay: Boolean
+) {
+    val isSurvey = selectedService == WelcomeService.SURVEY
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(if (largeDisplay) 16.dp else 8.dp)
     ) {
         BenefitPill(
             title = "Rápido",
-            subtitle = "Ordena en segundos",
+            subtitle = if (isSurvey) "Menos de 1 minuto" else "Ordena en segundos",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
         BenefitPill(
-            title = "Fácil",
-            subtitle = "Todo a tu alcance",
+            title = if (isSurvey) "Anónimo" else "Fácil",
+            subtitle = if (isSurvey) "Sin datos personales" else "Todo a tu alcance",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
         BenefitPill(
-            title = "Delicioso",
-            subtitle = "Para cada antojo",
+            title = if (isSurvey) "Confiable" else "Delicioso",
+            subtitle = if (isSurvey) "Tu opinión cuenta" else "Para cada antojo",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
