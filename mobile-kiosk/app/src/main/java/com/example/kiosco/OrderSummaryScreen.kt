@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.LocalBrandTheme
 import com.example.kiosco.ui.theme.TextMuted
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
@@ -48,9 +49,25 @@ fun OrderSummaryScreen(
     val brandTheme = LocalBrandTheme.current
     val totalPrice = orderItems.sumOf { it.subtotal }
     val totalItems = orderItems.sumOf { it.quantity }
+    var remainingSeconds by remember { mutableIntStateOf(30) }
+    val latestOnDone by rememberUpdatedState(onDone)
 
     LaunchedEffect(paymentConfirmed) {
         if (paymentConfirmed) onPrint()
+    }
+
+    LaunchedEffect(printState) {
+        remainingSeconds = 30
+        if (
+            printState == TicketPrintState.Printed ||
+            printState is TicketPrintState.Submitted
+        ) {
+            while (remainingSeconds > 0) {
+                delay(1_000)
+                remainingSeconds -= 1
+            }
+            latestOnDone()
+        }
     }
 
     Column(
@@ -116,12 +133,6 @@ fun OrderSummaryScreen(
                 totalItems = totalItems
             )
 
-            if (paymentConfirmed) {
-                Spacer(modifier = Modifier.height(20.dp))
-
-                TicketCard(printState = printState)
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
         }
 
@@ -133,6 +144,11 @@ fun OrderSummaryScreen(
                     .padding(horizontal = 24.dp)
                     .padding(top = 16.dp, bottom = 16.dp)
             ) {
+                if (printState !is TicketPrintState.Submitted) {
+                    TicketCard(printState = printState)
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 when (printState) {
                     TicketPrintState.Printed -> {
                         PrintActionButton(
@@ -141,9 +157,14 @@ fun OrderSummaryScreen(
                         )
                     }
 
+                    is TicketPrintState.Submitted,
                     TicketPrintState.Idle,
                     TicketPrintState.Printing -> {
                         ContinueWithoutPrintingButton(onClick = onDone)
+                        if (printState is TicketPrintState.Submitted) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            SubmittedPrintMessage(message = printState.message)
+                        }
                     }
 
                     is TicketPrintState.Failed -> {
@@ -156,6 +177,14 @@ fun OrderSummaryScreen(
                         }
                         ContinueWithoutPrintingButton(onClick = onDone)
                     }
+                }
+
+                if (
+                    printState == TicketPrintState.Printed ||
+                    printState is TicketPrintState.Submitted
+                ) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    CountdownMessage(remainingSeconds = remainingSeconds)
                 }
             }
         }
@@ -342,9 +371,9 @@ private fun TicketCard(printState: TicketPrintState) {
         TicketPrintState.Printed ->
             "Tu ticket se imprimió correctamente. Por favor recógelo."
 
-        is TicketPrintState.Failed -> if (printState.submittedUnconfirmed) {
-            printState.message
-        } else {
+        is TicketPrintState.Submitted -> return
+
+        is TicketPrintState.Failed -> {
             "No se pudo imprimir el ticket: ${printState.message}"
         }
     }
@@ -370,7 +399,9 @@ private fun TicketCard(printState: TicketPrintState) {
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
 
-            if (printState == TicketPrintState.Printed) {
+            if (
+                printState == TicketPrintState.Printed
+            ) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 val transition = rememberInfiniteTransition(label = "arrowBounce")
@@ -397,6 +428,38 @@ private fun TicketCard(printState: TicketPrintState) {
             }
         }
     }
+}
+
+@Composable
+private fun SubmittedPrintMessage(message: String) {
+    val brandTheme = LocalBrandTheme.current
+    Surface(
+        color = brandTheme.base.copy(alpha = 0.12f),
+        shape = RoundedCornerShape(18.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = message,
+            color = brandTheme.textPrimary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
+        )
+    }
+}
+
+@Composable
+private fun CountdownMessage(remainingSeconds: Int) {
+    val brandTheme = LocalBrandTheme.current
+    Text(
+        text = "Regresando al inicio en $remainingSeconds s",
+        color = brandTheme.textPrimary.copy(alpha = 0.72f),
+        fontSize = 15.sp,
+        fontWeight = FontWeight.Medium,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable

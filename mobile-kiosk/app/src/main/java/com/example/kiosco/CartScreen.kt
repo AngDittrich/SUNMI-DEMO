@@ -677,7 +677,7 @@ private fun PaymentModal(
             )
             val lowerCardMaximumHeight = if (compactHeight) 400.dp else 500.dp
             val stackDownshift = minOf(
-                8.dp,
+                16.dp,
                 maxHeight * ((1f - modalHeightFraction) / 2f)
             )
 

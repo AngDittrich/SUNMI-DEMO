@@ -50,7 +50,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.focusProperties
@@ -222,8 +222,14 @@ class MainActivity : ComponentActivity() {
                 var posPrintAttempt by remember { mutableStateOf(0L) }
                 var surveyPrintAttempt by remember { mutableStateOf(0L) }
 
-                fun printFailureState(error: Throwable): TicketPrintState.Failed {
+                fun printFailureState(error: Throwable): TicketPrintState {
                     val printError = error as? TicketPrintException
+                    if (printError?.submittedUnconfirmed == true) {
+                        return TicketPrintState.Submitted(
+                            message =
+                                "Recoja su ticket por favor"
+                        )
+                    }
                     return TicketPrintState.Failed(
                         message = error.message
                             ?.takeIf { it.isNotBlank() }
@@ -759,20 +765,23 @@ class MainActivity : ComponentActivity() {
                                     !isSurveyRoute &&
                                     !cartSheetVisible
                                 ) {
-                                    CartSummaryBar(
-                                        totalItems = totalItems,
-                                        totalPrice = totalPrice,
-                                        onCartClick = { cartSheetVisible = true },
-                                        enabled = totalItems > 0,
-                                        bagBounceTrigger = bagBounceTrigger,
-                                        onBagPositioned = { bagCenter = it },
+                                    AnimatedVisibility(
+                                        visible = totalItems > 0,
                                         modifier = Modifier
                                             .align(Alignment.BottomCenter)
                                             .padding(horizontal = 24.dp)
                                             .padding(bottom = 16.dp)
                                             .navigationBarsPadding()
-                                            .alpha(if (totalItems > 0) 1f else 0f)
-                                    )
+                                    ) {
+                                        CartSummaryBar(
+                                            totalItems = totalItems,
+                                            totalPrice = totalPrice,
+                                            onCartClick = { cartSheetVisible = true },
+                                            enabled = totalItems > 0,
+                                            bagBounceTrigger = bagBounceTrigger,
+                                            onBagPositioned = { bagCenter = it }
+                                        )
+                                    }
                                 }
 
                                 if (!isSurveyRoute) {

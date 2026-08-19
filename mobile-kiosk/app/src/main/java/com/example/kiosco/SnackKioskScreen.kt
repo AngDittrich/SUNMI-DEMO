@@ -855,7 +855,7 @@ fun CartSummaryBar(
                     .fillMaxSize()
                     .padding(
                         start = if (largeBar) 30.dp else 20.dp,
-                        end = if (largeBar) 10.dp else 8.dp
+                        end = if (largeBar) 18.dp else 16.dp
                     ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween

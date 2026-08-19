@@ -1,8 +1,36 @@
 # Printing Task 2 Report
 
+## 2026-08-19 logo-size correction
+
+- Verified the bundled logo canvases are `708x120` (SYSCOM) and `794x222` (SUNMI), while their nontransparent content bounds are only `676x75` and `678x136`. The previous 384-dot, equal-half composition therefore selected a 31-dot common canvas height, leaving the visible marks about 19 dots high rather than doubling them.
+- Trimmed only fully transparent asset margins before flattening each prepared logo onto white. The final combined strip remains opaque and the decoded source, cropped intermediate, prepared logos, and final strip each retain explicit recycling at their existing ownership boundary.
+- Switched the logo strip to the target 80 mm SUNMI printer's native 576-dot effective width and fitted the two trimmed aspect ratios as one centered group instead of forcing equal-width halves. With 4-dot outer margins and an 8-dot inter-logo gap, static arithmetic yields a shared 40-dot logo height, widths of 360 dots (SYSCOM) and 199 dots (SUNMI), and 4.5-dot margins on both sides: approximately `2.06x` and `2.11x` the prior visible heights, with no clipping.
+- Preserved side-by-side order (SYSCOM left, SUNMI right), equal height, centered alignment, white background, receipt/coupon content, and the absence of `SYSCOM - SUNMI` display text.
+- IDE diagnostics and source-level arithmetic checks reported no issues. `git diff --check` was run; no Gradle, compile, lint, build, assemble, install, or test command was run.
+
+## 2026-08-19 final-flow follow-up
+
+- Moved the non-error `Submitted` message below `Continuar sin imprimir` on both POS and survey final screens; it is no longer duplicated in the upper ticket/status area.
+- Added a visible 30-second return-home countdown for `Printed` and `Submitted` only. The state-keyed Compose effects cancel on retry, Back, explicit completion, or navigation and invoke the existing return callbacks once on expiry.
+- Combined the offline SYSCOM and SUNMI assets into one opaque-white 384-dot strip. Both logos preserve aspect ratio, share one fitted height, occupy left/right halves, and are printed through one centered bitmap for POS and survey output.
+- Preserved transparent-logo flattening, pre-transaction asset loading, source/strip bitmap recycling, retry semantics, and attempt-token invalidation.
+- Increased the NFC modal stack downshift cap from 8 dp to 16 dp while retaining the existing inset-derived slack clamp and portrait bounds.
+- IDE diagnostics and static source checks reported no issues. `git diff --check` was run; no Gradle, compile, lint, build, assemble, install, or test command was run.
+
 ## Status
 
 Complete. Implemented approved option A with documented transactional PrinterX confirmation.
+
+## 2026-08-19 follow-up
+
+- Added a non-error `TicketPrintState.Submitted` UI outcome for callback/timeout ambiguity after PrinterX may have started output. It tells the customer to collect the ticket, keeps `Continuar sin imprimir`, and never offers a duplicate reprint.
+- Definite printer/device errors remain `Failed`; PrinterX result code `0` remains the only confirmed `Printed` result.
+- Added the offline SYSCOM and SUNMI asset logos at the top of both POS receipts and survey coupons using documented `LineApi.printBitmap(Bitmap, BitmapStyle)`, centered at 384 dots.
+- Logo assets are decoded from `appContext.assets` before transaction content buffering/submission. Asset-loading failures return a normal retryable print failure.
+- Flattened each decoded logo onto an opaque white bitmap before handing it to PrinterX, preventing transparent asset pixels from being binarized as black; source and prepared bitmap lifetimes remain separate and safe.
+- Preserved attempt-token stale callback protection and main-thread exactly-once completion.
+- IDE static diagnostics were checked on the changed Kotlin files.
+- No Gradle, compile, lint, build, assemble, install, or test command was run.
 
 ## Files
 

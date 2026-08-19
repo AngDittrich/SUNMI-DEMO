@@ -1,6 +1,12 @@
 package com.example.kiosco
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -12,6 +18,7 @@ import com.sunmi.printerx.enums.Align
 import com.sunmi.printerx.enums.DividingLine
 import com.sunmi.printerx.enums.Status
 import com.sunmi.printerx.style.BaseStyle
+import com.sunmi.printerx.style.BitmapStyle
 import com.sunmi.printerx.style.QrStyle
 import com.sunmi.printerx.style.TextStyle
 import java.lang.ref.WeakReference
@@ -53,18 +60,11 @@ class SunmiPrinterManager(context: Context) {
         items: List<CartItem>,
         onResult: (Result<Unit>) -> Unit
     ) {
-        enqueuePrint(onResult) {
+        enqueuePrint(onResult) { logoStrip ->
             printDividingLine(DividingLine.EMPTY, 12)
 
             initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
-            printText(
-                "SYSCOM - SUNMI",
-                TextStyle.getStyle()
-                    .setTextSize(32)
-                    .enableBold(true)
-                    .enableAntiColor(true)
-                    .setTextSpace(4)
-            )
+            printTicketLogos(logoStrip)
 
             printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.DOTTED, 2)
@@ -173,23 +173,16 @@ class SunmiPrinterManager(context: Context) {
             printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.SOLID, 2)
 
-            printDividingLine(DividingLine.EMPTY, 60)
+            printDividingLine(DividingLine.EMPTY, 30)
         }
     }
 
     fun printSurveyCoupon(onResult: (Result<Unit>) -> Unit) {
-        enqueuePrint(onResult) {
+        enqueuePrint(onResult) { logoStrip ->
             printDividingLine(DividingLine.EMPTY, 12)
 
             initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
-            printText(
-                "SYSCOM - SUNMI",
-                TextStyle.getStyle()
-                    .setTextSize(32)
-                    .enableBold(true)
-                    .enableAntiColor(true)
-                    .setTextSpace(4)
-            )
+            printTicketLogos(logoStrip)
 
             printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.DOTTED, 2)
@@ -232,7 +225,7 @@ class SunmiPrinterManager(context: Context) {
             printDividingLine(DividingLine.EMPTY, 10)
             printDividingLine(DividingLine.SOLID, 2)
 
-            printDividingLine(DividingLine.EMPTY, 60)
+            printDividingLine(DividingLine.EMPTY, 30)
         }
     }
 
@@ -275,7 +268,7 @@ class SunmiPrinterManager(context: Context) {
 
     private fun enqueuePrint(
         onResult: (Result<Unit>) -> Unit,
-        addContent: LineApi.() -> Unit
+        addContent: LineApi.(Bitmap) -> Unit
     ) {
         val complete = onceOnMain(onResult)
         val accepted = synchronized(lock) {
@@ -298,7 +291,22 @@ class SunmiPrinterManager(context: Context) {
             }
             try {
                 printExecutor.execute {
-                    val result = runTransaction(currentPrinter, addContent)
+                    val logoStrip = runCatching { loadTicketLogoStrip() }.getOrElse {
+                        completeRequest(
+                            complete,
+                            Result.failure(
+                                userFacingFailure(it, retryable = true)
+                            )
+                        )
+                        return@execute
+                    }
+                    val result = try {
+                        runTransaction(currentPrinter) {
+                            addContent(logoStrip)
+                        }
+                    } finally {
+                        logoStrip.recycle()
+                    }
                     completeRequest(complete, result)
                 }
             } catch (_: RejectedExecutionException) {
@@ -703,6 +711,184 @@ class SunmiPrinterManager(context: Context) {
         }
     }
 
+    private fun loadTicketLogoStrip(): Bitmap {
+        var syscom: Bitmap? = null
+        var sunmi: Bitmap? = null
+        return try {
+            val loadedSyscom = loadAssetBitmap(SYSCOM_LOGO_ASSET)
+            syscom = loadedSyscom
+            val loadedSunmi = loadAssetBitmap(SUNMI_LOGO_ASSET)
+            sunmi = loadedSunmi
+            combineTicketLogos(
+                syscom = loadedSyscom,
+                sunmi = loadedSunmi
+            )
+        } catch (error: Throwable) {
+            throw TicketPrintException(
+                message = "No se pudieron cargar los logotipos del ticket.",
+                retryable = true,
+                cause = error
+            )
+        } finally {
+            syscom?.recycle()
+            sunmi?.recycle()
+        }
+    }
+
+    private fun loadAssetBitmap(assetPath: String): Bitmap {
+        val source = appContext.assets.open(assetPath).use(BitmapFactory::decodeStream)
+            ?: throw IllegalStateException(
+                "No se pudo cargar el logotipo de impresión $assetPath."
+            )
+        return try {
+            trimTransparentPaddingAndFlatten(source)
+        } finally {
+            source.recycle()
+        }
+    }
+
+    private fun trimTransparentPaddingAndFlatten(source: Bitmap): Bitmap {
+        val pixels = IntArray(source.width * source.height)
+        source.getPixels(
+            pixels,
+            0,
+            source.width,
+            0,
+            0,
+            source.width,
+            source.height
+        )
+
+        var left = source.width
+        var top = source.height
+        var right = -1
+        var bottom = -1
+        pixels.forEachIndexed { index, pixel ->
+            if (Color.alpha(pixel) != 0) {
+                val x = index % source.width
+                val y = index / source.width
+                left = minOf(left, x)
+                top = minOf(top, y)
+                right = maxOf(right, x)
+                bottom = maxOf(bottom, y)
+            }
+        }
+
+        if (right < left || bottom < top) {
+            return flattenOnWhite(source)
+        }
+
+        val cropped = Bitmap.createBitmap(
+            source,
+            left,
+            top,
+            right - left + 1,
+            bottom - top + 1
+        )
+        return try {
+            flattenOnWhite(cropped)
+        } finally {
+            if (cropped !== source) {
+                cropped.recycle()
+            }
+        }
+    }
+
+    private fun flattenOnWhite(source: Bitmap): Bitmap {
+        val flattened = Bitmap.createBitmap(
+            source.width,
+            source.height,
+            Bitmap.Config.ARGB_8888
+        )
+        return try {
+            val canvas = Canvas(flattened)
+            canvas.drawColor(Color.WHITE)
+            canvas.drawBitmap(
+                source,
+                0f,
+                0f,
+                Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+            )
+            flattened.setHasAlpha(false)
+            flattened
+        } catch (error: Throwable) {
+            flattened.recycle()
+            throw error
+        }
+    }
+
+    private fun combineTicketLogos(
+        syscom: Bitmap,
+        sunmi: Bitmap
+    ): Bitmap {
+        val availableLogoWidth =
+            TICKET_LOGO_STRIP_WIDTH_DOTS -
+                (TICKET_LOGO_HORIZONTAL_PADDING_DOTS * 2) -
+                TICKET_LOGO_GAP_DOTS
+        val combinedAspectRatio =
+            syscom.width.toFloat() / syscom.height +
+                sunmi.width.toFloat() / sunmi.height
+        val commonLogoHeight = minOf(
+            TICKET_LOGO_MAX_HEIGHT_DOTS,
+            (availableLogoWidth / combinedAspectRatio).toInt()
+        ).coerceAtLeast(1)
+        val syscomWidth = syscom.width * commonLogoHeight / syscom.height
+        val sunmiWidth = sunmi.width * commonLogoHeight / sunmi.height
+        val combinedLogoWidth = syscomWidth + TICKET_LOGO_GAP_DOTS + sunmiWidth
+        val groupLeft = (TICKET_LOGO_STRIP_WIDTH_DOTS - combinedLogoWidth) / 2f
+        val stripHeight =
+            commonLogoHeight + (TICKET_LOGO_VERTICAL_PADDING_DOTS * 2)
+        val strip = Bitmap.createBitmap(
+            TICKET_LOGO_STRIP_WIDTH_DOTS,
+            stripHeight,
+            Bitmap.Config.ARGB_8888
+        )
+
+        return try {
+            val canvas = Canvas(strip)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+            canvas.drawColor(Color.WHITE)
+
+            fun drawLogo(source: Bitmap, left: Float, scaledWidth: Int) {
+                canvas.drawBitmap(
+                    source,
+                    null,
+                    RectF(
+                        left,
+                        TICKET_LOGO_VERTICAL_PADDING_DOTS.toFloat(),
+                        left + scaledWidth,
+                        (TICKET_LOGO_VERTICAL_PADDING_DOTS + commonLogoHeight)
+                            .toFloat()
+                    ),
+                    paint
+                )
+            }
+
+            drawLogo(syscom, left = groupLeft, scaledWidth = syscomWidth)
+            drawLogo(
+                sunmi,
+                left = groupLeft + syscomWidth + TICKET_LOGO_GAP_DOTS,
+                scaledWidth = sunmiWidth
+            )
+            strip.setHasAlpha(false)
+            strip
+        } catch (error: Throwable) {
+            strip.recycle()
+            throw error
+        }
+    }
+
+    private fun LineApi.printTicketLogos(logoStrip: Bitmap) {
+        initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
+        printBitmap(
+            logoStrip,
+            BitmapStyle.getStyle()
+                .setAlign(Align.CENTER)
+                .setWidth(TICKET_LOGO_STRIP_WIDTH_DOTS)
+        )
+        printDividingLine(DividingLine.EMPTY, 12)
+    }
+
     private fun printerStatusFailure(
         currentPrinter: PrinterSdk.Printer
     ): Throwable? = try {
@@ -803,6 +989,11 @@ class SunmiPrinterManager(context: Context) {
         const val TIMEOUT_SIGNAL_GRACE_MS = 1_000L
         const val FAILURE_RECONCILIATION_DELAY_MS = 1_000L
         const val PRINT_RESULT_SUCCESS = 0
+        const val TICKET_LOGO_STRIP_WIDTH_DOTS = 576
+        const val TICKET_LOGO_MAX_HEIGHT_DOTS = 192
+        const val TICKET_LOGO_HORIZONTAL_PADDING_DOTS = 4
+        const val TICKET_LOGO_GAP_DOTS = 8
+        const val TICKET_LOGO_VERTICAL_PADDING_DOTS = 12
     }
 
     private enum class TransactionPhase {

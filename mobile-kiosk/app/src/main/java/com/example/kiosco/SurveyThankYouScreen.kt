@@ -24,7 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.LocalBrandTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun SurveyThankYouScreen(
@@ -47,6 +51,8 @@ fun SurveyThankYouScreen(
 ) {
     val brandTheme = LocalBrandTheme.current
     var automaticPrintStarted by rememberSaveable { mutableStateOf(false) }
+    var remainingSeconds by remember { mutableIntStateOf(30) }
+    val latestOnReturnHome by rememberUpdatedState(onReturnHome)
 
     LaunchedEffect(Unit) {
         if (!automaticPrintStarted) {
@@ -54,6 +60,20 @@ fun SurveyThankYouScreen(
             onPrint()
         } else if (printState == TicketPrintState.Idle) {
             onPrint()
+        }
+    }
+
+    LaunchedEffect(printState) {
+        remainingSeconds = 30
+        if (
+            printState == TicketPrintState.Printed ||
+            printState is TicketPrintState.Submitted
+        ) {
+            while (remainingSeconds > 0) {
+                delay(1_000)
+                remainingSeconds -= 1
+            }
+            latestOnReturnHome()
         }
     }
 
@@ -71,128 +91,189 @@ fun SurveyThankYouScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .widthIn(max = 640.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .widthIn(max = 640.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
-                color = brandTheme.surface,
-                shadowElevation = 10.dp
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = brandTheme.surface,
+                    shadowElevation = 10.dp
                 ) {
-                    Text(
-                        text = "¡Gracias por tu opinión!",
-                        color = brandTheme.textPrimary,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = "Presenta este cupón en tu próxima visita",
-                        color = brandTheme.textPrimary.copy(alpha = 0.72f),
-                        fontSize = 17.sp,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Surface(
-                        color = Color.White,
-                        shape = RoundedCornerShape(20.dp)
+                    Column(
+                        modifier = Modifier.padding(horizontal = 28.dp, vertical = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        AsyncImage(
-                            model = SURVEY_QR_ASSET,
-                            contentDescription = "Código QR del cupón $SURVEY_COUPON",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .size(240.dp)
-                                .padding(18.dp)
+                        Text(
+                            text = "¡Gracias por tu opinión!",
+                            color = brandTheme.textPrimary,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = "Presenta este cupón en tu próxima visita",
+                            color = brandTheme.textPrimary.copy(alpha = 0.72f),
+                            fontSize = 17.sp,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Surface(
+                            color = Color.White,
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            AsyncImage(
+                                model = SURVEY_QR_ASSET,
+                                contentDescription = "Código QR del cupón $SURVEY_COUPON",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .size(240.dp)
+                                    .padding(18.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = "Cupón",
+                            color = brandTheme.textPrimary.copy(alpha = 0.72f),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Text(
+                            text = SURVEY_COUPON,
+                            color = brandTheme.textPrimary,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.Black,
+                            textAlign = TextAlign.Center
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val printStatus = when (printState) {
+                    TicketPrintState.Idle,
+                    TicketPrintState.Printing -> "Imprimiendo tu cupón…"
+
+                    TicketPrintState.Printed ->
+                        "Tu cupón se imprimió correctamente. Por favor recógelo."
+
+                    is TicketPrintState.Submitted -> null
+
+                    is TicketPrintState.Failed ->
+                        "No se pudo imprimir el cupón: ${printState.message}"
+                }
+
+                if (printStatus != null) {
+                    Text(
+                        text = printStatus,
+                        color = brandTheme.textPrimary,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
+                    )
 
                     Spacer(modifier = Modifier.height(20.dp))
-
-                    Text(
-                        text = "Cupón",
-                        color = brandTheme.textPrimary.copy(alpha = 0.72f),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                    Text(
-                        text = SURVEY_COUPON,
-                        color = brandTheme.textPrimary,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            val printStatus = when (printState) {
-                TicketPrintState.Idle,
-                TicketPrintState.Printing -> "Imprimiendo tu cupón…"
-
-                TicketPrintState.Printed ->
-                    "Tu cupón se imprimió correctamente. Por favor recógelo."
-
-                is TicketPrintState.Failed ->
-                    "No se pudo imprimir el cupón: ${printState.message}"
-            }
-
-            Text(
-                text = printStatus,
-                color = brandTheme.textPrimary,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            when (printState) {
-                TicketPrintState.Printed -> {
-                    SurveyPrintButton(
-                        text = "Volver al inicio",
-                        onClick = onReturnHome
-                    )
                 }
 
-                TicketPrintState.Idle,
-                TicketPrintState.Printing -> {
-                    SurveyPrintButton(
-                        text = "Continuar sin imprimir",
-                        onClick = onReturnHome
-                    )
-                }
-
-                is TicketPrintState.Failed -> {
-                    if (printState.retryable) {
+                when (printState) {
+                    TicketPrintState.Printed -> {
                         SurveyPrintButton(
-                            text = "Imprimir de nuevo",
-                            onClick = onPrint
+                            text = "Volver al inicio",
+                            onClick = onReturnHome
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    SurveyPrintButton(
-                        text = "Continuar sin imprimir",
-                        onClick = onReturnHome
-                    )
+
+                    is TicketPrintState.Submitted,
+                    TicketPrintState.Idle,
+                    TicketPrintState.Printing -> {
+                        SurveyPrintButton(
+                            text = "Continuar sin imprimir",
+                            onClick = onReturnHome
+                        )
+                        if (printState is TicketPrintState.Submitted) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            SubmittedSurveyPrintMessage(message = printState.message)
+                        }
+                    }
+
+                    is TicketPrintState.Failed -> {
+                        if (printState.retryable) {
+                            SurveyPrintButton(
+                                text = "Imprimir de nuevo",
+                                onClick = onPrint
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                        SurveyPrintButton(
+                            text = "Continuar sin imprimir",
+                            onClick = onReturnHome
+                        )
+                    }
+                }
+
+                if (
+                    printState == TicketPrintState.Printed ||
+                    printState is TicketPrintState.Submitted
+                ) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SurveyCountdownMessage(remainingSeconds = remainingSeconds)
                 }
             }
         }
     }
+}
+
+@Composable
+private fun SubmittedSurveyPrintMessage(message: String) {
+    val brandTheme = LocalBrandTheme.current
+    Surface(
+        color = brandTheme.base.copy(alpha = 0.12f),
+        shape = RoundedCornerShape(18.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = message,
+            color = brandTheme.textPrimary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
+        )
+    }
+}
+
+@Composable
+private fun SurveyCountdownMessage(remainingSeconds: Int) {
+    val brandTheme = LocalBrandTheme.current
+    Text(
+        text = "Regresando al inicio en $remainingSeconds s",
+        color = brandTheme.textPrimary.copy(alpha = 0.72f),
+        fontSize = 15.sp,
+        fontWeight = FontWeight.Medium,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable

@@ -1,7 +1,6 @@
 package com.example.kiosco
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -143,7 +142,7 @@ fun SurveyScreen(
                         .weight(1f)
                         .padding(end = 48.dp),
                     color = brandTheme.textPrimary,
-                    fontSize = 26.sp,
+                    fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
@@ -155,10 +154,10 @@ fun SurveyScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = brandTheme.surface
+                    containerColor = brandTheme.base
                 ),
                 elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp
+                    defaultElevation = 4.dp
                 )
             ) {
                 Column(
@@ -170,7 +169,7 @@ fun SurveyScreen(
                     Icon(
                         imageVector = Icons.Default.Star,
                         contentDescription = null,
-                        tint = brandTheme.accent,
+                        tint = brandTheme.onBase,
                         modifier = Modifier.size(48.dp)
                     )
 
@@ -178,7 +177,7 @@ fun SurveyScreen(
 
                     Text(
                         text = "¿Cómo fue tu experiencia?",
-                        color = brandTheme.textPrimary,
+                        color = brandTheme.onBase,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
@@ -188,7 +187,7 @@ fun SurveyScreen(
 
                     Text(
                         text = "Selecciona una estrella para calificar",
-                        color = brandTheme.textPrimary.copy(alpha = 0.6f),
+                        color = brandTheme.onBase.copy(alpha = 0.8f),
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center
                     )
@@ -452,22 +451,16 @@ private fun ChoiceSection(
 
             options.forEach { option ->
                 val isSelected = selected == option.label
-                val backgroundColor by animateColorAsState(
-                    targetValue = if (isSelected) {
-                        brandTheme.accent
-                    } else {
-                        brandTheme.background
-                    },
-                    label = "optionBg"
-                )
-                val borderColor by animateColorAsState(
-                    targetValue = if (isSelected) {
-                        brandTheme.accent
-                    } else {
-                        brandTheme.textPrimary.copy(alpha = 0.12f)
-                    },
-                    label = "optionBorder"
-                )
+                val backgroundColor = if (isSelected) {
+                    brandTheme.accent
+                } else {
+                    brandTheme.background
+                }
+                val borderColor = if (isSelected) {
+                    brandTheme.accent
+                } else {
+                    brandTheme.textPrimary.copy(alpha = 0.12f)
+                }
 
                 Card(
                     modifier = Modifier
@@ -622,10 +615,7 @@ private fun RecommendOption(
     modifier: Modifier = Modifier
 ) {
     val brandTheme = LocalBrandTheme.current
-    val backgroundColor by animateColorAsState(
-        targetValue = if (selected) brandTheme.accent else brandTheme.background,
-        label = "recommendBg"
-    )
+    val backgroundColor = if (selected) brandTheme.accent else brandTheme.background
 
     Card(
         modifier = modifier
@@ -710,14 +700,11 @@ private fun HighlightsSection(
 
             highlightOptions.forEach { option ->
                 val isSelected = option in selected
-                val backgroundColor by animateColorAsState(
-                    targetValue = if (isSelected) {
-                        brandTheme.accent
-                    } else {
-                        brandTheme.background
-                    },
-                    label = "highlightBg"
-                )
+                val backgroundColor = if (isSelected) {
+                    brandTheme.accent
+                } else {
+                    brandTheme.background
+                }
 
                 Card(
                     modifier = Modifier
