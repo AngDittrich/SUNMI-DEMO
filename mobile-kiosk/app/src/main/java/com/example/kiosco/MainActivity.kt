@@ -653,11 +653,6 @@ class MainActivity : ComponentActivity() {
                                             paymentConfirmed = paymentConfirmed,
                                             printState = posPrintState,
                                             onPrint = ::printPosReceipt,
-                                            onSimulatePayment = {
-                                                if (!paymentConfirmed) {
-                                                    paymentConfirmed = true
-                                                }
-                                            },
                                             onDone = {
                                                 posPrintAttempt += 1
                                                 navController.navigate(NavRoutes.WELCOME) {
@@ -826,6 +821,17 @@ class MainActivity : ComponentActivity() {
                                     onDismissPaymentModal = {
                                         showCartPayment = false
                                         cartPaymentNfcDetected = false
+                                    },
+                                    onPaymentConfirmed = {
+                                        lastOrder.value = cartItems.value
+                                        posPrintAttempt += 1
+                                        posPrintState = TicketPrintState.Idle
+                                        paymentConfirmed = true
+                                        cartPaymentNfcDetected = false
+                                        cartItems.value = emptyList()
+                                        cartSheetVisible = false
+                                        detailProductId = null
+                                        navController.navigate(NavRoutes.ORDER_SUMMARY)
                                     },
                                     nfcDetected = cartPaymentNfcDetected
                                 )

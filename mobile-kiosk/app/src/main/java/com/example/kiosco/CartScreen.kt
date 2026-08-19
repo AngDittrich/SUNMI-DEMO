@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.Remove
@@ -68,6 +69,7 @@ fun CartScreen(
     showPaymentModal: Boolean,
     onShowPaymentModal: () -> Unit,
     onDismissPaymentModal: () -> Unit,
+    onPaymentConfirmed: () -> Unit,
     nfcDetected: Boolean
 ) {
     val brandTheme = LocalBrandTheme.current
@@ -263,7 +265,7 @@ fun CartScreen(
             nfcDetected = nfcDetected,
             onPaymentComplete = {
                 onDismissPaymentModal()
-                onCheckout()
+                onPaymentConfirmed()
             }
         )
     }
@@ -650,90 +652,136 @@ private fun PaymentModal(
             .background(Color.Black.copy(alpha = 0.7f)),
         contentAlignment = Alignment.Center
     ) {
-        Surface(
+        BoxWithConstraints(
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.86f)
-                .padding(horizontal = 24.dp),
-            shape = RoundedCornerShape(28.dp),
-            color = brandTheme.surface,
-            shadowElevation = 12.dp
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 20.dp),
+            contentAlignment = Alignment.Center
         ) {
+            val compactHeight = maxHeight < 640.dp
+            val modalHeightFraction = if (compactHeight) 0.94f else 0.86f
+            val cardGap = (maxHeight * 0.025f).coerceIn(12.dp, 24.dp)
+
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp, vertical = 28.dp),
+                    .widthIn(max = 520.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(modalHeightFraction),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .background(brandTheme.accent.copy(alpha = 0.14f)),
-                    contentAlignment = Alignment.Center
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = brandTheme.surface,
+                    shadowElevation = 10.dp
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Nfc,
-                        contentDescription = null,
-                        tint = brandTheme.accent,
-                        modifier = Modifier.size(40.dp)
-                    )
+                    Column(
+                        modifier = Modifier.padding(
+                            horizontal = if (compactHeight) 18.dp else 24.dp,
+                            vertical = if (compactHeight) 16.dp else 22.dp
+                        ),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(if (compactHeight) 56.dp else 68.dp)
+                                .clip(CircleShape)
+                                .background(brandTheme.accent.copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Nfc,
+                                contentDescription = null,
+                                tint = brandTheme.accent,
+                                modifier = Modifier.size(if (compactHeight) 32.dp else 38.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(if (compactHeight) 10.dp else 14.dp))
+
+                        Text(
+                            text = if (phase == PaymentPhase.Approved) {
+                                "Pago aprobado"
+                            } else {
+                                "Pago sin contacto"
+                            },
+                            fontSize = if (compactHeight) 21.sp else 24.sp,
+                            fontWeight = FontWeight.Black,
+                            color = brandTheme.textPrimary,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = if (phase == PaymentPhase.Approved) {
+                                "Procesando tu pedido…"
+                            } else {
+                                "Acerca tu tarjeta o celular al lector y mantenlo ahí."
+                            },
+                            fontSize = if (compactHeight) 14.sp else 16.sp,
+                            color = TextMuted,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(cardGap))
 
-                Text(
-                    text = if (phase == PaymentPhase.Approved) {
-                        "Pago aprobado"
-                    } else {
-                        "Pago sin contacto"
-                    },
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Black,
-                    color = brandTheme.textPrimary,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = if (phase == PaymentPhase.Approved) {
-                        "Procesando tu pedido…"
-                    } else {
-                        "Acerca tu tarjeta o celular al lector y mantenlo ahí."
-                    },
-                    fontSize = 16.sp,
-                    color = TextMuted,
-                    textAlign = TextAlign.Center
-                )
-
-                BoxWithConstraints(
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    contentAlignment = Alignment.Center
+                    shape = RoundedCornerShape(28.dp),
+                    color = brandTheme.surface,
+                    shadowElevation = 10.dp
                 ) {
-                    NfcTapZone(
-                        approved = phase == PaymentPhase.Approved,
-                        modifier = Modifier.offset(y = maxHeight * 0.15f)
-                    )
-                }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                horizontal = if (compactHeight) 16.dp else 24.dp,
+                                vertical = if (compactHeight) 14.dp else 20.dp
+                            ),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = if (phase == PaymentPhase.Approved) {
+                                "Transacción completada"
+                            } else {
+                                "Esperando tarjeta…"
+                            },
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (phase == PaymentPhase.Approved) {
+                                brandTheme.accent
+                            } else {
+                                TextMuted
+                            },
+                            textAlign = TextAlign.Center
+                        )
 
-                Text(
-                    text = if (phase == PaymentPhase.Approved) {
-                        "Transacción completada"
-                    } else {
-                        "Esperando tarjeta…"
-                    },
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (phase == PaymentPhase.Approved) {
-                        brandTheme.accent
-                    } else {
-                        TextMuted
-                    },
-                    textAlign = TextAlign.Center
-                )
+                        Spacer(modifier = Modifier.height(if (compactHeight) 8.dp else 12.dp))
+
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            val maximumZoneHeight = if (compactHeight) 210.dp else 260.dp
+                            val zoneHeight = minOf(maximumZoneHeight, maxHeight * 0.94f)
+
+                            NfcTapZone(
+                                approved = phase == PaymentPhase.Approved,
+                                modifier = Modifier
+                                    .height(zoneHeight)
+                                    .aspectRatio(220f / 280f)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -770,8 +818,6 @@ private fun NfcTapZone(
 
     Box(
         modifier = modifier
-            .width(220.dp)
-            .height(280.dp)
             .scale(if (approved) 1f else pulse)
             .drawBehind {
                 drawRoundRect(
@@ -789,16 +835,17 @@ private fun NfcTapZone(
         if (approved) {
             Box(
                 modifier = Modifier
-                    .size(96.dp)
+                    .fillMaxWidth(0.44f)
+                    .aspectRatio(1f)
                     .clip(CircleShape)
                     .background(brandTheme.accent),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "✓",
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    fontSize = 56.sp,
-                    fontWeight = FontWeight.Black
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Pago aprobado",
+                    tint = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.fillMaxSize(0.58f)
                 )
             }
         } else {
@@ -806,7 +853,9 @@ private fun NfcTapZone(
                 imageVector = Icons.Default.Nfc,
                 contentDescription = null,
                 tint = brandTheme.accent,
-                modifier = Modifier.size(72.dp)
+                modifier = Modifier
+                    .fillMaxWidth(0.33f)
+                    .aspectRatio(1f)
             )
         }
     }

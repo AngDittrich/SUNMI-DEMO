@@ -43,7 +43,6 @@ fun OrderSummaryScreen(
     paymentConfirmed: Boolean,
     printState: TicketPrintState,
     onPrint: () -> Unit,
-    onSimulatePayment: () -> Unit,
     onDone: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
@@ -104,22 +103,6 @@ fun OrderSummaryScreen(
                 color = TextMuted,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(20.dp))
-            Button(
-                onClick = onSimulatePayment,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = brandTheme.accent.copy(alpha = 0.15f),
-                    contentColor = brandTheme.accent
-                ),
-                shape = RoundedCornerShape(26.dp),
-                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 14.dp)
-            ) {
-                Text(
-                    text = "Simular pago (prueba)",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(28.dp))
