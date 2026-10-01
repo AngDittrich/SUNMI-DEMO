@@ -81,19 +81,31 @@ import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.delay
 
 object NavRoutes {
-    const val WELCOME = "welcome"
+    const val DEMO_HUB = "demo_hub"
+    const val POS_WELCOME = "pos_welcome"
     const val PRODUCT_LIST = "product_list"
     const val SURVEY = "survey"
     const val SURVEY_THANK_YOU = "survey_thank_you"
     const val ORDER_SUMMARY = "order_summary"
     const val ADMIN_LIST = "admin_list"
     const val ADMIN_FORM = "admin_form/{productId}/{barcode}"
+    // Hotel demo
+    const val HOTEL_WELCOME = "hotel_welcome"
+    const val HOTEL_DETAIL = "hotel_detail/{hotelId}"
+    const val HOTEL_DATES = "hotel_dates/{hotelId}/{roomId}"
+    const val HOTEL_PAY = "hotel_pay/{reservationId}"
+    const val HOTEL_TICKET = "hotel_ticket/{reservationId}"
 
     fun adminForm(productId: Int? = null, barcode: String = ""): String {
         val id = productId ?: -1
         val encoded = Uri.encode(barcode.ifBlank { "_" })
         return "admin_form/$id/$encoded"
     }
+
+    fun hotelDetail(hotelId: String) = "hotel_detail/$hotelId"
+    fun hotelDates(hotelId: String, roomId: String) = "hotel_dates/$hotelId/$roomId"
+    fun hotelPay(reservationId: String) = "hotel_pay/$reservationId"
+    fun hotelTicket(reservationId: String) = "hotel_ticket/$reservationId"
 }
 
 private data class ScanSuccessFeedback(
@@ -172,7 +184,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var isSunmiTheme by remember { mutableStateOf(false) }
-            var selectedService by remember { mutableStateOf(WelcomeService.POS) }
             val activeBrandTheme =
                 if (isSunmiTheme) BrandThemes.Sunmi else BrandThemes.Syscom
             val targetBrandTheme =
@@ -219,6 +230,13 @@ class MainActivity : ComponentActivity() {
                 var surveyPrintState by remember {
                     mutableStateOf<TicketPrintState>(TicketPrintState.Idle)
                 }
+                var hotelPrintState by remember {
+                    mutableStateOf<TicketPrintState>(TicketPrintState.Idle)
+                }
+                var hotelCheckoutState by remember {
+                    mutableStateOf<TicketPrintState>(TicketPrintState.Idle)
+                }
+                var hotelPaymentDetected by remember { mutableStateOf(false) }
                 var posPrintAttempt by remember { mutableStateOf(0L) }
                 var surveyPrintAttempt by remember { mutableStateOf(0L) }
 
@@ -308,7 +326,7 @@ class MainActivity : ComponentActivity() {
                     pinDialogVisible = false
                     detailProductId = null
                     navController.navigate(NavRoutes.PRODUCT_LIST) {
-                        popUpTo(NavRoutes.WELCOME) { inclusive = false }
+                        popUpTo(NavRoutes.DEMO_HUB) { inclusive = false }
                         launchSingleTop = true
                     }
                 }
@@ -318,6 +336,12 @@ class MainActivity : ComponentActivity() {
                         currentRoute == NavRoutes.SURVEY ||
                         currentRoute == NavRoutes.SURVEY_THANK_YOU
                     ) {
+                        return@rememberUpdatedState
+                    }
+                    if (currentRoute?.startsWith("hotel") == true) {
+                        if (currentRoute == NavRoutes.HOTEL_PAY && !hotelPaymentDetected) {
+                            hotelPaymentDetected = true
+                        }
                         return@rememberUpdatedState
                     }
                     // At checkout, any NFC/card tap = payment confirmation
@@ -528,11 +552,13 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         else -> {
-                            val isWelcomeRoute = currentRoute == NavRoutes.WELCOME
+                            val isWelcomeRoute = currentRoute == NavRoutes.DEMO_HUB ||
+                                    currentRoute == NavRoutes.POS_WELCOME
                             val isAdminRoute =
                                 currentRoute == NavRoutes.ADMIN_LIST ||
                                     currentRoute?.startsWith("admin_form/") == true ||
                                     currentRoute == NavRoutes.ADMIN_FORM
+                            val isHotelRoute = currentRoute?.startsWith("hotel") == true
                             val isSurveyRoute =
                                 currentRoute == NavRoutes.SURVEY ||
                                     currentRoute == NavRoutes.SURVEY_THANK_YOU
@@ -548,6 +574,10 @@ class MainActivity : ComponentActivity() {
                                         catalogOverlayVisible
                             ) {
                                 when {
+                                    showCartPayment && !cartPaymentNfcDetected -> {
+                                        showCartPayment = false
+                                        cartPaymentNfcDetected = false
+                                    }
                                     cartSheetVisible -> cartSheetVisible = false
                                     productNotFoundVisible -> productNotFoundVisible = false
                                     scanSuccess != null -> scanSuccess = null
@@ -558,21 +588,34 @@ class MainActivity : ComponentActivity() {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 NavHost(
                                     navController = navController,
-                                    startDestination = NavRoutes.WELCOME
+                                    startDestination = NavRoutes.DEMO_HUB
                                 ) {
-                                    composable(NavRoutes.WELCOME) {
+                                    // ── Demo Hub ────────────────────────────────────────
+                                    composable(NavRoutes.DEMO_HUB) {
+                                        DemoHubScreen(
+                                            onDemoSelected = { demo ->
+                                                val dest = when (demo) {
+                                                    Demo.POS -> NavRoutes.POS_WELCOME
+                                                    Demo.SURVEY -> NavRoutes.SURVEY
+                                                    Demo.HOTEL -> NavRoutes.HOTEL_WELCOME
+                                                }
+                                                navController.navigate(dest)
+                                            }
+                                        )
+                                    }
+
+                                    // ── POS Welcome ─────────────────────────────────────
+                                    composable(NavRoutes.POS_WELCOME) {
                                         WelcomeScreen(
                                             products = products,
-                                            selectedService = selectedService,
-                                            onServiceChange = { selectedService = it },
-                                            onGetStarted = { service ->
-                                                val destination = when (service) {
-                                                    WelcomeService.POS ->
-                                                        NavRoutes.PRODUCT_LIST
-                                                    WelcomeService.SURVEY ->
-                                                        NavRoutes.SURVEY
+                                            onGetStarted = {
+                                                navController.navigate(NavRoutes.PRODUCT_LIST)
+                                            },
+                                            onBackToHub = {
+                                                navController.navigate(NavRoutes.DEMO_HUB) {
+                                                    popUpTo(NavRoutes.DEMO_HUB) { inclusive = false }
+                                                    launchSingleTop = true
                                                 }
-                                                navController.navigate(destination)
                                             }
                                         )
                                     }
@@ -631,7 +674,12 @@ class MainActivity : ComponentActivity() {
                                                     launchSingleTop = true
                                                 }
                                             },
-                                            onBack = { navController.popBackStack() }
+                                            onBack = {
+                                                navController.navigate(NavRoutes.DEMO_HUB) {
+                                                    popUpTo(NavRoutes.DEMO_HUB) { inclusive = false }
+                                                    launchSingleTop = true
+                                                }
+                                            }
                                         )
                                     }
 
@@ -641,10 +689,8 @@ class MainActivity : ComponentActivity() {
                                             onPrint = ::printSurveyCoupon,
                                             onReturnHome = {
                                                 surveyPrintAttempt += 1
-                                                navController.navigate(NavRoutes.WELCOME) {
-                                                    popUpTo(NavRoutes.WELCOME) {
-                                                        inclusive = false
-                                                    }
+                                                navController.navigate(NavRoutes.DEMO_HUB) {
+                                                    popUpTo(0) { inclusive = true }
                                                     launchSingleTop = true
                                                 }
                                             },
@@ -667,7 +713,7 @@ class MainActivity : ComponentActivity() {
                                             onPrint = ::printPosReceipt,
                                             onDone = {
                                                 posPrintAttempt += 1
-                                                navController.navigate(NavRoutes.WELCOME) {
+                                                navController.navigate(NavRoutes.DEMO_HUB) {
                                                     popUpTo(0) { inclusive = true }
                                                 }
                                             }
@@ -688,6 +734,130 @@ class MainActivity : ComponentActivity() {
                                             onLogout = { exitEmployeeMode() },
                                             onDeleted = { refreshProducts() }
                                         )
+                                    }
+
+                                    // ── Hotel demo routes ────────────────────────────────
+                                    composable(NavRoutes.HOTEL_WELCOME) {
+                                        com.example.kiosco.hotel.HotelWelcomeScreen(
+                                            onHotelSelected = { hotelId ->
+                                                navController.navigate(NavRoutes.hotelDetail(hotelId))
+                                            },
+                                            onBack = {
+                                                navController.navigate(NavRoutes.DEMO_HUB) {
+                                                    popUpTo(NavRoutes.DEMO_HUB) { inclusive = false }
+                                                    launchSingleTop = true
+                                                }
+                                            }
+                                        )
+                                    }
+
+                                    composable(NavRoutes.HOTEL_DETAIL) { backStack ->
+                                        val hotelId = backStack.arguments?.getString("hotelId").orEmpty()
+                                        val hotel = com.example.kiosco.hotel.HotelDemo.findHotel(hotelId)
+                                        if (hotel == null) {
+                                            LaunchedEffect(hotelId) { navController.popBackStack() }
+                                        } else {
+                                            com.example.kiosco.hotel.HotelDetailScreen(
+                                                hotel = hotel,
+                                                onSelectRoom = { roomId ->
+                                                    navController.navigate(
+                                                        NavRoutes.hotelDates(hotelId, roomId)
+                                                    )
+                                                },
+                                                onBack = { navController.popBackStack() }
+                                            )
+                                        }
+                                    }
+
+                                    composable(NavRoutes.HOTEL_DATES) { backStack ->
+                                        val hotelId = backStack.arguments?.getString("hotelId").orEmpty()
+                                        val roomId = backStack.arguments?.getString("roomId").orEmpty()
+                                        val hotel = com.example.kiosco.hotel.HotelDemo.findHotel(hotelId)
+                                        val room = com.example.kiosco.hotel.HotelDemo.findRoom(hotelId, roomId)
+                                        if (hotel == null || room == null) {
+                                            LaunchedEffect(hotelId, roomId) { navController.popBackStack() }
+                                        } else {
+                                            com.example.kiosco.hotel.HotelDatesScreen(
+                                                hotel = hotel,
+                                                room = room,
+                                                onReserve = { reservation ->
+                                                    hotelPaymentDetected = false
+                                                    navController.navigate(NavRoutes.hotelPay(reservation.id))
+                                                },
+                                                onBack = { navController.popBackStack() }
+                                            )
+                                        }
+                                    }
+
+                                    composable(NavRoutes.HOTEL_PAY) { backStack ->
+                                        val resId = backStack.arguments?.getString("reservationId").orEmpty()
+                                        val reservation = com.example.kiosco.hotel.HotelRepository.findById(resId)
+                                        if (reservation == null) {
+                                            LaunchedEffect(resId) { navController.popBackStack() }
+                                        } else {
+                                            com.example.kiosco.hotel.HotelPaymentScreen(
+                                                reservation = reservation,
+                                                nfcDetected = hotelPaymentDetected,
+                                                onPaid = {
+                                                    hotelPaymentDetected = false
+                                                    hotelPrintState = TicketPrintState.Idle
+                                                    hotelCheckoutState = TicketPrintState.Idle
+                                                    navController.navigate(NavRoutes.hotelTicket(reservation.id))
+                                                },
+                                                onBack = {
+                                                    hotelPaymentDetected = false
+                                                    navController.popBackStack()
+                                                }
+                                            )
+                                        }
+                                    }
+
+                                    composable(NavRoutes.HOTEL_TICKET) { backStack ->
+                                        val resId = backStack.arguments?.getString("reservationId").orEmpty()
+                                        val reservation = com.example.kiosco.hotel.HotelRepository.findById(resId)
+                                        if (reservation == null) {
+                                            LaunchedEffect(resId) { navController.popBackStack() }
+                                        } else {
+                                            com.example.kiosco.hotel.HotelTicketScreen(
+                                                reservation = reservation,
+                                                printState = hotelPrintState,
+                                                checkoutState = hotelCheckoutState,
+                                                onPrint = {
+                                                    if (
+                                                        hotelPrintState != TicketPrintState.Idle &&
+                                                        hotelPrintState !is TicketPrintState.Failed
+                                                    ) {
+                                                        return@HotelTicketScreen
+                                                    }
+                                                    hotelPrintState = TicketPrintState.Printing
+                                                    printerManager.printHotelReceipt(reservation) { result ->
+                                                        hotelPrintState = result.fold(
+                                                            onSuccess = { TicketPrintState.Printed },
+                                                            onFailure = ::printFailureState
+                                                        )
+                                                    }
+                                                },
+                                                onCheckOut = {
+                                                    if (hotelCheckoutState == TicketPrintState.Printing) return@HotelTicketScreen
+                                                    hotelCheckoutState = TicketPrintState.Printing
+                                                    printerManager.printHotelCheckout(reservation) { result ->
+                                                        hotelCheckoutState = result.fold(
+                                                            onSuccess = { TicketPrintState.Printed },
+                                                            onFailure = ::printFailureState
+                                                        )
+                                                    }
+                                                },
+                                                onNewStay = {
+                                                    hotelPrintState = TicketPrintState.Idle
+                                                    hotelCheckoutState = TicketPrintState.Idle
+                                                    navController.navigate(NavRoutes.HOTEL_WELCOME) {
+                                                        popUpTo(NavRoutes.HOTEL_WELCOME) { inclusive = true }
+                                                        launchSingleTop = true
+                                                    }
+                                                },
+                                                onBack = { navController.popBackStack() }
+                                            )
+                                        }
                                     }
 
                                     composable(
@@ -763,6 +933,7 @@ class MainActivity : ComponentActivity() {
                                     !isWelcomeRoute &&
                                     !isAdminRoute &&
                                     !isSurveyRoute &&
+                                    !isHotelRoute &&
                                     !cartSheetVisible
                                 ) {
                                     AnimatedVisibility(
@@ -784,7 +955,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
-                                if (!isSurveyRoute) {
+                                if (!isSurveyRoute && !isHotelRoute) {
                                     AddToCartFlyOverlay(
                                         event = flyEvent,
                                         onFinished = { finishedId ->

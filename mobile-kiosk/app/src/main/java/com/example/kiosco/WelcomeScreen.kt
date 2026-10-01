@@ -6,7 +6,6 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.gestures.Orientation
 import android.graphics.BlurMaskFilter
@@ -32,11 +31,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.FactCheck
@@ -65,7 +64,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -85,9 +83,8 @@ import kotlin.math.roundToInt
 @Composable
 fun WelcomeScreen(
     products: List<Product>,
-    selectedService: WelcomeService,
-    onServiceChange: (WelcomeService) -> Unit,
-    onGetStarted: (WelcomeService) -> Unit
+    onGetStarted: () -> Unit,
+    onBackToHub: () -> Unit,
 ) {
     val brandTheme = LocalBrandTheme.current
     BoxWithConstraints(
@@ -124,7 +121,7 @@ fun WelcomeScreen(
             },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            BrandHeader(largeDisplay = largeDisplay)
+            BrandHeader(largeDisplay = largeDisplay, onBackToHub = onBackToHub)
 
             Spacer(modifier = Modifier.height(if (largeDisplay) 24.dp else 14.dp))
 
@@ -135,18 +132,7 @@ fun WelcomeScreen(
 
             Spacer(modifier = Modifier.height(if (largeDisplay) 26.dp else 18.dp))
 
-            BenefitRow(
-                selectedService = selectedService,
-                largeDisplay = largeDisplay
-            )
-
-            Spacer(modifier = Modifier.height(if (largeDisplay) 20.dp else 12.dp))
-
-            ServiceSelector(
-                selectedService = selectedService,
-                onServiceChange = onServiceChange,
-                largeDisplay = largeDisplay
-            )
+            BenefitRow(largeDisplay = largeDisplay)
 
             Spacer(
                 modifier = if (largeDisplay && !useScrollableLayout) {
@@ -168,7 +154,7 @@ fun WelcomeScreen(
 
             SlideToStartButton(
                 largeDisplay = largeDisplay,
-                onSlideComplete = { onGetStarted(selectedService) }
+                onSlideComplete = onGetStarted
             )
 
             Spacer(modifier = Modifier.height(if (largeDisplay) 24.dp else 14.dp))
@@ -177,14 +163,33 @@ fun WelcomeScreen(
 }
 
 @Composable
-private fun BrandHeader(largeDisplay: Boolean) {
-    Row(
+private fun BrandHeader(largeDisplay: Boolean, onBackToHub: () -> Unit) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if (largeDisplay) 96.dp else 64.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .height(if (largeDisplay) 96.dp else 64.dp)
     ) {
+        // Back-to-hub button
+        androidx.compose.material3.IconButton(
+            onClick = onBackToHub,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Volver al menú",
+                tint = LocalBrandTheme.current.textPrimary
+            )
+        }
+
+        // Logos centered
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .matchParentSize()
+                .padding(start = if (largeDisplay) 56.dp else 40.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -215,6 +220,7 @@ private fun BrandHeader(largeDisplay: Boolean) {
                 contentScale = ContentScale.Fit,
                 alignment = Alignment.CenterEnd
             )
+        }
         }
     }
 }
@@ -396,103 +402,29 @@ private fun SnackTile(
     }
 }
 
-@Composable
-private fun ServiceSelector(
-    selectedService: WelcomeService,
-    onServiceChange: (WelcomeService) -> Unit,
-    largeDisplay: Boolean
-) {
-    val brandTheme = LocalBrandTheme.current
-    val shape = RoundedCornerShape(if (largeDisplay) 24.dp else 18.dp)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(max = if (largeDisplay) 560.dp else 420.dp)
-            .clip(shape)
-            .background(brandTheme.surface)
-            .border(1.dp, brandTheme.base.copy(alpha = 0.22f), shape)
-            .padding(if (largeDisplay) 6.dp else 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(if (largeDisplay) 6.dp else 4.dp)
-    ) {
-        ServiceSegment(
-            label = "POS",
-            service = WelcomeService.POS,
-            selectedService = selectedService,
-            onServiceChange = onServiceChange,
-            largeDisplay = largeDisplay,
-            modifier = Modifier.weight(1f)
-        )
-        ServiceSegment(
-            label = "Encuesta",
-            service = WelcomeService.SURVEY,
-            selectedService = selectedService,
-            onServiceChange = onServiceChange,
-            largeDisplay = largeDisplay,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
+// ServiceSelector and ServiceSegment removed — demo selection now lives in DemoHubScreen.
 
 @Composable
-private fun ServiceSegment(
-    label: String,
-    service: WelcomeService,
-    selectedService: WelcomeService,
-    onServiceChange: (WelcomeService) -> Unit,
-    largeDisplay: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val brandTheme = LocalBrandTheme.current
-    val selected = selectedService == service
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(if (largeDisplay) 19.dp else 14.dp))
-            .background(if (selected) brandTheme.base else Color.Transparent)
-            .selectable(
-                selected = selected,
-                role = Role.RadioButton,
-                onClick = { onServiceChange(service) }
-            )
-            .padding(vertical = if (largeDisplay) 15.dp else 11.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            color = if (selected) brandTheme.onBase else brandTheme.textPrimary,
-            fontSize = if (largeDisplay) 16.sp else 13.sp,
-            fontWeight = FontWeight.ExtraBold
-        )
-    }
-}
-
-@Composable
-private fun BenefitRow(
-    selectedService: WelcomeService,
-    largeDisplay: Boolean
-) {
-    val isSurvey = selectedService == WelcomeService.SURVEY
-
+private fun BenefitRow(largeDisplay: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(if (largeDisplay) 16.dp else 8.dp)
     ) {
         BenefitPill(
             title = "Rápido",
-            subtitle = if (isSurvey) "Menos de 1 minuto" else "Ordena en segundos",
+            subtitle = "Ordena en segundos",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
         BenefitPill(
-            title = if (isSurvey) "Anónimo" else "Fácil",
-            subtitle = if (isSurvey) "Sin datos personales" else "Todo a tu alcance",
+            title = "Fácil",
+            subtitle = "Todo a tu alcance",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )
         BenefitPill(
-            title = if (isSurvey) "Confiable" else "Delicioso",
-            subtitle = if (isSurvey) "Tu opinión cuenta" else "Para cada antojo",
+            title = "Delicioso",
+            subtitle = "Para cada antojo",
             largeDisplay = largeDisplay,
             modifier = Modifier.weight(1f)
         )

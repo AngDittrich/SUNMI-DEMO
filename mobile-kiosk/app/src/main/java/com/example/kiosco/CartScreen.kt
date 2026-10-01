@@ -1,5 +1,6 @@
 package com.example.kiosco
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
@@ -264,6 +265,7 @@ fun CartScreen(
     if (showPaymentModal) {
         PaymentModal(
             nfcDetected = nfcDetected,
+            onCancel = onDismissPaymentModal,
             onPaymentComplete = {
                 onDismissPaymentModal()
                 onPaymentConfirmed()
@@ -629,11 +631,15 @@ private fun ClearCartDialog(
 @Composable
 private fun PaymentModal(
     nfcDetected: Boolean,
+    onCancel: () -> Unit,
     onPaymentComplete: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
     val successGreen = Color(0xFF1B8F3A)
     var phase by remember { mutableStateOf(PaymentPhase.WaitingForNfc) }
+    val waiting = phase == PaymentPhase.WaitingForNfc
+
+    BackHandler(enabled = waiting, onBack = onCancel)
 
     LaunchedEffect(nfcDetected) {
         if (nfcDetected && phase == PaymentPhase.WaitingForNfc) {
@@ -797,6 +803,23 @@ private fun PaymentModal(
                         )
                     }
                 }
+            }
+        }
+
+        if (waiting) {
+            TextButton(
+                onClick = onCancel,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .padding(top = 8.dp)
+            ) {
+                Text(
+                    text = "Cancelar",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             }
         }
     }

@@ -229,6 +229,130 @@ class SunmiPrinterManager(context: Context) {
         }
     }
 
+    fun printHotelReceipt(
+        reservation: com.example.kiosco.hotel.HotelReservation,
+        onResult: (Result<Unit>) -> Unit
+    ) = printStaySlip(reservation, departure = false, onResult = onResult)
+
+    fun printHotelCheckout(
+        reservation: com.example.kiosco.hotel.HotelReservation,
+        onResult: (Result<Unit>) -> Unit
+    ) = printStaySlip(reservation, departure = true, onResult = onResult)
+
+    private fun printStaySlip(
+        reservation: com.example.kiosco.hotel.HotelReservation,
+        departure: Boolean,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        enqueuePrint(onResult) { logoStrip ->
+            val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("es-MX"))
+            val checkIn = fmt.format(Date(reservation.checkInDate))
+            val checkOut = fmt.format(Date(reservation.checkOutDate))
+            val total = reservation.total
+
+            printDividingLine(DividingLine.EMPTY, 12)
+
+            initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
+            printTicketLogos(logoStrip)
+
+            printDividingLine(DividingLine.EMPTY, 10)
+            printDividingLine(DividingLine.DOTTED, 2)
+            printDividingLine(DividingLine.EMPTY, 10)
+
+            printText(
+                reservation.hotelName,
+                TextStyle.getStyle().setTextSize(20).enableBold(true)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 6)
+
+            printText(
+                if (departure) "COMPROBANTE DE SALIDA" else "COMPROBANTE DE RESERVA",
+                TextStyle.getStyle().setTextSize(16)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 10)
+            printDividingLine(DividingLine.SOLID, 2)
+            printDividingLine(DividingLine.EMPTY, 10)
+
+            initLine(BaseStyle.getStyle().setAlign(Align.LEFT))
+            printTexts(
+                arrayOf("Código:", "#${reservation.bookingCode}"),
+                intArrayOf(5, 7),
+                arrayOf(
+                    TextStyle.getStyle().setAlign(Align.LEFT).enableBold(true).setTextSize(14),
+                    TextStyle.getStyle().setAlign(Align.RIGHT).setTextSize(14)
+                )
+            )
+            printTexts(
+                arrayOf("Huésped:", reservation.guestName),
+                intArrayOf(5, 7),
+                arrayOf(
+                    TextStyle.getStyle().setAlign(Align.LEFT).enableBold(true).setTextSize(14),
+                    TextStyle.getStyle().setAlign(Align.RIGHT).setTextSize(14)
+                )
+            )
+            printTexts(
+                arrayOf("Habitación:", reservation.roomName),
+                intArrayOf(5, 7),
+                arrayOf(
+                    TextStyle.getStyle().setAlign(Align.LEFT).enableBold(true).setTextSize(14),
+                    TextStyle.getStyle().setAlign(Align.RIGHT).setTextSize(14)
+                )
+            )
+            printTexts(
+                arrayOf("Entrada:", checkIn),
+                intArrayOf(5, 7),
+                arrayOf(
+                    TextStyle.getStyle().setAlign(Align.LEFT).enableBold(true).setTextSize(14),
+                    TextStyle.getStyle().setAlign(Align.RIGHT).setTextSize(14)
+                )
+            )
+            printTexts(
+                arrayOf("Salida:", checkOut),
+                intArrayOf(5, 7),
+                arrayOf(
+                    TextStyle.getStyle().setAlign(Align.LEFT).enableBold(true).setTextSize(14),
+                    TextStyle.getStyle().setAlign(Align.RIGHT).setTextSize(14)
+                )
+            )
+            printTexts(
+                arrayOf("Noches:", "${reservation.nights}"),
+                intArrayOf(5, 7),
+                arrayOf(
+                    TextStyle.getStyle().setAlign(Align.LEFT).enableBold(true).setTextSize(14),
+                    TextStyle.getStyle().setAlign(Align.RIGHT).setTextSize(14)
+                )
+            )
+
+            printDividingLine(DividingLine.EMPTY, 10)
+            printDividingLine(DividingLine.SOLID, 2)
+            printDividingLine(DividingLine.EMPTY, 10)
+
+            initLine(BaseStyle.getStyle().setAlign(Align.RIGHT))
+            printText("TOTAL:", TextStyle.getStyle().setTextSize(22).enableBold(true))
+            printDividingLine(DividingLine.EMPTY, 8)
+            printText(
+                money(total),
+                TextStyle.getStyle().setTextSize(28).enableBold(true)
+            )
+
+            printDividingLine(DividingLine.EMPTY, 10)
+            printDividingLine(DividingLine.SOLID, 2)
+            printDividingLine(DividingLine.EMPTY, 10)
+
+            initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
+            printText(
+                if (departure) "Estancia finalizada" else "¡Gracias por su reserva!",
+                TextStyle.getStyle().setTextSize(16).enableBold(true)
+            )
+            printDividingLine(DividingLine.EMPTY, 6)
+            printText("Esperamos verle pronto.", TextStyle.getStyle().setTextSize(14))
+
+            printDividingLine(DividingLine.EMPTY, 30)
+        }
+    }
+
     fun release() {
         val printerCallbacks: List<(Result<PrinterSdk.Printer>) -> Unit>
         val requestCompletions: List<(Result<Unit>) -> Unit>

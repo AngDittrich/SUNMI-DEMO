@@ -1,10 +1,5 @@
 package com.example.kiosco
 
-enum class WelcomeService {
-    POS,
-    SURVEY
-}
-
 data class SurveyResponse(
     val overallRating: Int,
     val syscomRating: String,
