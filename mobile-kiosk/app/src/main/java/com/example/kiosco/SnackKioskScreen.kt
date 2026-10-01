@@ -46,7 +46,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -100,8 +99,6 @@ fun SnackKioskScreen(
     onProductClick: (Product) -> Unit,
     onAddToCart: (Product, Offset, Float) -> Unit,
     onCartClick: () -> Unit,
-    onThemeToggle: () -> Unit,
-    targetThemeDisplayName: String,
     onEmployeeLockClick: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
@@ -192,8 +189,6 @@ fun SnackKioskScreen(
                         largeDisplay = largeDisplay,
                         isEmployee = isEmployee,
                         onCartClick = onCartClick,
-                        onThemeToggle = onThemeToggle,
-                        targetThemeDisplayName = targetThemeDisplayName,
                         onEmployeeLockClick = onEmployeeLockClick
                     )
                     Spacer(modifier = Modifier.height(if (largeDisplay) 26.dp else 18.dp))
@@ -286,8 +281,6 @@ private fun KioskHeader(
     largeDisplay: Boolean,
     isEmployee: Boolean,
     onCartClick: () -> Unit,
-    onThemeToggle: () -> Unit,
-    targetThemeDisplayName: String,
     onEmployeeLockClick: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
@@ -343,37 +336,6 @@ private fun KioskHeader(
                         tint = brandTheme.onBase,
                         modifier = Modifier.size(if (largeDisplay) 26.dp else 20.dp)
                     )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                IconButton(
-                    onClick = onThemeToggle,
-                    modifier = Modifier
-                        .size(if (largeDisplay) 56.dp else 48.dp)
-                        .focusProperties { canFocus = false }
-                        .clip(CircleShape)
-                        .background(brandTheme.onBase.copy(alpha = 0.1f))
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = brandTheme.toggleLabel,
-                            color = brandTheme.onBase,
-                            fontSize = if (largeDisplay) 11.sp else 9.sp,
-                            fontWeight = FontWeight.Black
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Icon(
-                            imageVector = Icons.Default.SwapHoriz,
-                            contentDescription = "Cambiar de ${brandTheme.displayName} a $targetThemeDisplayName",
-                            tint = brandTheme.onBase,
-                            modifier = Modifier.size(if (largeDisplay) 23.dp else 19.dp)
-                        )
-                    }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))

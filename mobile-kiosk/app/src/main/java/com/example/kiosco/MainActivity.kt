@@ -186,8 +186,6 @@ class MainActivity : ComponentActivity() {
             var isSunmiTheme by remember { mutableStateOf(false) }
             val activeBrandTheme =
                 if (isSunmiTheme) BrandThemes.Sunmi else BrandThemes.Syscom
-            val targetBrandTheme =
-                if (isSunmiTheme) BrandThemes.Syscom else BrandThemes.Sunmi
             KioscoTheme(
                 darkTheme = false,
                 brandTheme = activeBrandTheme
@@ -607,6 +605,9 @@ class MainActivity : ComponentActivity() {
                                                     Demo.HOTEL -> NavRoutes.HOTEL_WELCOME
                                                 }
                                                 navController.navigate(dest)
+                                            },
+                                            onBrandSelected = { sunmi ->
+                                                isSunmiTheme = sunmi
                                             }
                                         )
                                     }
@@ -655,11 +656,6 @@ class MainActivity : ComponentActivity() {
                                                 }
                                             },
                                             onCartClick = { cartSheetVisible = true },
-                                            onThemeToggle = {
-                                                isSunmiTheme = !isSunmiTheme
-                                            },
-                                            targetThemeDisplayName =
-                                                targetBrandTheme.displayName,
                                             onEmployeeLockClick = {
                                                 if (isEmployee) {
                                                     exitEmployeeMode()

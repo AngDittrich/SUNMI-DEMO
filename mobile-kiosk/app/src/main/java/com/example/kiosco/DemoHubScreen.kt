@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -56,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.kiosco.ui.theme.BrandThemes
 import com.example.kiosco.ui.theme.LocalBrandTheme
 import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.delay
@@ -97,7 +99,10 @@ private val demoCards = listOf(
 )
 
 @Composable
-fun DemoHubScreen(onDemoSelected: (Demo) -> Unit) {
+fun DemoHubScreen(
+    onDemoSelected: (Demo) -> Unit,
+    onBrandSelected: (sunmi: Boolean) -> Unit,
+) {
     val brandTheme = LocalBrandTheme.current
 
     BoxWithConstraints(
@@ -127,6 +132,13 @@ fun DemoHubScreen(onDemoSelected: (Demo) -> Unit) {
             Spacer(modifier = Modifier.height(if (isLarge) 28.dp else 16.dp))
 
             HubBrandHeader(isLarge)
+
+            Spacer(modifier = Modifier.height(if (isLarge) 22.dp else 16.dp))
+
+            HubThemeSelector(
+                isLarge = isLarge,
+                onBrandSelected = onBrandSelected
+            )
 
             Spacer(modifier = Modifier.height(if (isLarge) 28.dp else 20.dp))
 
@@ -370,6 +382,84 @@ private fun CardMedia(
                 textAlign = TextAlign.Center
             )
         }
+    }
+}
+
+@Composable
+private fun HubThemeSelector(
+    isLarge: Boolean,
+    onBrandSelected: (sunmi: Boolean) -> Unit,
+) {
+    val brandTheme = LocalBrandTheme.current
+    val isSunmi = brandTheme.displayName == BrandThemes.Sunmi.displayName
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "Tema de la demo",
+            color = TextMuted,
+            fontSize = if (isLarge) 13.sp else 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(999.dp))
+                .background(brandTheme.surface)
+                .border(1.dp, Color(0xFFE4E4E8), RoundedCornerShape(999.dp))
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            ThemeOption(
+                label = "SYSCOM",
+                swatch = BrandThemes.Syscom.base,
+                selected = !isSunmi,
+                isLarge = isLarge,
+                onClick = { onBrandSelected(false) }
+            )
+            ThemeOption(
+                label = "SUNMI",
+                swatch = BrandThemes.Sunmi.accent,
+                selected = isSunmi,
+                isLarge = isLarge,
+                onClick = { onBrandSelected(true) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThemeOption(
+    label: String,
+    swatch: Color,
+    selected: Boolean,
+    isLarge: Boolean,
+    onClick: () -> Unit,
+) {
+    val brandTheme = LocalBrandTheme.current
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(if (selected) swatch else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = if (isLarge) 22.dp else 16.dp,
+                vertical = if (isLarge) 12.dp else 10.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(if (isLarge) 10.dp else 8.dp)
+                .clip(RoundedCornerShape(999.dp))
+                .background(if (selected) Color.White else swatch)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = label,
+            color = if (selected) Color.White else brandTheme.textPrimary,
+            fontSize = if (isLarge) 15.sp else 13.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
