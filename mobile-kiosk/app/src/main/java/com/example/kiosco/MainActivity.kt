@@ -237,6 +237,8 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf<TicketPrintState>(TicketPrintState.Idle)
                 }
                 var hotelPaymentDetected by remember { mutableStateOf(false) }
+                var hotelAwaitingCard by remember { mutableStateOf(false) }
+                var cartAwaitingCard by remember { mutableStateOf(false) }
                 var posPrintAttempt by remember { mutableStateOf(0L) }
                 var surveyPrintAttempt by remember { mutableStateOf(0L) }
 
@@ -339,7 +341,11 @@ class MainActivity : ComponentActivity() {
                         return@rememberUpdatedState
                     }
                     if (currentRoute?.startsWith("hotel") == true) {
-                        if (currentRoute == NavRoutes.HOTEL_PAY && !hotelPaymentDetected) {
+                        if (
+                            currentRoute == NavRoutes.HOTEL_PAY &&
+                            hotelAwaitingCard &&
+                            !hotelPaymentDetected
+                        ) {
                             hotelPaymentDetected = true
                         }
                         return@rememberUpdatedState
@@ -350,7 +356,7 @@ class MainActivity : ComponentActivity() {
                         return@rememberUpdatedState
                     }
                     // At cart payment modal, NFC tap = payment confirmation
-                    if (showCartPayment && !cartPaymentNfcDetected) {
+                    if (showCartPayment && cartAwaitingCard && !cartPaymentNfcDetected) {
                         cartPaymentNfcDetected = true
                         return@rememberUpdatedState
                     }
@@ -577,6 +583,7 @@ class MainActivity : ComponentActivity() {
                                     showCartPayment && !cartPaymentNfcDetected -> {
                                         showCartPayment = false
                                         cartPaymentNfcDetected = false
+                                        cartAwaitingCard = false
                                     }
                                     cartSheetVisible -> cartSheetVisible = false
                                     productNotFoundVisible -> productNotFoundVisible = false
@@ -798,13 +805,20 @@ class MainActivity : ComponentActivity() {
                                             com.example.kiosco.hotel.HotelPaymentScreen(
                                                 reservation = reservation,
                                                 nfcDetected = hotelPaymentDetected,
+                                                onCardListeningChanged = { listening ->
+                                                    hotelAwaitingCard = listening
+                                                    if (listening) hotelPaymentDetected = false
+                                                },
+                                                onCashPayment = { printerManager.openCashDrawer() },
                                                 onPaid = {
+                                                    hotelAwaitingCard = false
                                                     hotelPaymentDetected = false
                                                     hotelPrintState = TicketPrintState.Idle
                                                     hotelCheckoutState = TicketPrintState.Idle
                                                     navController.navigate(NavRoutes.hotelTicket(reservation.id))
                                                 },
                                                 onBack = {
+                                                    hotelAwaitingCard = false
                                                     hotelPaymentDetected = false
                                                     navController.popBackStack()
                                                 }
@@ -1003,11 +1017,18 @@ class MainActivity : ComponentActivity() {
                                     onShowPaymentModal = {
                                         showCartPayment = true
                                         cartPaymentNfcDetected = false
+                                        cartAwaitingCard = false
                                     },
                                     onDismissPaymentModal = {
                                         showCartPayment = false
                                         cartPaymentNfcDetected = false
+                                        cartAwaitingCard = false
                                     },
+                                    onCardListeningChanged = { listening ->
+                                        cartAwaitingCard = listening
+                                        if (listening) cartPaymentNfcDetected = false
+                                    },
+                                    onCashPayment = { printerManager.openCashDrawer() },
                                     onPaymentConfirmed = {
                                         lastOrder.value = cartItems.value
                                         posPrintAttempt += 1

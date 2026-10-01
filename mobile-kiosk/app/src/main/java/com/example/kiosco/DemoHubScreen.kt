@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,14 +23,15 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Hotel
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.FactCheck
+import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -50,71 +52,49 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.kiosco.ui.theme.LocalBrandTheme
+import com.example.kiosco.ui.theme.TextMuted
 import kotlinx.coroutines.delay
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Data model for a single demo card
-// ─────────────────────────────────────────────────────────────────────────────
 
 private data class DemoCard(
     val demo: Demo,
     val title: String,
-    val subtitle: String,
+    val label: String,
     val description: String,
     val icon: ImageVector,
-    val accentColor: Color,
-    val gradientStart: Color,
-    val gradientEnd: Color,
+    val photoAsset: String? = null,
 )
-
-private val HotelBlue = Color(0xFF1565C0)
-private val HotelGold = Color(0xFFFFD54F)
-private val SurveyAmber = Color(0xFFFF8F00)
-private val SurveyAmberLight = Color(0xFFFFCC80)
-private val PosGreen = Color(0xFF00C853)
-private val PosGreenDark = Color(0xFF1B5E20)
 
 private val demoCards = listOf(
     DemoCard(
         demo = Demo.POS,
         title = "Punto de Venta",
-        subtitle = "POS Demo",
+        label = "POS",
         description = "Catálogo táctil, carrito de compra, escáner de código de barras y cobro con NFC.",
         icon = Icons.Filled.ShoppingCart,
-        accentColor = PosGreen,
-        gradientStart = Color(0xFF1B5E20),
-        gradientEnd = Color(0xFF2E7D32),
+        photoAsset = "file:///android_asset/demo/pos-demo-card.jpg",
     ),
     DemoCard(
         demo = Demo.SURVEY,
         title = "Encuesta de Satisfacción",
-        subtitle = "Survey Demo",
-        description = "Recopila opiniones con QR, genera cupones impresos con la impresora SUNMI.",
+        label = "Encuesta",
+        description = "Recopila opiniones con QR y genera cupones impresos con la impresora SUNMI.",
         icon = Icons.Filled.FactCheck,
-        accentColor = SurveyAmber,
-        gradientStart = Color(0xFF4E2A00),
-        gradientEnd = Color(0xFF7B4800),
+        photoAsset = "file:///android_asset/demo/survey-demo-card.jpg",
     ),
     DemoCard(
         demo = Demo.HOTEL,
         title = "Reserva de hotel",
-        subtitle = "Hotel Demo",
+        label = "Hotel",
         description = "Elige habitación, define las fechas de estancia e imprime el comprobante en SUNMI.",
         icon = Icons.Filled.Hotel,
-        accentColor = HotelBlue,
-        gradientStart = Color(0xFFE3F2FD),
-        gradientEnd = Color(0xFFBBDEFB),
+        photoAsset = "file:///android_asset/demo/hotel-demo-card.jpg",
     ),
 )
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DemoHubScreen
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 fun DemoHubScreen(onDemoSelected: (Demo) -> Unit) {
@@ -123,77 +103,59 @@ fun DemoHubScreen(onDemoSelected: (Demo) -> Unit) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(brandTheme.background)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(brandTheme.surface, brandTheme.background),
+                    endY = 900f
+                )
+            )
             .statusBarsPadding()
             .navigationBarsPadding(),
         contentAlignment = Alignment.TopCenter
     ) {
         val isLarge = maxWidth >= 700.dp
-        val horizontalPad = if (isLarge) 48.dp else 20.dp
-        val useRow = isLarge && maxWidth >= 900.dp
+        val horizontalPad = if (isLarge) 40.dp else 16.dp
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .widthIn(max = 1100.dp)
+                .widthIn(max = 980.dp)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = horizontalPad),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(if (isLarge) 32.dp else 20.dp))
+            Spacer(modifier = Modifier.height(if (isLarge) 28.dp else 16.dp))
 
-            // ── Header: logos ────────────────────────────────────────────────
             HubBrandHeader(isLarge)
 
             Spacer(modifier = Modifier.height(if (isLarge) 28.dp else 20.dp))
 
-            // ── Tagline ──────────────────────────────────────────────────────
             Text(
                 text = "Selecciona una demo para comenzar",
-                color = brandTheme.textPrimary.copy(alpha = 0.6f),
-                fontSize = if (isLarge) 22.sp else 16.sp,
+                color = TextMuted,
+                fontSize = if (isLarge) 18.sp else 14.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(if (isLarge) 36.dp else 28.dp))
+            Spacer(modifier = Modifier.height(if (isLarge) 28.dp else 18.dp))
 
-            // ── Demo cards ───────────────────────────────────────────────────
-            if (useRow) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    demoCards.forEachIndexed { index, card ->
-                        Box(modifier = Modifier.weight(1f)) {
-                            AnimatedDemoCard(
-                                card = card,
-                                index = index,
-                                isLarge = isLarge,
-                                onSelected = { onDemoSelected(card.demo) }
-                            )
-                        }
-                    }
-                }
-            } else {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    demoCards.forEachIndexed { index, card ->
-                        AnimatedDemoCard(
-                            card = card,
-                            index = index,
-                            isLarge = isLarge,
-                            onSelected = { onDemoSelected(card.demo) }
-                        )
-                    }
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(if (isLarge) 16.dp else 12.dp)
+            ) {
+                demoCards.forEachIndexed { index, card ->
+                    AnimatedDemoCard(
+                        card = card,
+                        index = index,
+                        isLarge = isLarge,
+                        onSelected = { onDemoSelected(card.demo) }
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(if (isLarge) 36.dp else 24.dp))
+            Spacer(modifier = Modifier.height(if (isLarge) 32.dp else 24.dp))
 
-            // ── Footer ───────────────────────────────────────────────────────
             Text(
                 text = "SYSCOM + SUNMI · Demo Suite",
                 color = brandTheme.textPrimary.copy(alpha = 0.4f),
@@ -207,10 +169,6 @@ fun DemoHubScreen(onDemoSelected: (Demo) -> Unit) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Animated card with staggered entrance
-// ─────────────────────────────────────────────────────────────────────────────
-
 @Composable
 private fun AnimatedDemoCard(
     card: DemoCard,
@@ -219,18 +177,18 @@ private fun AnimatedDemoCard(
     onSelected: () -> Unit,
 ) {
     val alpha = remember { Animatable(0f) }
-    val translateY = remember { Animatable(60f) }
+    val translateY = remember { Animatable(28f) }
 
     LaunchedEffect(Unit) {
-        delay(120L * index)
-        alpha.animateTo(1f, animationSpec = tween(380, easing = FastOutSlowInEasing))
+        delay(80L * index)
+        alpha.animateTo(1f, animationSpec = tween(320, easing = FastOutSlowInEasing))
     }
     LaunchedEffect(Unit) {
-        delay(120L * index)
+        delay(80L * index)
         translateY.animateTo(
             0f,
             animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
+                dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessMediumLow
             )
         )
@@ -245,155 +203,114 @@ private fun AnimatedDemoCard(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Single demo card
-// ─────────────────────────────────────────────────────────────────────────────
-
 @Composable
 private fun DemoCardContent(
     card: DemoCard,
     isLarge: Boolean,
     onSelected: () -> Unit,
 ) {
+    val brandTheme = LocalBrandTheme.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-
     val scaleAnim = remember { Animatable(1f) }
+    val cornerRadius = if (isLarge) 28.dp else 22.dp
+
     LaunchedEffect(isPressed) {
         scaleAnim.animateTo(
-            if (isPressed) 0.965f else 1f,
-            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = 600f)
+            if (isPressed) 0.985f else 1f,
+            animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = 700f)
         )
     }
 
-    val brandTheme = LocalBrandTheme.current
-    val cornerRadius: Dp = if (isLarge) 32.dp else 24.dp
-
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .scale(scaleAnim.value)
-            .shadow(
-                elevation = if (isPressed) 2.dp else 12.dp,
-                shape = RoundedCornerShape(cornerRadius),
-                ambientColor = card.accentColor,
-                spotColor = card.accentColor
-            )
+            .shadow(elevation = if (isPressed) 2.dp else 8.dp, shape = RoundedCornerShape(cornerRadius))
             .clip(RoundedCornerShape(cornerRadius))
-            .background(Color.White)
+            .background(brandTheme.surface)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onSelected
             )
     ) {
-        // Subtle background gradient
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            card.gradientStart.copy(alpha = 0.3f),
-                            Color.White
-                        )
-                    )
-                )
-        )
+        val cardHeight = if (isLarge) 188.dp else 148.dp
+        val actionWidth = (maxWidth * 0.18f).coerceIn(76.dp, 116.dp)
+        val mediaWidth = (maxWidth * 0.34f).coerceIn(116.dp, 240.dp)
+        val textWidth = (maxWidth - mediaWidth - actionWidth).coerceAtLeast(0.dp)
 
-        // Glowing circle accent (decorative)
-        Box(
-            modifier = Modifier
-                .size(if (isLarge) 240.dp else 180.dp)
-                .align(Alignment.TopEnd)
-                .graphicsLayer { translationX = 80f; translationY = -60f }
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            card.accentColor.copy(alpha = 0.15f),
-                            Color.Transparent
-                        )
-                    ),
-                    shape = CircleShape
-                )
-        )
-
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(if (isLarge) 32.dp else 24.dp)
+                .height(cardHeight)
         ) {
-            // Icon badge
-            Box(
+            CardMedia(
+                card = card,
+                isLarge = isLarge,
                 modifier = Modifier
-                    .size(if (isLarge) 72.dp else 58.dp)
-                    .clip(RoundedCornerShape(if (isLarge) 22.dp else 18.dp))
-                    .background(card.accentColor.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = card.icon,
-                    contentDescription = card.title,
-                    tint = card.accentColor,
-                    modifier = Modifier.size(if (isLarge) 40.dp else 32.dp)
-                )
-            }
+                    .width(mediaWidth)
+                    .fillMaxHeight()
+            )
 
-            Spacer(modifier = Modifier.height(if (isLarge) 24.dp else 20.dp))
-
-            // Subtitle chip
-            Box(
+            Column(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(100))
-                    .background(card.accentColor.copy(alpha = 0.1f))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .width(textWidth)
+                    .fillMaxHeight()
+                    .padding(
+                        start = if (isLarge) 22.dp else 14.dp,
+                        end = if (isLarge) 18.dp else 12.dp
+                    ),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = card.subtitle,
-                    color = card.accentColor,
-                    fontSize = if (isLarge) 13.sp else 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.8.sp
+                    text = card.title,
+                    color = brandTheme.textPrimary,
+                    fontSize = if (isLarge) 26.sp else 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    lineHeight = if (isLarge) 30.sp else 22.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(if (isLarge) 8.dp else 6.dp))
+
+                Text(
+                    text = card.description,
+                    color = TextMuted,
+                    fontSize = if (isLarge) 15.sp else 13.sp,
+                    lineHeight = if (isLarge) 21.sp else 18.sp,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = card.title,
-                color = brandTheme.textPrimary,
-                fontSize = if (isLarge) 28.sp else 22.sp,
-                fontWeight = FontWeight.ExtraBold,
-                lineHeight = if (isLarge) 34.sp else 28.sp
-            )
-
-            Spacer(modifier = Modifier.height(if (isLarge) 12.dp else 10.dp))
-
-            Text(
-                text = card.description,
-                color = brandTheme.textPrimary.copy(alpha = 0.6f),
-                fontSize = if (isLarge) 16.sp else 14.sp,
-                lineHeight = if (isLarge) 24.sp else 20.sp
-            )
-
-            Spacer(modifier = Modifier.height(if (isLarge) 32.dp else 24.dp))
-
-            // CTA row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            Box(
+                modifier = Modifier
+                    .width(actionWidth)
+                    .fillMaxHeight()
+                    .background(brandTheme.base),
+                contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(100))
-                        .background(card.accentColor)
-                        .padding(horizontal = if (isLarge) 28.dp else 20.dp, vertical = if (isLarge) 14.dp else 10.dp)
-                ) {
+                        .align(Alignment.CenterStart)
+                        .width(3.dp)
+                        .fillMaxHeight()
+                        .background(brandTheme.highlight)
+                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = brandTheme.onBase,
+                        modifier = Modifier.size(if (isLarge) 28.dp else 22.dp)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Iniciar demo",
-                        color = Color.White,
-                        fontSize = if (isLarge) 16.sp else 14.sp,
+                        text = "Entrar",
+                        color = brandTheme.onBase,
+                        fontSize = if (isLarge) 16.sp else 13.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
@@ -402,9 +319,59 @@ private fun DemoCardContent(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Brand header (logos)
-// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+private fun CardMedia(
+    card: DemoCard,
+    isLarge: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        when {
+            card.photoAsset != null -> {
+                AsyncImage(
+                    model = card.photoAsset,
+                    contentDescription = card.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .fillMaxHeight(0.42f)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.72f))
+                    )
+                )
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = if (isLarge) 12.dp else 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = card.icon,
+                contentDescription = card.label,
+                tint = Color.White,
+                modifier = Modifier.size(if (isLarge) 22.dp else 18.dp)
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = card.label,
+                color = Color.White,
+                fontSize = if (isLarge) 13.sp else 11.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
 
 @Composable
 private fun HubBrandHeader(isLarge: Boolean) {

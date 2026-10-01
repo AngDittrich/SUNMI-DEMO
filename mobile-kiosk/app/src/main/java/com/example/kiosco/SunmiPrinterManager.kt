@@ -47,6 +47,7 @@ class SunmiPrinterManager(context: Context) {
     private val activePrintCallbacks = mutableSetOf<PrintResult>()
 
     private var printer: PrinterSdk.Printer? = null
+    private var cashDrawerCallback: PrintResult? = null
     private var connecting = false
     private var released = false
     private var connectionAttempt = 0L
@@ -226,6 +227,44 @@ class SunmiPrinterManager(context: Context) {
             printDividingLine(DividingLine.SOLID, 2)
 
             printDividingLine(DividingLine.EMPTY, 30)
+        }
+    }
+
+    /**
+     * Opens the RJ12 cash drawer through PrinterX. Missing hardware or a
+     * failed command is logged and ignored so cash checkout can continue.
+     */
+    fun openCashDrawer() {
+        val callback = object : PrintResult() {
+            override fun onResult(resultCode: Int, message: String?) {
+                if (resultCode != PRINT_RESULT_SUCCESS) {
+                    Log.w(TAG, "La caja no se abrió ($resultCode): $message")
+                }
+                synchronized(lock) {
+                    if (cashDrawerCallback === this) cashDrawerCallback = null
+                }
+            }
+        }
+        synchronized(lock) {
+            if (released) return
+            cashDrawerCallback = callback
+        }
+        withPrinter { printerResult ->
+            val currentPrinter = printerResult.getOrElse { error ->
+                Log.w(TAG, "Caja no abierta: impresora no disponible", error)
+                return@withPrinter
+            }
+            try {
+                printExecutor.execute {
+                    try {
+                        currentPrinter.cashDrawerApi().open(callback)
+                    } catch (error: Throwable) {
+                        Log.w(TAG, "Caja no abierta", error)
+                    }
+                }
+            } catch (error: Throwable) {
+                Log.w(TAG, "Caja no abierta", error)
+            }
         }
     }
 

@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
@@ -52,6 +53,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,6 +71,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.kiosco.ui.theme.LocalBrandTheme
+import kotlinx.coroutines.launch
 
 private data class ServiceOption(
     val label: String,
@@ -97,9 +100,24 @@ fun SurveyScreen(
     var recommendUs by rememberSaveable { mutableStateOf<Boolean?>(null) }
     var highlights by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
     var comment by rememberSaveable { mutableStateOf("") }
-    val canSubmit = overallRating in 1..5 && syscomRating != null && sunmiRating != null && recommendUs != null
+    var currentStep by rememberSaveable { mutableIntStateOf(0) }
+    val canContinue = when (currentStep) {
+        0 -> overallRating in 1..5
+        1 -> syscomRating != null && sunmiRating != null
+        2 -> recommendUs != null
+        else -> true
+    }
+    val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
 
-    BackHandler(onBack = onBack)
+    BackHandler {
+        if (currentStep > 0) {
+            currentStep -= 1
+            scope.launch { scrollState.animateScrollTo(0) }
+        } else {
+            onBack()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -120,7 +138,7 @@ fun SurveyScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .widthIn(max = 680.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -129,146 +147,141 @@ fun SurveyScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBack) {
+                IconButton(
+                    onClick = {
+                        if (currentStep > 0) {
+                            currentStep -= 1
+                            scope.launch { scrollState.animateScrollTo(0) }
+                        } else {
+                            onBack()
+                        }
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Volver",
                         tint = brandTheme.textPrimary
                     )
                 }
-                Text(
-                    text = "Encuesta de Satisfacción",
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 48.dp),
-                    color = brandTheme.textPrimary,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = brandTheme.base
-                ),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 4.dp
-                )
-            ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .weight(1f)
+                        .padding(horizontal = 12.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = brandTheme.onBase,
-                        modifier = Modifier.size(48.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
                     Text(
-                        text = "¿Cómo fue tu experiencia?",
-                        color = brandTheme.onBase,
+                        text = "Encuesta de satisfacción",
+                        color = brandTheme.textPrimary,
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        fontWeight = FontWeight.Bold
                     )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
                     Text(
-                        text = "Selecciona una estrella para calificar",
-                        color = brandTheme.onBase.copy(alpha = 0.8f),
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
+                        text = "Paso ${currentStep + 1} de 4",
+                        color = brandTheme.textPrimary.copy(alpha = 0.55f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            SurveyProgress(currentStep = currentStep)
+            Spacer(modifier = Modifier.height(20.dp))
 
-            RatingSection(
-                icon = Icons.Default.Star,
-                title = "Califica tu experiencia",
-                subtitle = "¿Qué tan satisfecho estás en general?",
-                rating = overallRating,
-                onRatingChange = { overallRating = it }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ChoiceSection(
-                icon = Icons.Default.Handshake,
-                title = "Servicio SYSCOM",
-                subtitle = "¿Cómo calificas la atención de nuestro equipo?",
-                options = serviceOptions,
-                selected = syscomRating,
-                onSelect = { syscomRating = it }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ChoiceSection(
-                icon = Icons.Default.PhoneAndroid,
-                title = "Dispositivo SUNMI",
-                subtitle = "¿Cómo calificas el dispositivo SUNMI?",
-                options = serviceOptions,
-                selected = sunmiRating,
-                onSelect = { sunmiRating = it }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            RecommendSection(
-                selected = recommendUs,
-                onSelect = { recommendUs = it }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            HighlightsSection(
-                selected = highlights,
-                onToggle = { option ->
-                    highlights = if (option in highlights) {
-                        highlights - option
-                    } else {
-                        highlights + option
-                    }
+            when (currentStep) {
+                0 -> {
+                    SurveyStepIntro()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    RatingSection(
+                        icon = Icons.Default.Star,
+                        title = "¿Cómo fue tu experiencia?",
+                        subtitle = "Toca una estrella para comenzar",
+                        rating = overallRating,
+                        onRatingChange = { overallRating = it }
+                    )
                 }
-            )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                1 -> {
+                    StepHeading(
+                        title = "Cuéntanos sobre el servicio",
+                        subtitle = "Responde las dos preguntas para continuar"
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ChoiceSection(
+                        icon = Icons.Default.Handshake,
+                        title = "Servicio SYSCOM",
+                        subtitle = "Atención de nuestro equipo",
+                        options = serviceOptions,
+                        selected = syscomRating,
+                        onSelect = { syscomRating = it }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ChoiceSection(
+                        icon = Icons.Default.PhoneAndroid,
+                        title = "Dispositivo SUNMI",
+                        subtitle = "Experiencia con el dispositivo",
+                        options = serviceOptions,
+                        selected = sunmiRating,
+                        onSelect = { sunmiRating = it }
+                    )
+                }
 
-            CommentSection(
-                comment = comment,
-                onCommentChange = { comment = it }
-            )
+                2 -> {
+                    StepHeading(
+                        title = "Una última valoración",
+                        subtitle = "Estas respuestas son rápidas y opcionales de ampliar"
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    RecommendSection(
+                        selected = recommendUs,
+                        onSelect = { recommendUs = it }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HighlightsSection(
+                        selected = highlights,
+                        onToggle = { option ->
+                            highlights = if (option in highlights) {
+                                highlights - option
+                            } else {
+                                highlights + option
+                            }
+                        }
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(28.dp))
+                else -> {
+                    StepHeading(
+                        title = "¿Quieres contarnos algo más?",
+                        subtitle = "El comentario es opcional"
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CommentSection(
+                        comment = comment,
+                        onCommentChange = { comment = it }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-                    onSubmit(
-                        SurveyResponse(
-                            overallRating = overallRating,
-                            syscomRating = checkNotNull(syscomRating),
-                            sunmiRating = checkNotNull(sunmiRating),
-                            recommendUs = checkNotNull(recommendUs),
-                            highlights = highlights,
-                            comment = comment
+                    if (currentStep < 3) {
+                        currentStep += 1
+                        scope.launch { scrollState.animateScrollTo(0) }
+                    } else {
+                        onSubmit(
+                            SurveyResponse(
+                                overallRating = overallRating,
+                                syscomRating = checkNotNull(syscomRating),
+                                sunmiRating = checkNotNull(sunmiRating),
+                                recommendUs = checkNotNull(recommendUs),
+                                highlights = highlights,
+                                comment = comment
+                            )
                         )
-                    )
+                    }
                 },
-                enabled = canSubmit,
+                enabled = canContinue,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -286,20 +299,122 @@ fun SurveyScreen(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    imageVector = if (currentStep == 3) {
+                        Icons.AutoMirrored.Filled.Send
+                    } else {
+                        Icons.AutoMirrored.Filled.ArrowForward
+                    },
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Enviar opinión",
+                    text = if (currentStep == 3) "Enviar opinión" else "Continuar",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
+            if (!canContinue) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = when (currentStep) {
+                        0 -> "Selecciona una calificación para continuar"
+                        1 -> "Completa las dos valoraciones para continuar"
+                        else -> "Selecciona una opción para continuar"
+                    },
+                    color = brandTheme.textPrimary.copy(alpha = 0.55f),
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+}
+
+@Composable
+private fun SurveyProgress(currentStep: Int) {
+    val brandTheme = LocalBrandTheme.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        repeat(4) { index ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        if (index <= currentStep) {
+                            brandTheme.accent
+                        } else {
+                            brandTheme.textPrimary.copy(alpha = 0.12f)
+                        }
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+private fun SurveyStepIntro() {
+    val brandTheme = LocalBrandTheme.current
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = brandTheme.base),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(22.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = null,
+                tint = brandTheme.highlight,
+                modifier = Modifier.size(42.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "Tu opinión importa",
+                    color = brandTheme.onBase,
+                    fontSize = 21.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Solo tomará un minuto.",
+                    color = brandTheme.onBase.copy(alpha = 0.72f),
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StepHeading(title: String, subtitle: String) {
+    val brandTheme = LocalBrandTheme.current
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title,
+            color = brandTheme.textPrimary,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.ExtraBold
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = subtitle,
+            color = brandTheme.textPrimary.copy(alpha = 0.58f),
+            fontSize = 14.sp
+        )
     }
 }
 

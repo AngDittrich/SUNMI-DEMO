@@ -150,23 +150,6 @@ fun OrderSummaryScreen(
                 }
 
                 when (printState) {
-                    TicketPrintState.Printed -> {
-                        PrintActionButton(
-                            text = "Listo",
-                            onClick = onDone
-                        )
-                    }
-
-                    is TicketPrintState.Submitted,
-                    TicketPrintState.Idle,
-                    TicketPrintState.Printing -> {
-                        ContinueWithoutPrintingButton(onClick = onDone)
-                        if (printState is TicketPrintState.Submitted) {
-                            Spacer(modifier = Modifier.height(12.dp))
-                            SubmittedPrintMessage(message = printState.message)
-                        }
-                    }
-
                     is TicketPrintState.Failed -> {
                         if (printState.retryable) {
                             PrintActionButton(
@@ -175,7 +158,21 @@ fun OrderSummaryScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                         }
-                        ContinueWithoutPrintingButton(onClick = onDone)
+                        PrintActionButton(
+                            text = "Continuar",
+                            onClick = onDone
+                        )
+                    }
+
+                    else -> {
+                        PrintActionButton(
+                            text = "Continuar",
+                            onClick = onDone
+                        )
+                        if (printState is TicketPrintState.Submitted) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            SubmittedPrintMessage(message = printState.message)
+                        }
                     }
                 }
 
@@ -488,22 +485,3 @@ private fun PrintActionButton(
     }
 }
 
-@Composable
-private fun ContinueWithoutPrintingButton(onClick: () -> Unit) {
-    val brandTheme = LocalBrandTheme.current
-    OutlinedButton(
-        onClick = onClick,
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = brandTheme.textPrimary),
-        shape = RoundedCornerShape(26.dp),
-        contentPadding = PaddingValues(horizontal = 32.dp, vertical = 18.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-    ) {
-        Text(
-            text = "Continuar sin imprimir",
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 18.sp
-        )
-    }
-}

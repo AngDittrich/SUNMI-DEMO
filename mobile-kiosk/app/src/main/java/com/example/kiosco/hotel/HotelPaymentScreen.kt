@@ -28,12 +28,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,21 +59,33 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
+private enum class HotelPayStep { Choose, Card, Cash }
+
 @Composable
 fun HotelPaymentScreen(
     reservation: HotelReservation,
     nfcDetected: Boolean,
+    onCardListeningChanged: (Boolean) -> Unit,
+    onCashPayment: () -> Unit,
     onPaid: () -> Unit,
     onBack: () -> Unit,
 ) {
+    var step by remember { mutableStateOf(HotelPayStep.Choose) }
     var forwarded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(nfcDetected) {
-        if (nfcDetected && !forwarded) {
-            delay(900)
-            forwarded = true
-            onPaid()
-        }
+    LaunchedEffect(step) {
+        onCardListeningChanged(step == HotelPayStep.Card)
+    }
+    DisposableEffect(Unit) {
+        onDispose { onCardListeningChanged(false) }
+    }
+
+    LaunchedEffect(step, nfcDetected) {
+        val ready = step == HotelPayStep.Cash || (step == HotelPayStep.Card && nfcDetected)
+        if (!ready || forwarded) return@LaunchedEffect
+        delay(900)
+        forwarded = true
+        onPaid()
     }
 
     Box(
@@ -78,7 +95,9 @@ fun HotelPaymentScreen(
             .statusBarsPadding()
     ) {
         IconButton(
-            onClick = onBack,
+            onClick = {
+                if (step == HotelPayStep.Card) step = HotelPayStep.Choose else onBack()
+            },
             modifier = Modifier.align(Alignment.TopStart)
         ) {
             Icon(
@@ -88,7 +107,20 @@ fun HotelPaymentScreen(
             )
         }
 
-        BoxWithConstraints(
+        if (step == HotelPayStep.Choose) {
+            HotelMethodChoice(
+                totalLabel = formatHotelMoney(reservation.total),
+                onCash = {
+                    onCashPayment()
+                    step = HotelPayStep.Cash
+                },
+                onCard = { step = HotelPayStep.Card }
+            )
+        } else if (step == HotelPayStep.Cash) {
+            HotelCashConfirm()
+        }
+
+        if (step == HotelPayStep.Card) BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding()
@@ -223,6 +255,132 @@ fun HotelPaymentScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HotelMethodChoice(
+    totalLabel: String,
+    onCash: () -> Unit,
+    onCard: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            modifier = Modifier
+                .widthIn(max = 520.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(28.dp),
+            color = Color.White,
+            shadowElevation = 10.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "¿Cómo vas a pagar?",
+                    color = HotelColors.TextPrimary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = totalLabel,
+                    color = HotelColors.Indigo,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 22.dp)
+                )
+                PayChoiceButton(
+                    label = "Efectivo",
+                    icon = Icons.Filled.Payments,
+                    container = HotelColors.Yellow,
+                    content = HotelColors.Indigo,
+                    onClick = onCash
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                PayChoiceButton(
+                    label = "Tarjeta",
+                    icon = Icons.Filled.CreditCard,
+                    container = HotelColors.Indigo,
+                    content = Color.White,
+                    onClick = onCard
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PayChoiceButton(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    container: Color,
+    content: Color,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = content)
+    ) {
+        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(22.dp))
+        Text(
+            text = label,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 17.sp,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun HotelCashConfirm() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Surface(
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .widthIn(max = 520.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(28.dp),
+            color = Color.White,
+            shadowElevation = 10.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = HotelColors.PaidGreen,
+                    modifier = Modifier.size(48.dp)
+                )
+                Text(
+                    text = "Pago en efectivo",
+                    color = HotelColors.TextPrimary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+                Text(
+                    text = "Pago registrado. Preparando tu ticket…",
+                    color = HotelColors.TextMuted,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
         }
     }

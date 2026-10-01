@@ -70,10 +70,11 @@ fun HotelTicketScreen(
     onNewStay: () -> Unit,
     onBack: () -> Unit,
 ) {
-    val reservationReady = printState == TicketPrintState.Printed ||
-        printState is TicketPrintState.Submitted
     val checkoutDone = checkoutState == TicketPrintState.Printed ||
         checkoutState is TicketPrintState.Submitted
+    val canLeave = checkoutDone ||
+        checkoutState == TicketPrintState.Printing ||
+        checkoutState is TicketPrintState.Failed
     val status = when {
         checkoutState == TicketPrintState.Printing -> "Imprimiendo check-out…"
         checkoutDone -> "Check-out completado"
@@ -146,46 +147,40 @@ fun HotelTicketScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (printState is TicketPrintState.Failed) {
+            if (printState is TicketPrintState.Failed || checkoutState is TicketPrintState.Failed) {
                 Button(
-                    onClick = onPrint,
+                    onClick = if (checkoutState is TicketPrintState.Failed) onCheckOut else onPrint,
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = HotelColors.Yellow,
+                        containerColor = Color.White,
                         contentColor = HotelColors.Indigo
                     )
                 ) {
-                    Text("Reintentar impresión", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                    Text("Reintentar", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                 }
             }
-            if (reservationReady) {
-                Button(
-                    onClick = if (checkoutDone) onNewStay else onCheckOut,
-                    enabled = checkoutState != TicketPrintState.Printing,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = HotelColors.Yellow,
-                        contentColor = HotelColors.Indigo,
-                        disabledContainerColor = HotelColors.Yellow.copy(alpha = 0.55f),
-                        disabledContentColor = HotelColors.Indigo.copy(alpha = 0.7f)
-                    )
-                ) {
-                    Text(
-                        text = when {
-                            checkoutState == TicketPrintState.Printing -> "Imprimiendo…"
-                            checkoutDone -> "Nueva reserva"
-                            else -> "Hacer check-out"
-                        },
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 16.sp
-                    )
-                }
+            Button(
+                onClick = if (canLeave) onNewStay else onCheckOut,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = HotelColors.Yellow,
+                    contentColor = HotelColors.Indigo
+                )
+            ) {
+                Text(
+                    text = when {
+                        canLeave -> "Continuar"
+                        else -> "Hacer check-out"
+                    },
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 16.sp
+                )
             }
         }
     }

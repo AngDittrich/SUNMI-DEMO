@@ -198,26 +198,6 @@ fun SurveyThankYouScreen(
                 }
 
                 when (printState) {
-                    TicketPrintState.Printed -> {
-                        SurveyPrintButton(
-                            text = "Volver al inicio",
-                            onClick = onReturnHome
-                        )
-                    }
-
-                    is TicketPrintState.Submitted,
-                    TicketPrintState.Idle,
-                    TicketPrintState.Printing -> {
-                        SurveyPrintButton(
-                            text = "Continuar sin imprimir",
-                            onClick = onReturnHome
-                        )
-                        if (printState is TicketPrintState.Submitted) {
-                            Spacer(modifier = Modifier.height(12.dp))
-                            SubmittedSurveyPrintMessage(message = printState.message)
-                        }
-                    }
-
                     is TicketPrintState.Failed -> {
                         if (printState.retryable) {
                             SurveyPrintButton(
@@ -227,9 +207,20 @@ fun SurveyThankYouScreen(
                             Spacer(modifier = Modifier.height(12.dp))
                         }
                         SurveyPrintButton(
-                            text = "Continuar sin imprimir",
+                            text = "Continuar",
                             onClick = onReturnHome
                         )
+                    }
+
+                    else -> {
+                        SurveyPrintButton(
+                            text = "Continuar",
+                            onClick = onReturnHome
+                        )
+                        if (printState is TicketPrintState.Submitted) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            SubmittedSurveyPrintMessage(message = printState.message)
+                        }
                     }
                 }
 

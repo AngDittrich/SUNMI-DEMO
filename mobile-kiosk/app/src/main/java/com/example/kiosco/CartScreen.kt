@@ -26,8 +26,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.outlined.ShoppingBag
@@ -71,6 +73,8 @@ fun CartScreen(
     showPaymentModal: Boolean,
     onShowPaymentModal: () -> Unit,
     onDismissPaymentModal: () -> Unit,
+    onCardListeningChanged: (Boolean) -> Unit,
+    onCashPayment: () -> Unit,
     onPaymentConfirmed: () -> Unit,
     nfcDetected: Boolean
 ) {
@@ -264,8 +268,11 @@ fun CartScreen(
 
     if (showPaymentModal) {
         PaymentModal(
+            totalPrice = totalPrice,
             nfcDetected = nfcDetected,
             onCancel = onDismissPaymentModal,
+            onCardListeningChanged = onCardListeningChanged,
+            onCashPayment = onCashPayment,
             onPaymentComplete = {
                 onDismissPaymentModal()
                 onPaymentConfirmed()
@@ -630,26 +637,43 @@ private fun ClearCartDialog(
 
 @Composable
 private fun PaymentModal(
+    totalPrice: Double,
     nfcDetected: Boolean,
     onCancel: () -> Unit,
+    onCardListeningChanged: (Boolean) -> Unit,
+    onCashPayment: () -> Unit,
     onPaymentComplete: () -> Unit
 ) {
     val brandTheme = LocalBrandTheme.current
     val successGreen = Color(0xFF1B8F3A)
-    var phase by remember { mutableStateOf(PaymentPhase.WaitingForNfc) }
+    var phase by remember { mutableStateOf(PaymentPhase.ChooseMethod) }
     val waiting = phase == PaymentPhase.WaitingForNfc
+    val cardApproved = phase == PaymentPhase.CardApproved
 
-    BackHandler(enabled = waiting, onBack = onCancel)
+    LaunchedEffect(phase) {
+        onCardListeningChanged(phase == PaymentPhase.WaitingForNfc)
+    }
+    DisposableEffect(Unit) {
+        onDispose { onCardListeningChanged(false) }
+    }
 
-    LaunchedEffect(nfcDetected) {
+    BackHandler(enabled = phase != PaymentPhase.CardApproved && phase != PaymentPhase.CashApproved) {
+        if (phase == PaymentPhase.WaitingForNfc) {
+            phase = PaymentPhase.ChooseMethod
+        } else {
+            onCancel()
+        }
+    }
+
+    LaunchedEffect(nfcDetected, phase) {
         if (nfcDetected && phase == PaymentPhase.WaitingForNfc) {
-            phase = PaymentPhase.Approved
+            phase = PaymentPhase.CardApproved
         }
     }
 
     LaunchedEffect(phase) {
-        if (phase == PaymentPhase.Approved) {
-            delay(1400)
+        if (phase == PaymentPhase.CardApproved || phase == PaymentPhase.CashApproved) {
+            delay(if (phase == PaymentPhase.CashApproved) 900 else 1400)
             onPaymentComplete()
         }
     }
@@ -660,7 +684,20 @@ private fun PaymentModal(
             .background(Color.Black.copy(alpha = 0.7f)),
         contentAlignment = Alignment.Center
     ) {
-        BoxWithConstraints(
+        if (phase == PaymentPhase.ChooseMethod) {
+            PosMethodChoice(
+                totalPrice = totalPrice,
+                onCash = {
+                    onCashPayment()
+                    phase = PaymentPhase.CashApproved
+                },
+                onCard = { phase = PaymentPhase.WaitingForNfc },
+                onCancel = onCancel
+            )
+        } else if (phase == PaymentPhase.CashApproved) {
+            PosCashConfirm()
+        }
+        if (waiting || cardApproved) BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding()
@@ -727,7 +764,7 @@ private fun PaymentModal(
                         Spacer(modifier = Modifier.height(if (compactHeight) 10.dp else 14.dp))
 
                         Text(
-                            text = if (phase == PaymentPhase.Approved) {
+                            text = if (phase == PaymentPhase.CardApproved) {
                                 "Pago aprobado"
                             } else {
                                 "Pago sin contacto"
@@ -741,7 +778,7 @@ private fun PaymentModal(
                         Spacer(modifier = Modifier.height(6.dp))
 
                         Text(
-                            text = if (phase == PaymentPhase.Approved) {
+                            text = if (phase == PaymentPhase.CardApproved) {
                                 "Procesando tu pedido…"
                             } else {
                                 "Acerca tu tarjeta o celular al lector y mantenlo ahí."
@@ -777,7 +814,7 @@ private fun PaymentModal(
                             contentAlignment = Alignment.BottomCenter
                         ) {
                             NfcTapZone(
-                                approved = phase == PaymentPhase.Approved,
+                                approved = phase == PaymentPhase.CardApproved,
                                 modifier = Modifier
                                     .height(zoneHeight)
                                     .aspectRatio(240f / 320f)
@@ -787,14 +824,14 @@ private fun PaymentModal(
                         Spacer(modifier = Modifier.height(if (compactHeight) 8.dp else 12.dp))
 
                         Text(
-                            text = if (phase == PaymentPhase.Approved) {
+                            text = if (phase == PaymentPhase.CardApproved) {
                                 "Transacción completada"
                             } else {
                                 "Esperando tarjeta…"
                             },
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (phase == PaymentPhase.Approved) {
+                            color = if (phase == PaymentPhase.CardApproved) {
                                 successGreen
                             } else {
                                 TextMuted
@@ -825,7 +862,124 @@ private fun PaymentModal(
     }
 }
 
-private enum class PaymentPhase { WaitingForNfc, Approved }
+private enum class PaymentPhase { ChooseMethod, WaitingForNfc, CardApproved, CashApproved }
+
+@Composable
+private fun PosMethodChoice(
+    totalPrice: Double,
+    onCash: () -> Unit,
+    onCard: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val brandTheme = LocalBrandTheme.current
+    Surface(
+        modifier = Modifier
+            .padding(horizontal = 24.dp)
+            .widthIn(max = 520.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        color = brandTheme.surface,
+        shadowElevation = 10.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "¿Cómo vas a pagar?",
+                color = brandTheme.textPrimary,
+                fontWeight = FontWeight.Black,
+                fontSize = 24.sp,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "$${String.format("%.2f", totalPrice)}",
+                color = brandTheme.accent,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 22.sp,
+                modifier = Modifier.padding(top = 8.dp, bottom = 22.dp)
+            )
+            Button(
+                onClick = onCash,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = brandTheme.accent,
+                    contentColor = Color.White
+                )
+            ) {
+                Icon(Icons.Filled.Payments, contentDescription = null, modifier = Modifier.size(22.dp))
+                Text(
+                    text = "Efectivo",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 17.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onCard,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Filled.CreditCard, contentDescription = null, modifier = Modifier.size(22.dp))
+                Text(
+                    text = "Tarjeta",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 17.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+            TextButton(onClick = onCancel, modifier = Modifier.padding(top = 8.dp)) {
+                Text("Cancelar", color = TextMuted, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PosCashConfirm() {
+    val brandTheme = LocalBrandTheme.current
+    Surface(
+        modifier = Modifier
+            .padding(horizontal = 24.dp)
+            .widthIn(max = 520.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        color = brandTheme.surface,
+        shadowElevation = 10.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null,
+                tint = Color(0xFF1B8F3A),
+                modifier = Modifier.size(48.dp)
+            )
+            Text(
+                text = "Pago en efectivo",
+                color = brandTheme.textPrimary,
+                fontWeight = FontWeight.Black,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(top = 12.dp)
+            )
+            Text(
+                text = "Pago registrado. Preparando tu ticket…",
+                color = TextMuted,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+    }
+}
 
 @Composable
 private fun NfcTapZone(
