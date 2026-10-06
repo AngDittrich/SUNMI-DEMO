@@ -1,1 +1,33 @@
+# IDE y sistema
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Android / Gradle
+**/.gradle/
+**/local.properties
+**/build/
+**/captures/
+**/.cxx/
+**/.externalNativeBuild/
+**/.kotlin/
+
+# Node / Prisma
+**/node_modules/
+backend/generated/
+backend/dist/
+backend/.env
+backend/dev.db
+backend/dev.db-journal
+
+# Copias locales de skills y bitácoras de agentes
 .agents/
+.superpowers/
+backend/.agents/
+backend/.claude/
+backend/.windsurf/
+
+# Logs
+*.log

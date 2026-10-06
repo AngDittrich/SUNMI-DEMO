@@ -20,8 +20,8 @@ import android.util.Log
  *  1. NDEF payload (first non-blank UTF-8 record) — e.g. "NFC-001"
  *  2. Tag UID as uppercase hex — e.g. "04A2B3C4D5E6F7"
  *
- * Products are matched by this identifier against the `nfcId` column
- * (see docs/superpowers/plans/2026-08-18-sunmi-nfc-reader.md, Task 4).
+ * Products are matched by this identifier against the `nfcId` column.
+ * Payment taps are handled separately in MainActivity. See docs/kiosk/hardware.md.
  *
  * SUNMI's proprietary NfcControlManager (switching between the under-screen
  * and external NFC antennas, plus the watermark) is delivered as a local AAR
